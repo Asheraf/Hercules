@@ -7149,7 +7149,7 @@ static int pc_setstat(struct map_session_data *sd, int type, int val)
 // Calculates the number of status points PC gets when leveling up (from level to level+1)
 static int pc_gets_status_point(int level)
 {
-	if (battle_config.use_statpoint_table) //Use values from "db/statpoint.txt"
+	if (battle_config.use_statpoint_table) //Use values from "db/statpoint.conf"
 		return (pc->statp[level+1] - pc->statp[level]);
 	else //Default increase
 		return ((level+15) / 5);
@@ -11992,12 +11992,74 @@ static bool pc_read_attr_fix_db(void)
 	return true;
 }
 
+/**
+ * Reads status point totals (statpoint.conf)
+ * @return First level that still needs generated data.
+ */
+static int pc_read_statpoint_db(void)
+{
+	char filepath[256];
+	libconfig->format_db_path(DBPATH"statpoint.conf", filepath, sizeof(filepath));
+
+	struct config_t statpoint_conf;
+	if (!libconfig->load_file(&statpoint_conf, filepath)) {
+		ShowWarning("Can't read '"CL_WHITE"%s"CL_RESET"'... Generating DB.\n", filepath);
+		return 1;
+	}
+
+	struct config_setting_t *statpoint_db = libconfig->setting_get_member(statpoint_conf.root, "statpoint_db");
+	if (statpoint_db == NULL) {
+		ShowWarning("Can't read '"CL_WHITE"%s"CL_RESET"'... Generating DB.\n", filepath);
+		libconfig->destroy(&statpoint_conf);
+		return 1;
+	}
+
+	int max_level = 0;
+	int count = 0;
+	int i = 0;
+	struct config_setting_t *entry = NULL;
+
+	while ((entry = libconfig->setting_get_elem(statpoint_db, i++)) != NULL) {
+		int level = 0;
+
+		if (libconfig->setting_lookup_int(entry, "Level", &level) == CONFIG_FALSE || level <= 0 || level > MAX_LEVEL) {
+			ShowWarning("%s: Invalid level %d in '"CL_WHITE"%s"CL_RESET"', skipping...\n", __func__, level, filepath);
+			continue;
+		}
+
+		int status_point = 0;
+
+		if (libconfig->setting_lookup_int(entry, "StatusPoint", &status_point) == CONFIG_FALSE) {
+			ShowWarning("%s: Missing StatusPoint for level %d in '"CL_WHITE"%s"CL_RESET"', skipping...\n",
+				__func__, level, filepath);
+			continue;
+		}
+
+		if (status_point < 0) {
+			ShowWarning("%s: Invalid StatusPoint %d for level %d in '"CL_WHITE"%s"CL_RESET"', defaulting to 0...\n",
+				__func__, status_point, level, filepath);
+			status_point = 0;
+		}
+
+		pc->statp[level] = status_point;
+		if (level > max_level)
+			max_level = level;
+		count++;
+	}
+
+	libconfig->destroy(&statpoint_conf);
+
+	ShowStatus("Done reading '"CL_WHITE"%d"CL_RESET"' entries in '"CL_WHITE"%s"CL_RESET"'.\n", count, filepath);
+	return max_level + 1;
+}
+
 /*==========================================
  * PC DB reading.
  * exp_group_db.conf - required experience values
  * skill_tree.txt    - skill tree for every class
  * attr_fix.conf     - elemental adjustment table
  * level_penalty.conf - exp/itemdrop penalty table (Renewal only)
+ * statpoint.conf    - status point totals
  *------------------------------------------*/
 static int pc_readdb(void)
 {
@@ -12019,36 +12081,9 @@ static int pc_readdb(void)
 	if (!pc_read_attr_fix_db())
 		return 1;
 
-	// reset then read statspoint
+	// Reset then read statpoint
 	memset(pc->statp,0,sizeof(pc->statp));
-	int i = 1;
-
-	char line[24000];
-	sprintf(line, "%s/"DBPATH"statpoint.txt", map->db_path);
-	FILE *fp = fopen(line, "r");
-	if(fp == NULL){
-		ShowWarning("Can't read '"CL_WHITE"%s"CL_RESET"'... Generating DB.\n",line);
-		//return 1;
-	} else {
-		unsigned int count = 0;
-
-		while(fgets(line, sizeof(line), fp))
-		{
-			int stat;
-			if(line[0]=='/' && line[1]=='/')
-				continue;
-			if ((stat=(int)strtol(line,NULL,10))<0)
-				stat=0;
-			if (i > MAX_LEVEL)
-				break;
-			count++;
-			pc->statp[i]=stat;
-			i++;
-		}
-		fclose(fp);
-
-		ShowStatus("Done reading '"CL_WHITE"%u"CL_RESET"' entries in '"CL_WHITE"%s/"DBPATH"%s"CL_RESET"'.\n",count,map->db_path,"statpoint.txt");
-	}
+	int i = pc->read_statpoint_db();
 	// generate the remaining parts of the db if necessary
 	int k = battle_config.use_statpoint_table; //save setting
 	battle_config.use_statpoint_table = 0; //temporarily disable to force pc->gets_status_point use default values
@@ -13212,6 +13247,7 @@ void pc_defaults(void)
 	pc->read_attr_fix_db = pc_read_attr_fix_db;
 	pc->read_attr_fix_db_entry = pc_read_attr_fix_db_entry;
 	pc->read_attr_fix_db_level = pc_read_attr_fix_db_level;
+	pc->read_statpoint_db = pc_read_statpoint_db;
 	pc->level_penalty_txt_removal_notice = pc_level_penalty_txt_removal_notice;
 	pc->read_level_penalty_db_sub = pc_read_level_penalty_db_sub;
 	pc->read_level_penalty_db = pc_read_level_penalty_db;
