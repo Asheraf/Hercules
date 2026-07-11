@@ -6532,6 +6532,10 @@ static int pc_jobid2mapid(int class_)
 		case JOB_WANDERER_T:            return MAPID_MINSTRELWANDERER_T;
 		case JOB_BABY_MINSTREL:
 		case JOB_BABY_WANDERER:         return MAPID_BABY_MINSTRELWANDERER;
+		case JOB_TROUBADOUR:
+		case JOB_TROUVERE:              return MAPID_TROUBADOURTROUVERE;
+		case JOB_SHINKIRO:
+		case JOB_SHIRANUI:              return MAPID_SHINKIROSHIRANUI;
 #define JOB_ENUM_VALUE(name, id, msgtbl) case JOB_ ## name: return MAPID_ ## name;
 #include "common/class.h"
 #undef JOB_ENUM_VALUE
@@ -6555,6 +6559,8 @@ static int pc_mapid2jobid(unsigned int class_, int sex)
 		case MAPID_MINSTRELWANDERER:      return sex ? JOB_MINSTREL : JOB_WANDERER;
 		case MAPID_MINSTRELWANDERER_T:    return sex ? JOB_MINSTREL_T : JOB_WANDERER_T;
 		case MAPID_BABY_MINSTRELWANDERER: return sex ? JOB_BABY_MINSTREL : JOB_BABY_WANDERER;
+		case MAPID_TROUBADOURTROUVERE:    return sex == SEX_MALE ? JOB_TROUBADOUR : JOB_TROUVERE;
+		case MAPID_SHINKIROSHIRANUI:      return sex == SEX_MALE ? JOB_SHINKIRO : JOB_SHIRANUI;
 #define JOB_ENUM_VALUE(name, id, msgtbl) case MAPID_ ## name: return JOB_ ## name;
 #include "common/class.h"
 #undef JOB_ENUM_VALUE
@@ -6675,6 +6681,31 @@ static int pc_check_job_name(const char *name)
 		{ "Guillotine_Cross", JOB_GUILLOTINE_CROSS },
 		{ "Star_Emperor", JOB_STAR_EMPEROR },
 		{ "Soul_Reaper", JOB_SOUL_REAPER },
+		{ "Dragon_Knight", JOB_DRAGON_KNIGHT },
+		{ "Meister", JOB_MEISTER },
+		{ "Shadow_Cross", JOB_SHADOW_CROSS },
+		{ "Arch_Mage", JOB_ARCH_MAGE },
+		{ "Cardinal", JOB_CARDINAL },
+		{ "Windhawk", JOB_WINDHAWK },
+		{ "Imperial_Guard", JOB_IMPERIAL_GUARD },
+		{ "Biolo", JOB_BIOLO },
+		{ "Abyss_Chaser", JOB_ABYSS_CHASER },
+		{ "Elemental_Master", JOB_ELEMENTAL_MASTER },
+		{ "Inquisitor", JOB_INQUISITOR },
+		{ "Troubadour", JOB_TROUBADOUR },
+		{ "Trouvere", JOB_TROUVERE },
+		{ "Sky_Emperor", JOB_SKY_EMPEROR },
+		{ "Soul_Ascetic", JOB_SOUL_ASCETIC },
+		{ "Shinkiro", JOB_SHINKIRO },
+		{ "Shiranui", JOB_SHIRANUI },
+		{ "Night_Watch", JOB_NIGHT_WATCH },
+		{ "Hyper_Novice", JOB_HYPER_NOVICE },
+		{ "Spirit_Handler", JOB_SPIRIT_HANDLER },
+		{ "Druid", JOB_DRUID },
+		{ "Baby_Druid", JOB_BABY_DRUID },
+		{ "Karnos", JOB_KARNOS },
+		{ "Baby_Karnos", JOB_BABY_KARNOS },
+		{ "Alitea", JOB_ALITEA },
 		{ "Rune_Knight_Trans", JOB_RUNE_KNIGHT_T },
 		{ "Warlock_Trans", JOB_WARLOCK_T },
 		{ "Ranger_Trans", JOB_RANGER_T },
@@ -6813,7 +6844,10 @@ static int pc_checkbaselevelup(struct map_session_data *sd)
 			sd->status.base_exp = next-1;
 
 		int status_points = pc->gets_status_point(sd->status.base_level);
-		int trait_points = pc->gets_trait_point(sd->status.base_level);
+		int trait_points = 0;
+
+		if ((sd->job & JOBL_FOURTH) != 0)
+			trait_points = pc->gets_trait_point(sd->status.base_level);
 		sd->status.base_level++;
 		sd->status.status_point += status_points;
 		sd->status.trait_point = (int)cap_value((int64)sd->status.trait_point + trait_points,
@@ -7271,6 +7305,19 @@ static int pc_gets_trait_point(int level)
 	return 0;
 }
 
+/**
+ * Returns the maximum trait stat for the character's current job.
+ *
+ * @param sd The target character.
+ * @return The maximum trait stat, or 0 for jobs without trait stats.
+ **/
+static int pc_maxtraitstats(struct map_session_data *sd)
+{
+	nullpo_ret(sd);
+
+	return (sd->job & JOBL_FOURTH) != 0 ? battle_config.max_trait_parameter : 0;
+}
+
 /// Returns the number of stat points needed to change the specified stat by val.
 /// If val is negative, returns the number of stat points that would be needed to
 /// raise the specified stat from (current value - val) to current value.
@@ -7445,7 +7492,7 @@ static int pc_need_trait_point(struct map_session_data *sd, int type, int val)
 		return 0;
 
 	int low = pc->getstat(sd, type);
-	if (low >= battle_config.max_trait_parameter && val > 0)
+	if (low >= pc->maxtraitstats(sd) && val > 0)
 		return 0;
 
 	return (int)cap_value(val < 0 ? -(int64)val : (int64)val, 0, INT_MAX);
@@ -7465,7 +7512,7 @@ static int pc_max_trait_parameter_increase(struct map_session_data *sd, int type
 	int base = pc->getstat(sd, type);
 	int final = base;
 	int trait_points = sd->status.trait_point;
-	while (final < battle_config.max_trait_parameter && trait_points > 0) {
+	while (final < pc->maxtraitstats(sd) && trait_points > 0) {
 		trait_points -= 1;
 		final++;
 	}
@@ -7491,7 +7538,7 @@ static bool pc_trait_status_up(struct map_session_data *sd, int type, int increa
 	int current = pc->getstat(sd, type);
 	int max_increase = pc->max_trait_parameter_increase(sd, type);
 	increase = cap_value(increase, 0, max_increase);
-	if (increase <= 0 || current + increase > battle_config.max_trait_parameter) {
+	if (increase <= 0 || current + increase > pc->maxtraitstats(sd)) {
 		clif->statusupack(sd, type, 0, increase);
 		return false;
 	}
@@ -7530,7 +7577,7 @@ static int pc_trait_status_up2(struct map_session_data *sd, int type, int val)
 
 	int need = pc->need_trait_point(sd, type, 1);
 	val = pc->setstat(sd, type, (int)cap_value((int64)pc->getstat(sd, type) + val,
-		0, battle_config.max_trait_parameter));
+		0, pc->maxtraitstats(sd)));
 
 	status_calc_pc(sd, SCO_NONE);
 
@@ -7785,27 +7832,37 @@ static int pc_resetstate(struct map_session_data *sd)
 		}
 
 		sd->status.status_point = pc->statp[sd->status.base_level] + ((sd->job & JOBL_UPPER) != 0 ? 52 : 0); // extra 52+48=100 stat points
-		sd->status.trait_point = pc->traitp[sd->status.base_level] + battle_config.trait_points_job_change;
+		if ((sd->job & JOBL_FOURTH) != 0)
+			sd->status.trait_point = (int)cap_value((int64)pc->traitp[sd->status.base_level]
+				+ battle_config.trait_points_job_change, 0, INT_MAX);
+		else
+			sd->status.trait_point = 0;
 	}
 	else
 	{
 		int add = 0;
-		int trait_add = 0;
+
 		add += pc->need_status_point(sd, SP_STR, 1-pc->getstat(sd, SP_STR));
 		add += pc->need_status_point(sd, SP_AGI, 1-pc->getstat(sd, SP_AGI));
 		add += pc->need_status_point(sd, SP_VIT, 1-pc->getstat(sd, SP_VIT));
 		add += pc->need_status_point(sd, SP_INT, 1-pc->getstat(sd, SP_INT));
 		add += pc->need_status_point(sd, SP_DEX, 1-pc->getstat(sd, SP_DEX));
 		add += pc->need_status_point(sd, SP_LUK, 1-pc->getstat(sd, SP_LUK));
-		trait_add += pc->need_trait_point(sd, SP_POW, -pc->getstat(sd, SP_POW));
-		trait_add += pc->need_trait_point(sd, SP_STA, -pc->getstat(sd, SP_STA));
-		trait_add += pc->need_trait_point(sd, SP_WIS, -pc->getstat(sd, SP_WIS));
-		trait_add += pc->need_trait_point(sd, SP_SPL, -pc->getstat(sd, SP_SPL));
-		trait_add += pc->need_trait_point(sd, SP_CON, -pc->getstat(sd, SP_CON));
-		trait_add += pc->need_trait_point(sd, SP_CRT, -pc->getstat(sd, SP_CRT));
-
 		sd->status.status_point += add;
-		sd->status.trait_point += trait_add;
+
+		if ((sd->job & JOBL_FOURTH) != 0) {
+			int trait_add = 0;
+
+			trait_add += pc->need_trait_point(sd, SP_POW, -pc->getstat(sd, SP_POW));
+			trait_add += pc->need_trait_point(sd, SP_STA, -pc->getstat(sd, SP_STA));
+			trait_add += pc->need_trait_point(sd, SP_WIS, -pc->getstat(sd, SP_WIS));
+			trait_add += pc->need_trait_point(sd, SP_SPL, -pc->getstat(sd, SP_SPL));
+			trait_add += pc->need_trait_point(sd, SP_CON, -pc->getstat(sd, SP_CON));
+			trait_add += pc->need_trait_point(sd, SP_CRT, -pc->getstat(sd, SP_CRT));
+			sd->status.trait_point = (int)cap_value((int64)sd->status.trait_point + trait_add,
+				INT_MIN, INT_MAX);
+		} else
+			sd->status.trait_point = 0;
 	}
 
 	pc->setstat(sd, SP_STR, 1);
@@ -8829,7 +8886,8 @@ static int pc_setparam(struct map_session_data *sd, int type, int64 val)
 			int64 trait = 0;
 			for (int i = 0; i < val - sd->status.base_level; i++) {
 				stat += pc->gets_status_point(sd->status.base_level + i);
-				trait += pc->gets_trait_point(sd->status.base_level + i);
+				if ((sd->job & JOBL_FOURTH) != 0)
+					trait += pc->gets_trait_point(sd->status.base_level + i);
 			}
 			sd->status.status_point += stat;
 			sd->status.trait_point = (int)cap_value((int64)sd->status.trait_point + trait,
@@ -8965,22 +9023,22 @@ static int pc_setparam(struct map_session_data *sd, int type, int64 val)
 		sd->status.luk = cap_value((int)val, 1, pc_maxstats(sd));
 		break;
 	case SP_POW:
-		sd->status.pow = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.pow = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_STA:
-		sd->status.sta = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.sta = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_WIS:
-		sd->status.wis = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.wis = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_SPL:
-		sd->status.spl = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.spl = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_CON:
-		sd->status.con = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.con = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_CRT:
-		sd->status.crt = cap_value((int)val, 0, battle_config.max_trait_parameter);
+		sd->status.crt = cap_value((int)val, 0, pc->maxtraitstats(sd));
 		break;
 	case SP_KARMA:
 		sd->status.karma = (int)val;
@@ -9263,6 +9321,8 @@ static int pc_jobchange(struct map_session_data *sd, int class_, int upper)
 		pc->resetfeel(sd);
 	}
 
+	int previous_job = sd->job;
+
 	sd->status.class_ = class_;
 	{
 		int fame_list_type = pc->famelist_type(sd->job);
@@ -9273,10 +9333,13 @@ static int pc_jobchange(struct map_session_data *sd, int class_, int upper)
 	sd->status.job_level=1;
 	sd->status.job_exp=0;
 
+	bool reset_state = false;
+
 	if (sd->status.base_level > pc->maxbaselv(sd)) {
 		sd->status.base_level = pc->maxbaselv(sd);
 		sd->status.base_exp=0;
 		pc->resetstate(sd);
+		reset_state = true;
 		clif->updatestatus(sd,SP_STATUSPOINT);
 		clif->updatestatus(sd, SP_TSTATUSPOINT);
 		clif->updatestatus(sd,SP_BASELEVEL);
@@ -9284,6 +9347,26 @@ static int pc_jobchange(struct map_session_data *sd, int class_, int upper)
 		clif->updatestatus(sd,SP_NEXTBASEEXP);
 	}
 
+	if ((job & JOBL_FOURTH) != 0 && (previous_job & JOBL_FOURTH) == 0 && !reset_state) {
+		sd->status.trait_point = (int)cap_value((int64)sd->status.trait_point
+			+ battle_config.trait_points_job_change, INT_MIN, INT_MAX);
+		clif->updatestatus(sd, SP_TSTATUSPOINT);
+	} else if ((job & JOBL_FOURTH) == 0 && (previous_job & JOBL_FOURTH) != 0) {
+		sd->status.trait_point = 0;
+		pc->setstat(sd, SP_POW, 0);
+		pc->setstat(sd, SP_STA, 0);
+		pc->setstat(sd, SP_WIS, 0);
+		pc->setstat(sd, SP_SPL, 0);
+		pc->setstat(sd, SP_CON, 0);
+		pc->setstat(sd, SP_CRT, 0);
+		clif->updatestatus(sd, SP_TSTATUSPOINT);
+		clif->updatestatus(sd, SP_POW);
+		clif->updatestatus(sd, SP_STA);
+		clif->updatestatus(sd, SP_WIS);
+		clif->updatestatus(sd, SP_SPL);
+		clif->updatestatus(sd, SP_CON);
+		clif->updatestatus(sd, SP_CRT);
+	}
 	clif->updatestatus(sd, SP_UPOW);
 	clif->updatestatus(sd, SP_USTA);
 	clif->updatestatus(sd, SP_UWIS);
@@ -12469,7 +12552,11 @@ static bool pc_job_is_dummy(int job)
 	 || (job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2)
 	 || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2)
 	 || job == JOB_DUMMY4219    || job == JOB_DUMMY4221
-	 || (job >= JOB_DUMMY4230 && job <= JOB_DUMMY4237))
+	 || (job >= JOB_DUMMY4230 && job <= JOB_DUMMY4237)
+	 || job == JOB_DUMMY4356
+	 || (job > JOB_BABY_SOUL_REAPER && job < JOB_DRAGON_KNIGHT)
+	 || (job > JOB_TROUVERE && job < JOB_SKY_EMPEROR)
+	 || (job > JOB_SPIRIT_HANDLER && job <= JOB_SECOND_JOB_END && job < JOB_DRUID))
 		return true;
 	return false;
 }
@@ -13504,6 +13591,7 @@ void pc_defaults(void)
 	pc->statusup = pc_statusup;
 	pc->statusup2 = pc_statusup2;
 	pc->gets_trait_point = pc_gets_trait_point;
+	pc->maxtraitstats = pc_maxtraitstats;
 	pc->need_trait_point = pc_need_trait_point;
 	pc->max_trait_parameter_increase = pc_max_trait_parameter_increase;
 	pc->trait_status_up = pc_trait_status_up;

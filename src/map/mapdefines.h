@@ -61,11 +61,13 @@
 #define JOBL_UPPER 0x1000
 #define JOBL_BABY  0x2000
 #define JOBL_THIRD 0x4000
+#define JOBL_FOURTH 0x8000
 
 // For filtering and quick checking.
 #define MAPID_BASEMASK 0x00ff
 #define MAPID_UPPERMASK 0x0fff
 #define MAPID_THIRDMASK (JOBL_THIRD|MAPID_UPPERMASK)
+#define MAPID_FOURTHMASK (JOBL_FOURTH | MAPID_THIRDMASK)
 
 // Max size for inputs to Vending text prompts
 #define MESSAGE_SIZE (79 + 1)

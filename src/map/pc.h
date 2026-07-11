@@ -1099,6 +1099,7 @@ END_ZEROED_BLOCK; /* End */
 	bool (*statusup) (struct map_session_data *sd, int type, int increase);
 	int (*statusup2) (struct map_session_data *sd,int type,int val);
 	int (*gets_trait_point) (int level);
+	int (*maxtraitstats) (struct map_session_data *sd);
 	int (*need_trait_point) (struct map_session_data *sd, int type, int val);
 	int (*max_trait_parameter_increase) (struct map_session_data *sd, int type);
 	bool (*trait_status_up) (struct map_session_data *sd, int type, int increase);

@@ -2025,7 +2025,7 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	// ----- AP MAX CALCULATION -----
 	int base_max_ap = sd->status.max_ap;
-	if (base_max_ap <= 0)
+	if ((sd->job & JOBL_FOURTH) != 0 && base_max_ap <= 0)
 		base_max_ap = 200;
 	i64 = (int64)base_max_ap + bstatus->max_ap;
 	bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);

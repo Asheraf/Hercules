@@ -1267,8 +1267,58 @@ enum msgtable_messages {
 	MSGTBL_JOB_SOUL_REAPER = 681,
 	/** Baby Soul Reaper */
 	MSGTBL_JOB_BABY_SOUL_REAPER = 682,
+	/** Dragon Knight */
+	MSGTBL_JOB_DRAGON_KNIGHT = 683,
+	/** Meister */
+	MSGTBL_JOB_MEISTER = 684,
+	/** Shadow Cross */
+	MSGTBL_JOB_SHADOW_CROSS = 685,
+	/** Arch Mage */
+	MSGTBL_JOB_ARCH_MAGE = 686,
+	/** Cardinal */
+	MSGTBL_JOB_CARDINAL = 687,
+	/** Windhawk */
+	MSGTBL_JOB_WINDHAWK = 688,
+	/** Imperial Guard */
+	MSGTBL_JOB_IMPERIAL_GUARD = 689,
+	/** Biolo */
+	MSGTBL_JOB_BIOLO = 690,
+	/** Abyss Chaser */
+	MSGTBL_JOB_ABYSS_CHASER = 691,
+	/** Elemental Master */
+	MSGTBL_JOB_ELEMENTAL_MASTER = 692,
+	/** Inquisitor */
+	MSGTBL_JOB_INQUISITOR = 693,
+	/** Troubadour */
+	MSGTBL_JOB_TROUBADOUR = 694,
+	/** Trouvere */
+	MSGTBL_JOB_TROUVERE = 695,
+	/** Sky Emperor */
+	MSGTBL_JOB_SKY_EMPEROR = 696,
+	/** Soul Ascetic */
+	MSGTBL_JOB_SOUL_ASCETIC = 697,
+	/** Shinkiro */
+	MSGTBL_JOB_SHINKIRO = 698,
+	/** Shiranui */
+	MSGTBL_JOB_SHIRANUI = 699,
+	/** Night Watch */
+	MSGTBL_JOB_NIGHT_WATCH = 700,
+	/** Hyper Novice */
+	MSGTBL_JOB_HYPER_NOVICE = 701,
+	/** Spirit Handler */
+	MSGTBL_JOB_SPIRIT_HANDLER = 702,
+	/** Druid */
+	MSGTBL_JOB_DRUID = 703,
+	/** Baby Druid */
+	MSGTBL_JOB_BABY_DRUID = 704,
+	/** Karnos */
+	MSGTBL_JOB_KARNOS = 705,
+	/** Baby Karnos */
+	MSGTBL_JOB_BABY_KARNOS = 706,
+	/** Alitea */
+	MSGTBL_JOB_ALITEA = 707,
 
-	//683-849 FREE (please start using from the top if you need, leave the 670+ range for new jobs)
+	// 708-849 FREE (please start using from the top if you need, leave the 670+ range for new jobs)
 
 	/** No Knockback | */
 	MSGTBL_MAPINFO_NO_KNOCKBACK = 850,
