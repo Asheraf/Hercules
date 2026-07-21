@@ -4422,6 +4422,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 40 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case DR_CRUEL_BITE:
+					skillratio += -100 + 60 * skill_lv + 4 * st->str;
+					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
+						skillratio += 20 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
@@ -5355,7 +5361,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 			return BF_LONG;
 	}
 	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_RUSH_QUAKE
-		|| skill_id == MT_RUSH_STRIKE || skill_id == ABC_UNLUCKY_RUSH)
+		|| skill_id == MT_RUSH_STRIKE || skill_id == ABC_UNLUCKY_RUSH || skill_id == DR_CRUEL_BITE)
 		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);

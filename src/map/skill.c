@@ -6793,6 +6793,26 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		}
 			break;
+		case DR_CRUEL_BITE:
+		{
+			enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+			if (Assert_chk(dir >= UNIT_DIR_FIRST && dir < UNIT_DIR_MAX)) {
+				map->freeblock_unlock();
+				return 0;
+			}
+
+			if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 2, true) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+
+			clif->blown(src);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+		}
+			break;
 
 		case KO_JYUMONJIKIRI:
 		case GC_DARKILLUSION:
@@ -18743,6 +18763,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case DR_ENRAGE_WOLF:
 		case DR_NOMERCY_CLAW:
+		case DR_CRUEL_BITE:
 		case BO_DUST_EXPLOSION:
 			if (sc == NULL || sc->data[SC_MYSTERY_POWDER] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
