@@ -1511,6 +1511,20 @@ static void clif_spiritball_single(int fd, struct map_session_data *sd)
 	clif->send(&p, sizeof(p), &sd->bl, SELF);
 }
 
+static void clif_servantball_single(int fd, struct map_session_data *sd)
+{
+	nullpo_retv(sd);
+
+	struct PACKET_ZC_SPIRITS p = { 0 };
+
+	p.PacketType = HEADER_ZC_SPIRITS;
+	p.AID = sd->bl.id;
+	p.num = sd->servantball;
+	WFIFOHEAD(fd, sizeof(p));
+	memcpy(WFIFOP(fd, 0), &p, sizeof(p));
+	WFIFOSET(fd, sizeof(p));
+}
+
 /*==========================================
  * Kagerou/Oboro amulet spirit
  *------------------------------------------*/
@@ -1611,6 +1625,8 @@ static bool clif_spawn(struct block_list *bl)
 				clif->spiritballs(&sd->bl, sd->spiritball, AREA);
 			if (sd->soulball > 0)
 				clif->soulballs(&sd->bl, sd->soulball, AREA);
+			if (sd->servantball > 0)
+				clif->servantballs(&sd->bl, sd->servantball, AREA);
 			if (sd->state.size == SZ_BIG) // tiny/big players [Valaris]
 				clif->specialeffect(bl,423,AREA);
 			else if (sd->state.size == SZ_MEDIUM)
@@ -5055,6 +5071,8 @@ static void clif_getareachar_pc(struct map_session_data *sd, struct map_session_
 		clif->charm_single(sd->fd, dstsd);
 	if (dstsd->soulball > 0)
 		clif->soulballs(&sd->bl, sd->soulball, AREA);
+	if (dstsd->servantball > 0)
+		clif->servantball_single(sd->fd, dstsd);
 	for( i = 0; i < dstsd->sc_display_count; i++ ) {
 		clif->sc_continue(&sd->bl, dstsd->bl.id, SELF, status->get_sc_icon(dstsd->sc_display[i]->type), dstsd->sc_display[i]->val1, dstsd->sc_display[i]->val2, dstsd->sc_display[i]->val3);
 	}
@@ -8245,6 +8263,18 @@ static void clif_spiritballs(struct block_list *bl, int spiritballs, enum send_t
 	clif->send(&p, sizeof(struct PACKET_ZC_SPIRITS), bl, target);
 }
 
+static void clif_servantballs(struct block_list *bl, int servantballs, enum send_target target)
+{
+	nullpo_retv(bl);
+
+	struct PACKET_ZC_SPIRITS p = { 0 };
+
+	p.PacketType = HEADER_ZC_SPIRITS;
+	p.AID = bl->id;
+	p.num = servantballs;
+	clif->send(&p, sizeof(p), bl, target);
+}
+
 /// Notifies clients in area of a character's combo delay (ZC_COMBODELAY).
 /// 01d2 <account id>.L <delay>.L
 static void clif_combo_delay(struct block_list *bl, int wait)
@@ -9856,6 +9886,8 @@ static void clif_refresh(struct map_session_data *sd)
 		clif->charm_single(sd->fd, sd);
 	if (sd->soulball > 0)
 		clif->soulballs(&sd->bl, sd->soulball, SELF);
+	if (sd->servantball > 0)
+		clif->servantballs(&sd->bl, sd->servantball, SELF);
 
 	if (sd->vd.cloth_color)
 		clif->refreshlook(&sd->bl,sd->bl.id,LOOK_CLOTHES_COLOR,sd->vd.cloth_color,SELF);
@@ -26976,6 +27008,8 @@ void clif_defaults(void)
 	clif->soulballs = clif_soulball;
 	clif->spiritballs = clif_spiritballs;
 	clif->spiritball_single = clif_spiritball_single;
+	clif->servantballs = clif_servantballs;
+	clif->servantball_single = clif_servantball_single;
 	clif->bladestop = clif_bladestop;
 	clif->mvp_effect = clif_mvp_effect;
 	clif->heal = clif_heal;

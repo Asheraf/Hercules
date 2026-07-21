@@ -3067,6 +3067,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case SJ_PROMINENCEKICK:
 						skillratio += 50 + 50 * skill_lv;
 					break;
+				case DK_SERVANTWEAPON_ATK:
+					skillratio += -100 + 600 + 850 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
@@ -5161,11 +5165,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	}
 
 	//Check for critical
-	if( !flag.cri && wd.type != BDT_MULTIHIT && sstatus->cri &&
+	if (!flag.cri && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
-		skill_id == NJ_KIRIKAGE))
+		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5589,8 +5593,13 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					if (sd->bonus.atk_rate)
 						ATK_ADDRATE(sd->bonus.atk_rate);
 #endif
-					if(flag.cri && sd->bonus.crit_atk_rate)
-						ATK_ADDRATE(sd->bonus.crit_atk_rate);
+					if (flag.cri != 0 && sd->bonus.crit_atk_rate != 0) {
+						int crit_atk_rate = sd->bonus.crit_atk_rate;
+
+						if (skill_id == DK_SERVANTWEAPON_ATK)
+							crit_atk_rate /= 2;
+						ATK_ADDRATE(crit_atk_rate);
+					}
 					if(flag.cri && sc && sc->data[SC_MTF_CRIDAMAGE])
 						ATK_ADDRATE(sc->data[SC_MTF_CRIDAMAGE]->val1);// temporary it should be 'bonus.crit_atk_rate'
 #ifdef RENEWAL
@@ -7151,6 +7160,16 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 				skill->castend_nodamage_id(src, src, SJ_FALLINGSTAR_ATK, sc->data[SC_FALLINGSTAR]->val1, tick, flag);
 			if (sd != NULL)
 				sd->auto_cast_current.type = AUTOCAST_NONE;
+		}
+
+		if (damage > 0 && (wd.flag & BF_SHORT) != 0 && sc != NULL && sc->data[SC_SERVANTWEAPON] != NULL
+		 && sd->servantball > 0 && rnd() % 100 < 5 * sc->data[SC_SERVANTWEAPON]->val1) {
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			pc->delservantball(sd, 1);
+			skill->castend_damage_id(src, target, DK_SERVANTWEAPON_ATK, sc->data[SC_SERVANTWEAPON]->val1, tick, flag);
+			sd->auto_cast_current.type = ac_type;
 		}
 
 		if (wd.flag & BF_WEAPON && src != target && damage > 0) {

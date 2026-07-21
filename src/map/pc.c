@@ -373,6 +373,28 @@ static void pc_delsoulball(struct map_session_data *sd, int count, bool type)
 		clif->soulballs(&sd->bl, sd->soulball, AREA);
 }
 
+static void pc_addservantball(struct map_session_data *sd, int count)
+{
+	nullpo_retv(sd);
+
+	if (count <= 0)
+		return;
+
+	sd->servantball = cap_value(sd->servantball + count, 0, MAX_SERVANTBALL);
+	clif->servantballs(&sd->bl, sd->servantball, AREA);
+}
+
+static void pc_delservantball(struct map_session_data *sd, int count)
+{
+	nullpo_retv(sd);
+
+	if (count <= 0)
+		return;
+
+	sd->servantball -= cap_value(count, 0, sd->servantball);
+	clif->servantballs(&sd->bl, sd->servantball, AREA);
+}
+
 static int pc_check_banding(struct block_list *bl, va_list ap)
 {
 	int *c, *b_sd;
@@ -8362,6 +8384,9 @@ static int pc_dead(struct map_session_data *sd, struct block_list *src)
 	if (sd->soulball != 0)
 		pc->delsoulball(sd, sd->soulball, false);
 
+	if (sd->servantball != 0)
+		pc->delservantball(sd, sd->servantball);
+
 	if (sd->charm_type != CHARM_TYPE_NONE && sd->charm_count > 0)
 		pc->del_charm(sd, sd->charm_count, sd->charm_type);
 
@@ -13682,6 +13707,8 @@ void pc_defaults(void)
 	pc->delspiritball_sub = pc_delspiritball_sub;
 	pc->addsoulball = pc_addsoulball;
 	pc->delsoulball = pc_delsoulball;
+	pc->addservantball = pc_addservantball;
+	pc->delservantball = pc_delservantball;
 	pc->addfame = pc_addfame;
 	pc->fame_rank = pc_fame_rank;
 	pc->famelist_type = pc_famelist_type;

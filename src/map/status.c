@@ -7924,6 +7924,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC__AUTOSHADOWSPELL: // otherwise you can't change your shadow spell to a lower skill_id
 			case SC_ENSEMBLEFATIGUE:
 				break;
+			case SC_SERVANTWEAPON:
+				val4 = sce->val4;
+				break;
 			case SC_GOSPEL:
 				//Must not override a casting gospel char.
 				if(sce->val4 == BCT_SELF)
@@ -10081,6 +10084,14 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				tick_time = total_tick;
 				total_tick = INFINITE_DURATION;
 				break;
+			case SC_SERVANTWEAPON:
+				if (val4 <= 0)
+					val4 = total_tick;
+				total_tick = val4;
+				tick_time = min(max(500, skill->get_time2(DK_SERVANTWEAPON, val1)), val4);
+				if (sd != NULL)
+					pc->addservantball(sd, MAX_SERVANTBALL);
+				break;
 			case SC_SOULREAPER:
 				val2 = 10 + 5 * val1; // Chance of Getting A Soul Sphere.
 				break;
@@ -12058,6 +12069,10 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			if (sd != NULL)
 				pc->delsoulball(sd, sd->soulball, false);
 			break;
+		case SC_SERVANTWEAPON:
+			if (sd != NULL)
+				pc->delservantball(sd, sd->servantball);
+			break;
 		case SC_SOULUNITY:
 		{
 			struct map_session_data *tsd;
@@ -13307,6 +13322,17 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 			pc->addsoulball(sd, sce->val2);
 			if (sd->soulball < sce->val2) {
 				sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
+		case SC_SERVANTWEAPON:
+			if (sd != NULL && sd->servantball < MAX_SERVANTBALL)
+				pc->addservantball(sd, MAX_SERVANTBALL);
+
+			sce->val4 -= min(max(500, skill->get_time2(DK_SERVANTWEAPON, sce->val1)), sce->val4);
+			if (sce->val4 > 0) {
+				sc_timer_next(min(max(500, skill->get_time2(DK_SERVANTWEAPON, sce->val1)), sce->val4) + tick,
+				              status->change_timer, bl->id, data);
 				return 0;
 			}
 			break;

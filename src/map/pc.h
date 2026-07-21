@@ -486,6 +486,7 @@ END_ZEROED_BLOCK;
 	enum spirit_charm_types charm_type;
 	int charm_timer[MAX_SPIRITCHARM];
 	int soulball;
+	int servantball;
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
 	int mission_mobid; //Stores the target mob_id for TK_MISSION
@@ -1198,6 +1199,8 @@ END_ZEROED_BLOCK; /* End */
 	int (*getmaxspiritball) (struct map_session_data *sd, int min);
 	void (*addsoulball) (struct map_session_data *sd, int max);
 	void (*delsoulball) (struct map_session_data *sd, int count, bool type);
+	void (*addservantball) (struct map_session_data *sd, int count);
+	void (*delservantball) (struct map_session_data *sd, int count);
 	void (*addfame) (struct map_session_data *sd, int ranktype, int count);
 	int (*fame_rank) (int char_id, int ranktype);
 	int (*famelist_type) (uint16 job_mapid);

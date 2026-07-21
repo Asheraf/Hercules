@@ -5241,6 +5241,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_CURSEEXPLOSION:
 		case SP_SHA:
 		case SP_SWHOO:
+		case DK_SERVANTWEAPON_ATK:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -8154,6 +8155,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			}
 			break;
+		case DK_SERVANTWEAPON:
 		case SL_KAITE:
 		case SL_KAAHI:
 		case SL_KAIZEL:
