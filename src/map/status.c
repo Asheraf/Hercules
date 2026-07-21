@@ -2060,6 +2060,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	if (sc->data[SC_WEREWOLF] == NULL && sc->data[SC_WERERAPTOR] == NULL
 		&& (skill_lv = pc->checkskill(sd, KR_EARTH_BUD)) > 0)
 		sd->hprate += skill_lv * 2;
+	if ((skill_lv = pc->checkskill(sd, KR_NATURE_VIGOUR)) > 0) {
+		sd->sprate += skill_lv * 2;
+		sd->sprecov_rate += skill_lv * 10;
+	}
 
 	// ----- HP MAX CALCULATION -----
 
