@@ -7702,6 +7702,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IQ_POWERFUL_FAITH:
 		case IQ_FIRM_FAITH:
 		case IQ_SINCERE_FAITH:
+		case IQ_FIRST_FAITH_POWER:
 #ifdef RENEWAL
 		case BD_ADAPTATION:
 		case HP_BASILICA: // 2018.11 rebalance - Basilica changed to a self buff
@@ -17956,6 +17957,10 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 			break;
 		case SR_RIDEINLIGHTNING:
 			if (sc != NULL && sc->data[SC_MASSIVE_F_BLASTER] != NULL)
+				req.spiritball = 0;
+			break;
+		case SR_FALLENEMPIRE:
+			if (sc != NULL && sc->data[SC_FIRST_FAITH_POWER] != NULL)
 				req.spiritball = 0;
 			break;
 		case SR_GATEOFHELL:
