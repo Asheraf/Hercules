@@ -3173,6 +3173,8 @@ static int skill_magic_reflect(struct block_list *src, struct block_list *bl, in
 	struct map_session_data* sd = BL_CAST(BL_PC, bl);
 
 	nullpo_ret(src);
+	if (sc != NULL && sc->data[SC_DEADLY_DEFEASANCE] != NULL)
+		return 0;
 	if( sc && sc->data[SC_KYOMU] ) // Nullify reflecting ability
 		return  0;
 
@@ -4848,7 +4850,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 	if (status->isdead(bl))
 		return 1;
 
-	if (skill_id != 0 && skill->get_type(skill_id, skill_lv) == BF_MAGIC && status->isimmune(bl) == 100) {
+	if (skill_id != 0 && skill_id != AG_DEADLY_PROJECTION
+	    && skill->get_type(skill_id, skill_lv) == BF_MAGIC && status->isimmune(bl) == 100) {
 		//GTB makes all targeted magic display miss with a single bolt.
 		sc_type sct = skill->get_sc_type(skill_id);
 		if(sct != SC_NONE)
@@ -5614,6 +5617,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
 			break;
 
+		case AG_DEADLY_PROJECTION:
+			sc_start(src, bl, SC_DEADLY_DEFEASANCE, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case AL_HOLYLIGHT:
 			status_change_end(bl, SC_PLATINUM_ALTER, INVALID_TIMER);
 			FALLTHROUGH

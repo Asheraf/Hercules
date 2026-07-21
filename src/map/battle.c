@@ -2081,6 +2081,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 1000 + 200 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_DEADLY_PROJECTION:
+					skillratio += -100 + 2800 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				default:
 					battle->calc_skillratio_magic_unknown(&attack_type, src, target, &skill_id, &skill_lv, &skillratio, &flag);
 					break;

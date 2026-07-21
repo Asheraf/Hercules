@@ -1842,6 +1842,9 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		}
 	}
 
+	if (sc->data[SC_DEADLY_DEFEASANCE] != NULL)
+		sd->special_state.no_magic_damage = 0;
+
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
 	if(bstatus->lhw.range < 1) bstatus->lhw.range = 1;
@@ -6795,6 +6798,8 @@ static int status_isimmune(struct block_list *bl)
 
 	if (sc != NULL && sc->data[SC_HERMODE] != NULL)
 		return 100;
+	if (sc != NULL && sc->data[SC_DEADLY_DEFEASANCE] != NULL)
+		return 0;
 
 	if (bl->type == BL_PC) {
 		const struct map_session_data *sd = BL_UCCAST(BL_PC, bl);
@@ -7049,7 +7054,8 @@ static int status_get_sc_def(struct block_list *src, struct block_list *bl, enum
 #define SCDEF_LVL_DIFF(bl, src, maxlv, factor) ( ( SCDEF_LVL_CAP((bl), (maxlv)) - SCDEF_LVL_CAP((src), (maxlv)) ) * (factor) )
 
 	//Status that are blocked by Golden Thief Bug card or Wand of Hermod
-	if (status->isimmune(bl) && (skill->get_inf(skill_id) & INF_SELF_SKILL) == 0 // [Aegis] self-cast skills are not blocked, even if magic.
+	if (status->isimmune(bl) != 0 && skill_id != AG_DEADLY_PROJECTION
+	    && (skill->get_inf(skill_id) & INF_SELF_SKILL) == 0 // [Aegis] self-cast skills are not blocked, even if magic.
 	    && ((skill->get_type(skill_id, 1) & BF_MAGIC) != 0 // [Aegis] if an SC is caused by magic then it's blocked, no matter what SC.
 	        || (status->get_sc_type(type) & SC_NO_MAGIC_BLOCK) != 0))
 		return 0;
