@@ -5938,6 +5938,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_IMPERIAL_PRESSURE:
 		case DR_NOMERCY_CLAW:
 		case DR_FLICKING_TONADO:
+		case DR_LOW_FLIGHT:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -6255,6 +6256,24 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						clif->blown(src);
 						break;
+					case DR_LOW_FLIGHT:
+					{
+						enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+						if (Assert_chk(dir >= UNIT_DIR_FIRST && dir < UNIT_DIR_MAX)) {
+							map->freeblock_unlock();
+							return 0;
+						}
+
+						if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 2, true) != 0) {
+							if (sd != NULL)
+								clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+							break;
+						}
+
+						clif->blown(src);
+					}
+						FALLTHROUGH
 					case DR_NOMERCY_CLAW:
 					case DR_FLICKING_TONADO:
 					case AG_ROCK_DOWN:
@@ -18795,6 +18814,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_ENRAGE_RAPTOR:
 		case DR_SHOOTING_FEATHER:
 		case DR_FLICKING_TONADO:
+		case DR_LOW_FLIGHT:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
