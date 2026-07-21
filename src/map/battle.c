@@ -2147,6 +2147,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 650 * skill_lv + 10 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_ROCK_DOWN:
+					skillratio += -100 + 1550 * skill_lv + 5 * st->spl;
+					if (sc != NULL && sc->data[SC_CLIMAX] != NULL)
+						skillratio += 300 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_ALL_BLOOM_ATK:
 					skillratio += -100 + 200 + 1200 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);

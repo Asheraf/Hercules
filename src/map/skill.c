@@ -5365,6 +5365,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						clif->blown(src);
 						break;
+					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
 					case GN_CARTCANNON:
@@ -5638,6 +5639,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 		case AG_ASTRAL_STRIKE:
 		case AG_ASTRAL_STRIKE_ATK:
+		case AG_ROCK_DOWN:
 		case MG_SOULSTRIKE:
 		case NPC_DARKSTRIKE:
 		case MG_COLDBOLT:
