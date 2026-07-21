@@ -3115,6 +3115,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 150 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case DK_STORMSLASH:
+					skillratio += -100 + 300 + 750 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_GIANTGROWTH] != NULL && rnd() % 100 < 60)
+						skillratio *= 2;
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
@@ -5229,13 +5235,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	//Check for critical
 	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 		|| skill_id == DK_SERVANT_W_DEMOL
-		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) && sstatus->cri &&
+		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
+		|| skill_id == DK_STORMSLASH) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
-			|| skill_id == DK_HACKANDSLASHER_ATK))
+			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5671,7 +5678,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 							|| skill_id == DK_SERVANT_W_DEMOL
-							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK)
+							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
+							|| skill_id == DK_STORMSLASH)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

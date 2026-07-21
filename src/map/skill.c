@@ -5285,6 +5285,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_MADNESS_CRUSHER:
 		case DK_HACKANDSLASHER:
 		case DK_DRAGONIC_AURA:
+		case DK_STORMSLASH:
 		case DK_SERVANTWEAPON_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
@@ -5338,6 +5339,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case DK_HACKANDSLASHER:
+					case DK_STORMSLASH:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case DK_SERVANT_W_PHANTOM:
