@@ -2066,6 +2066,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->smatk_rate = 0;
 	if (sd->smatk_rate != 100)
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk * sd->smatk_rate / 100, 0, SHRT_MAX);
+	if (sd->has_shield != 0 && (skill_lv = pc->checkskill(sd, IG_SHIELD_MASTERY)) > 0)
+		bstatus->res = (int32)cap_value((int64)bstatus->res + 3 * skill_lv, 0, SHRT_MAX);
 	if (sd->res_rate < 0)
 		sd->res_rate = 0;
 	if (sd->res_rate != 100)
