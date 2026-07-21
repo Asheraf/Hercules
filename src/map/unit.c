@@ -1775,6 +1775,20 @@ static int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill
 			}
 		}
 		break;
+	case DK_SERVANT_W_SIGN:
+		if (sd != NULL) {
+			int i = 0, count = min(skill_lv, MAX_SERVANT_SIGN);
+
+			ARR_FIND(0, count, i, sd->servant_sign[i] == target_id);
+			if (i == count) {
+				ARR_FIND(0, count, i, sd->servant_sign[i] == 0);
+				if (i == count) {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					return 0;
+				}
+			}
+		}
+		break;
 	}
 
 	// moved here to prevent Suffragium from ending if skill fails

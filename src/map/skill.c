@@ -11827,6 +11827,37 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			}
 			break;
+		case DK_SERVANT_W_SIGN:
+			if (sd != NULL) {
+				int i = 0, count = min(skill_lv, MAX_SERVANT_SIGN);
+
+				if ((dstsd == NULL && dstmd == NULL) || (tsce != NULL && tsce->val1 != src->id)) {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					break;
+				}
+
+				ARR_FIND(0, count, i, sd->servant_sign[i] == bl->id);
+				if (i == count) {
+					ARR_FIND(0, count, i, sd->servant_sign[i] == 0);
+					if (i == count) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+						break;
+					}
+				}
+
+				if (sc_start4(src, bl, type, 100, src->id, i, skill_lv, 0, skill->get_time(skill_id, skill_lv),
+				    skill_id) != 0) {
+					sd->servant_sign[i] = bl->id;
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				} else {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				}
+			} else if (dstsd != NULL || dstmd != NULL) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start4(src, bl, type, 100, 0, 0, skill_lv, 0,
+				                               skill->get_time(skill_id, skill_lv), skill_id));
+			}
+			break;
 		case RL_QD_SHOT:
 			if (sd != NULL) {
 				skill->area_temp[1] = bl->id;
@@ -16660,6 +16691,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 
 	if (require.spiritball > 0) {
 		switch(skill_id) {
+		case DK_SERVANT_W_SIGN:
+			if (sd->servantball < require.spiritball) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_EMPTY_SERVANTWEAPON, require.spiritball, 0);
+				return 0;
+			}
+			break;
 		case SP_SOULGOLEM:
 		case SP_SOULSHADOW:
 		case SP_SOULFALCON:
@@ -16905,6 +16942,32 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 	switch( skill_id ) {
 		case PR_BENEDICTIO:
 			skill->check_pc_partner(sd, skill_id, &skill_lv, 1, 1);
+			break;
+		case DK_SERVANT_W_SIGN:
+			if (target == NULL || (target->type != BL_PC && target->type != BL_MOB)
+			 || sd->servantball == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_EMPTY_SERVANTWEAPON, 1, 0);
+				return 0;
+			}
+			{
+				struct status_change *tsc = status->get_sc(target);
+				int sign_slot = 0, count = min(skill_lv, MAX_SERVANT_SIGN);
+
+				if (tsc != NULL && tsc->data[SC_SERVANT_SIGN] != NULL
+				 && tsc->data[SC_SERVANT_SIGN]->val1 != sd->bl.id) {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					return 0;
+				}
+
+				ARR_FIND(0, count, sign_slot, sd->servant_sign[sign_slot] == target->id);
+				if (sign_slot == count) {
+					ARR_FIND(0, count, sign_slot, sd->servant_sign[sign_slot] == 0);
+					if (sign_slot == count) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+						return 0;
+					}
+				}
+			}
 			break;
 		case AM_CANNIBALIZE:
 		case AM_SPHEREMINE: {
@@ -17180,6 +17243,9 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 			case SP_SOULEXPLOSION:
 			case SP_KAUTE:
 				pc->delsoulball(sd, req.spiritball, false);
+				break;
+			case DK_SERVANT_W_SIGN:
+				pc->delservantball(sd, req.spiritball);
 				break;
 			default:
 				pc->delspiritball(sd, req.spiritball, 0);

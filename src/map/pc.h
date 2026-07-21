@@ -487,6 +487,7 @@ END_ZEROED_BLOCK;
 	int charm_timer[MAX_SPIRITCHARM];
 	int soulball;
 	int servantball;
+	int servant_sign[MAX_SERVANT_SIGN];
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
 	int mission_mobid; //Stores the target mob_id for TK_MISSION

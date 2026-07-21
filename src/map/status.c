@@ -12027,6 +12027,15 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			}
 		}
 			break;
+		case SC_SERVANT_SIGN:
+		{
+			struct map_session_data *caster = map->id2sd(sce->val1);
+
+			if (caster != NULL && sce->val2 >= 0 && sce->val2 < MAX_SERVANT_SIGN
+			 && caster->servant_sign[sce->val2] == bl->id)
+				caster->servant_sign[sce->val2] = 0;
+		}
+			break;
 		case SC_SUNSTANCE:
 			status_change_end(bl, SC_LIGHTOFSUN, INVALID_TIMER);
 			break;

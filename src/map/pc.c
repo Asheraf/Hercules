@@ -8289,6 +8289,15 @@ static int pc_dead(struct map_session_data *sd, struct block_list *src)
 			sd->united_soul[i] = 0;
 		}
 	}
+	for (int i = 0; i < MAX_SERVANT_SIGN; i++) {
+		if (sd->servant_sign[i] != 0) {
+			struct block_list *bl = map->id2bl(sd->servant_sign[i]);
+
+			if (bl != NULL)
+				status_change_end(bl, SC_SERVANT_SIGN, INVALID_TIMER);
+			sd->servant_sign[i] = 0;
+		}
+	}
 
 	if (sd->status.pet_id > 0 && sd->pd != NULL) {
 		struct pet_data *pd = sd->pd;

@@ -53,6 +53,7 @@
  **/
 #define MAX_SOUL_BALL 20
 #define MAX_SERVANTBALL 5
+#define MAX_SERVANT_SIGN 5
 
 /**
  * United Soul Limitation
