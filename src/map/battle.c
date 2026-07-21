@@ -2125,6 +2125,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 100 + 760 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_FROZEN_SLASH:
+					skillratio += -100 + 450 + 950 * skill_lv + 5 * st->spl;
+					if (sc != NULL && sc->data[SC_CLIMAX] != NULL)
+						skillratio += 150 + 350 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_FLORAL_FLARE_ROAD:
 					skillratio += -100 + 50 + 740 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);

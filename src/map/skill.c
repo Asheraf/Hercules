@@ -5325,6 +5325,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_CRIMSON_ARROW_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
+		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
@@ -8072,6 +8073,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case AG_RAIN_OF_CRYSTAL:
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			skill->unitsetting(src, skill_id, skill_lv, src->x, src->y, 0);
+			break;
+		case AG_FROZEN_SLASH:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
 
 		case AG_DESTRUCTIVE_HURRICANE:
