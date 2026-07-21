@@ -2127,6 +2127,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case KN_PIERCE:
 				case ML_PIERCE:
 					skillratio += 10 * skill_lv;
+					if (skill_id == KN_PIERCE && sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
+					 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
+						skillratio *= 2;
 					break;
 				case MER_CRASH:
 					skillratio += 10 * skill_lv;
@@ -2424,6 +2427,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case ML_SPIRALPIERCE:
 					skillratio += -100 + 150 + 50 * skill_lv;
 					RE_LVL_DMOD(100);
+					if (skill_id == LK_SPIRALPIERCE && sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
+					 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
+						skillratio *= 2;
 	#endif
 					break;
 				case PA_SACRIFICE:
@@ -2554,6 +2560,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 								skillratio += (10000 - min(10000, sd->inventory_data[index]->weight)) / 10;
 							skillratio = skillratio * (100 + (status->get_lv(src)-100) / 2) / 100 + 50 * pc->checkskill(sd,LK_SPIRALPIERCE);
 						}
+						if (sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
+						 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
+							skillratio *= 2;
 					break;
 				case RK_WINDCUTTER:
 						skillratio = (skill_lv + 2) * 50;
@@ -3090,6 +3099,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					battle->calc_skillratio_weapon_unknown(&attack_type, src, target, &skill_id, &skill_lv, &skillratio, &flag);
 					break;
 			}
+#ifndef RENEWAL
+			if (skill_id == LK_SPIRALPIERCE && sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
+			 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
+				skillratio *= 2;
+#endif
 			//Skill damage modifiers that stack linearly
 			if(sc && skill_id != PA_SACRIFICE){
 				if(sc->data[SC_OVERTHRUST])

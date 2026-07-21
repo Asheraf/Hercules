@@ -3398,6 +3398,34 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 
 	damage = dmg.damage + dmg.damage2;
 
+	switch (skill_id) {
+		case KN_PIERCE:
+		case LK_SPIRALPIERCE:
+		case RK_HUNDREDSPEAR:
+		{
+			struct status_change *ssc = status->get_sc(src);
+
+			if (ssc == NULL || ssc->data[SC_CHARGINGPIERCE] == NULL)
+				break;
+
+			struct status_change_entry *sce = ssc->data[SC_CHARGINGPIERCE_COUNT];
+
+			if (sce == NULL) {
+				sc_start(src, src, SC_CHARGINGPIERCE_COUNT, 100, 1,
+				         skill->get_time2(DK_CHARGINGPIERCE, 1), DK_CHARGINGPIERCE);
+			} else if (sce->val1 < 10) {
+				sc_start(src, src, SC_CHARGINGPIERCE_COUNT, 100, sce->val1 + 1,
+				         skill->get_time2(DK_CHARGINGPIERCE, 1), DK_CHARGINGPIERCE);
+			} else {
+				clif->specialeffect(bl, 1767, AREA);
+				status_change_end(src, SC_CHARGINGPIERCE_COUNT, INVALID_TIMER);
+			}
+		}
+			break;
+		default:
+			break;
+	}
+
 	if( (skill_id == AL_INCAGI || skill_id == AL_BLESSING ||
 		skill_id == CASH_BLESSING || skill_id == CASH_INCAGI ||
 		skill_id == MER_INCAGI || skill_id == MER_BLESSING) && tsd && tsd->sc.data[SC_PROPERTYUNDEAD] )
@@ -8202,6 +8230,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 		case DK_SERVANTWEAPON:
+		case DK_CHARGINGPIERCE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case SL_KAITE:
 		case SL_KAAHI:
 		case SL_KAIZEL:

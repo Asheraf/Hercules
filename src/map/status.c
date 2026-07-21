@@ -10426,6 +10426,10 @@ static int status_get_val_flag(enum sc_type type)
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch (type) {
+		case SC_CHARGINGPIERCE:
+		case SC_CHARGINGPIERCE_COUNT:
+			val_flag |= 1;
+			break;
 	}
 	PRAGMA_GCC46(GCC diagnostic pop)
 	return val_flag;
@@ -12085,6 +12089,9 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_SERVANTWEAPON:
 			if (sd != NULL)
 				pc->delservantball(sd, sd->servantball);
+			break;
+		case SC_CHARGINGPIERCE:
+			status_change_end(bl, SC_CHARGINGPIERCE_COUNT, INVALID_TIMER);
 			break;
 		case SC_SOULUNITY:
 		{
