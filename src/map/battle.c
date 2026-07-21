@@ -3049,6 +3049,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if( sc && sc->data[SC_BLAST_OPTION] )
 						skillratio += (sd ? sd->status.job_level * 5 : 0);
 					break;
+				case IQ_FIRST_BRAND:
+					skillratio += -100 + 1200 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_OLEUM_SANCTUM:
 					skillratio += -100 + 500 + 2000 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
@@ -5431,7 +5435,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_SERVANT_W_DEMOL
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
-		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER) && sstatus->cri &&
+		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
+		|| skill_id == IQ_FIRST_BRAND) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5439,7 +5444,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
-			|| skill_id == IQ_EXPOSION_BLASTER))
+			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5877,7 +5882,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_SERVANT_W_DEMOL
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
-							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER)
+							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
+							|| skill_id == IQ_FIRST_BRAND)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

@@ -2328,6 +2328,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			if (skill->area_temp[3] == 1)
 				sc_start(src, bl, SC_STUN, 10, skill_lv, skill_get_time(skill_id, skill_lv), skill_id); // TODO: What's the chance/time?
 			break;
+		case IQ_FIRST_BRAND:
+			sc_start(src, bl, SC_FIRST_BRAND, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case IQ_OLEUM_SANCTUM:
 			sc_start(src, bl, SC_HOLY_OIL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5330,6 +5333,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANT_W_DEMOL:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
+		case IQ_FIRST_BRAND:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5402,6 +5406,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case GN_CARTCANNON:
 					case SU_SCRATCH:
 					case SU_LUNATICCARROTBEAT:
+					case IQ_FIRST_BRAND:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
