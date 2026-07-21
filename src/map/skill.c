@@ -7702,13 +7702,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IQ_POWERFUL_FAITH:
 		case IQ_FIRM_FAITH:
 		case IQ_SINCERE_FAITH:
-		case IQ_FIRST_FAITH_POWER:
 #ifdef RENEWAL
 		case BD_ADAPTATION:
 		case HP_BASILICA: // 2018.11 rebalance - Basilica changed to a self buff
 #endif
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case IQ_FIRST_FAITH_POWER:
+			status_change_end(bl, SC_SECOND_JUDGE, INVALID_TIMER);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case IQ_JUDGE:
+			status_change_end(bl, SC_FIRST_FAITH_POWER, INVALID_TIMER);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case DK_SERVANT_W_DEMOL:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -16683,6 +16692,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_COMBOSKILL, SR_DRAGONCOMBO, 0);
 			}
 			return 0;
+		case IQ_JUDGE:
+			if (sc == NULL || sc->data[SC_FIRST_FAITH_POWER] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+			break;
 		case SR_CRESCENTELBOW:
 			if( sc && sc->data[SC_CRESCENTELBOW] ) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_DUPLICATE, 0, 0);
@@ -17960,7 +17975,11 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 				req.spiritball = 0;
 			break;
 		case SR_FALLENEMPIRE:
-			if (sc != NULL && sc->data[SC_FIRST_FAITH_POWER] != NULL)
+			if (sc != NULL && (sc->data[SC_FIRST_FAITH_POWER] != NULL || sc->data[SC_SECOND_JUDGE] != NULL))
+				req.spiritball = 0;
+			break;
+		case SR_FLASHCOMBO:
+			if (sc != NULL && sc->data[SC_SECOND_JUDGE] != NULL)
 				req.spiritball = 0;
 			break;
 		case SR_GATEOFHELL:
