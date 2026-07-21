@@ -10383,6 +10383,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case DR_PREENING:
 		case DR_BLOOD_HOWLING:
 		case DR_NATURE_SHIELD:
+		case KR_WIND_VEIL:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
@@ -18925,6 +18926,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_LOW_FLIGHT:
 		case KR_TYPHOON_WING:
 		case KR_FEATHER_SPRINKLE:
+		case KR_WIND_VEIL:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;

@@ -4982,6 +4982,29 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		if ((flag & (BF_WEAPON | BF_MAGIC)) != 0 && sc->data[SC_IRON_HOWLING] != NULL)
 			damage = damage * (100 - (5 + 5 * sc->data[SC_IRON_HOWLING]->val1)) / 100;
 
+		if ((flag & (BF_WEAPON | BF_MAGIC)) != 0 && sc->data[SC_WIND_VEIL] != NULL) {
+			int reduction;
+
+			switch (sc->data[SC_WIND_VEIL]->val1) {
+				case 1:
+					reduction = 5;
+					break;
+				case 2:
+					reduction = 7;
+					break;
+				case 3:
+					reduction = 9;
+					break;
+				case 4:
+					reduction = 12;
+					break;
+				default:
+					reduction = 15;
+					break;
+			}
+			damage = damage * (100 - reduction) / 100;
+		}
+
 		if( sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER] ) {
 			if( (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) )
 				damage -= 15 * damage / 100;//15% reduction to physical melee attacks

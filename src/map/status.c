@@ -6139,6 +6139,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 				val = max( val, 25);
 			if (sc->data[SC_WERERAPTOR] != NULL)
 				val = max(val, 25);
+			if (sc->data[SC_WIND_VEIL] != NULL)
+				val = max(val, 25 + 25 * sc->data[SC_WIND_VEIL]->val1);
 			if (sc->data[SC_WILD_WALK] != NULL)
 				val = max(val, sc->data[SC_WILD_WALK]->val2);
 			if (sc->data[SC_SHADOW_CLOCK] != NULL)
@@ -12527,6 +12529,7 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			if (type == SC_WERERAPTOR) {
 				status_change_end(bl, SC_ENRAGE_RAPTOR, INVALID_TIMER);
 				status_change_end(bl, SC_PREENING, INVALID_TIMER);
+				status_change_end(bl, SC_WIND_VEIL, INVALID_TIMER);
 			}
 			if (vd != NULL && sce->val4 != 0)
 				clif->changelook(bl, LOOK_BODY2, sce->val4);
