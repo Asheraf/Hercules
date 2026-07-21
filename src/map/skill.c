@@ -10290,6 +10290,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SP_SOULCOLLECT:
 		case IG_GUARD_STANCE:
 		case IG_ATTACK_STANCE:
+		case DR_TRUTH_OF_ICE:
 			if (tsce != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, status_change_end(bl, type, INVALID_TIMER));
 				map->freeblock_unlock();
@@ -18641,8 +18642,15 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}
-	if ((skill_id == DR_WEREWOLF && sc != NULL && sc->data[SC_WERERAPTOR] != NULL)
-	 || (skill_id == DR_WERERAPTOR && sc != NULL && sc->data[SC_WEREWOLF] != NULL)) {
+	if ((skill_id == DR_WEREWOLF && sc != NULL && (sc->data[SC_WERERAPTOR] != NULL
+		|| sc->data[SC_TRUTH_OF_ICE] != NULL))
+	 || (skill_id == DR_WERERAPTOR && sc != NULL && (sc->data[SC_WEREWOLF] != NULL
+	 	|| sc->data[SC_TRUTH_OF_ICE] != NULL))) {
+		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+		return 0;
+	}
+	if (skill_id == DR_TRUTH_OF_ICE && sc != NULL && (sc->data[SC_WEREWOLF] != NULL
+		|| sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}

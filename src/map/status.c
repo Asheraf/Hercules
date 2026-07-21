@@ -2668,6 +2668,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		if (sc->data[SC_PROPERTYGROUND] != NULL)
 			sd->magic_atk_ele[ELE_EARTH] += sc->data[SC_PROPERTYGROUND]->val1;
 #endif
+		if (sc->data[SC_TRUTH_OF_ICE] != NULL)
+			sd->magic_atk_ele[ELE_WATER] += 10;
 		if (sc->data[SC_BASILICA_BUFF] != NULL)
 			sd->magic_atk_ele[ELE_HOLY] += sc->data[SC_BASILICA_BUFF]->val1;
 
