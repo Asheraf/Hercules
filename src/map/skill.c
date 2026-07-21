@@ -5297,6 +5297,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANTWEAPON_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
+		case AG_SOUL_VC_STRIKE:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
