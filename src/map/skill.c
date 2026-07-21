@@ -5948,6 +5948,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_RADIANT_SPEAR:
 		case IG_IMPERIAL_PRESSURE:
 		case DR_NOMERCY_CLAW:
+		case DR_AROUND_FLOWER:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 		case AG_FROZEN_SLASH:
@@ -6286,6 +6287,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					}
 						FALLTHROUGH
 					case DR_NOMERCY_CLAW:
+					case DR_AROUND_FLOWER:
 					case DR_ICE_CLOUD:
 					case DR_WIND_BOMB:
 					case DR_FLICKING_TONADO:
@@ -9913,6 +9915,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case NPC_PULSESTRIKE:
 		case LG_MOONSLASHER:
 		case DR_NOMERCY_CLAW:
+		case DR_AROUND_FLOWER:
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 

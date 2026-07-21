@@ -1736,6 +1736,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case DR_AROUND_FLOWER:
+					skillratio += -100 + 100 * skill_lv;
+					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {
+						skillratio += 5 * st->int_;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case AL_HOLYLIGHT:
 					skillratio += 25;
 					if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
