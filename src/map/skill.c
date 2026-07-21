@@ -5097,6 +5097,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			                    skill_lv), skill->splash_target(src),
 			                   skill->get_type(skill_id,
 			                                   skill_lv), src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
+			skill->castend_damage_id(src, bl, AG_CRIMSON_ARROW_ATK, skill_lv, tick, flag | SD_LEVEL | SD_ANIMATION);
 			break;
 		case NC_FLAMELAUNCHER:
 			if (sd) pc->overheat(sd,1);
@@ -5321,6 +5322,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_STORMSLASH:
 		case DK_SERVANTWEAPON_ATK:
 		case AG_CRYSTAL_IMPACT:
+		case AG_CRIMSON_ARROW_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case AG_SOUL_VC_STRIKE:

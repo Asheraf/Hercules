@@ -2178,6 +2178,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 400 * skill_lv + 3 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_CRIMSON_ARROW_ATK:
+					skillratio += -100 + 750 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
 					break;
@@ -4197,6 +4201,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 	sc = status->get_sc(src);
 	if (skill_id == AG_CRYSTAL_IMPACT && sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 2)
 		ad.div_ = 2;
+	if (skill_id == AG_CRIMSON_ARROW_ATK && sc != NULL && sc->data[SC_CLIMAX] != NULL)
+		ad.div_ = 2;
 
 	//Initialize variables that will be used afterwards
 	s_ele = skill->get_ele(skill_id, skill_lv);
@@ -4407,6 +4413,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			bonus_skill_id = AG_VIOLENT_QUAKE;
 		else if (skill_id == AG_CRYSTAL_IMPACT_ATK)
 			bonus_skill_id = AG_CRYSTAL_IMPACT;
+		else if (skill_id == AG_CRIMSON_ARROW_ATK)
+			bonus_skill_id = AG_CRIMSON_ARROW;
 		int64 skill_damage_bonus = 0;
 		if (sd != NULL)
 			skill_damage_bonus = pc->skillatk_bonus(sd, bonus_skill_id);
