@@ -5719,6 +5719,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			status_change_end(src, SC_BLADESTOP, INVALID_TIMER);
 			break;
+		case DR_HUNGER:
+		{
+			int rate = (skill_lv + 1) / 2;
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			int64 damage = skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			if (damage > 0) {
+				int64 heal = damage > 10000000 / rate ? 100000 : damage * rate / 100;
+
+				status->heal(src, heal, 0, STATUS_HEAL_SHOWEFFECT);
+			}
+		}
+			break;
 
 		case RG_BACKSTAP: {
 #ifndef RENEWAL
@@ -18764,6 +18777,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_ENRAGE_WOLF:
 		case DR_NOMERCY_CLAW:
 		case DR_CRUEL_BITE:
+		case DR_HUNGER:
 		case BO_DUST_EXPLOSION:
 			if (sc == NULL || sc->data[SC_MYSTERY_POWDER] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
@@ -20760,6 +20774,7 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 	struct status_data *st;
 	struct status_change *sc;
 	int i,hp_rate,sp_rate, sp_skill_rate_bonus = 100;
+	bool ignore_sp_reduction = skill_id == DR_HUNGER;
 	uint16 idx;
 
 	memset(&req,0,sizeof(req));
@@ -20830,14 +20845,14 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 		req.sp += (st->sp * sp_rate)/100;
 	else
 		req.sp += (st->max_sp * (-sp_rate))/100;
-	if( sd->dsprate != 100 )
+	if (sd->dsprate != 100 && (ignore_sp_reduction == false || sd->dsprate > 100))
 		req.sp = req.sp * sd->dsprate / 100;
 
 	ARR_FIND(0, ARRAYLENGTH(sd->skillusesprate), i, sd->skillusesprate[i].id == skill_id);
-	if( i < ARRAYLENGTH(sd->skillusesprate) )
+	if (i < ARRAYLENGTH(sd->skillusesprate) && (ignore_sp_reduction == false || sd->skillusesprate[i].val > 0))
 		sp_skill_rate_bonus += sd->skillusesprate[i].val;
 	ARR_FIND(0, ARRAYLENGTH(sd->skillusesp), i, sd->skillusesp[i].id == skill_id);
-	if( i < ARRAYLENGTH(sd->skillusesp) )
+	if (i < ARRAYLENGTH(sd->skillusesp) && (ignore_sp_reduction == false || sd->skillusesp[i].val < 0))
 		req.sp -= sd->skillusesp[i].val;
 
 	req.sp = cap_value(req.sp * sp_skill_rate_bonus / 100, 0, SHRT_MAX);
@@ -20850,14 +20865,16 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 			req.sp += req.sp * sc->data[SC_UNLIMITED_HUMMING_VOICE]->val3 / 100;
 		if (sc->data[SC_RECOGNIZEDSPELL])
 			req.sp += req.sp / 4;
-		if (sc->data[SC_TELEKINESIS_INTENSE] && skill->get_ele(skill_id, skill_lv) == ELE_GHOST)
+		if (ignore_sp_reduction == false && sc->data[SC_TELEKINESIS_INTENSE] != NULL
+		 && skill->get_ele(skill_id, skill_lv) == ELE_GHOST)
 			req.sp -= req.sp * sc->data[SC_TELEKINESIS_INTENSE]->val2 / 100;
-		if (sc->data[SC_TARGET_ASPD])
+		if (ignore_sp_reduction == false && sc->data[SC_TARGET_ASPD] != NULL)
 			req.sp -= req.sp * sc->data[SC_TARGET_ASPD]->val1 / 100;
-		if (sc->data[SC_MVPCARD_MISTRESS])
+		if (ignore_sp_reduction == false && sc->data[SC_MVPCARD_MISTRESS] != NULL)
 			req.sp -= req.sp * sc->data[SC_MVPCARD_MISTRESS]->val1 / 100;
 #ifdef RENEWAL
-		if (sc->data[SC_ADAPTATION] && (skill->get_inf2(skill_id) & (INF2_SONG_DANCE | INF2_ENSEMBLE_SKILL)) != 0)
+		if (ignore_sp_reduction == false && sc->data[SC_ADAPTATION] != NULL
+			&& (skill->get_inf2(skill_id) & (INF2_SONG_DANCE | INF2_ENSEMBLE_SKILL)) != 0)
 			req.sp -= req.sp * sc->data[SC_ADAPTATION]->val2 / 100;
 #endif
 		if (sc->data[SC_CRESCIVEBOLT] != NULL)

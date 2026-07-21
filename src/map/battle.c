@@ -4428,6 +4428,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 20 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case DR_HUNGER:
+					skillratio += -100 + 80 * skill_lv + 3 * st->str;
+					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
+						skillratio += 40 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
