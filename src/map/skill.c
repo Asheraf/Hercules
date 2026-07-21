@@ -5951,6 +5951,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case KR_DOUBLE_SLASH:
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
+		case KR_CLAW_WAVE:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 		case AG_FROZEN_SLASH:
@@ -15076,6 +15077,12 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				                   skill->castend_damage_id);
 			}
 			break;
+		case KR_CLAW_WAVE:
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+			                   skill->castend_damage_id);
+			break;
 		case PR_BENEDICTIO:
 			r = skill->get_splash(skill_id, skill_lv);
 			skill->area_temp[1] = src->id;
@@ -18858,6 +18865,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case DR_ENRAGE_WOLF:
+		case KR_CLAW_WAVE:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case DR_ENRAGE_RAPTOR:
 		case DR_PREENING:
 		case DR_SHOOTING_FEATHER:
