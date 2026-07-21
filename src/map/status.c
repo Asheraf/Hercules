@@ -4528,6 +4528,8 @@ static unsigned short status_calc_str(struct block_list *bl, struct status_chang
 		str += sc->data[SC_STR_SCROLL]->val1;
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		str += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_BLOOD_HOWLING] != NULL)
+		str += sc->data[SC_BLOOD_HOWLING]->val1 * 2;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -4862,6 +4864,8 @@ static unsigned short status_calc_luk(struct block_list *bl, struct status_chang
 		luk += sc->data[SC_MYSTICPOWDER]->val2;
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		luk += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_BLOOD_HOWLING] != NULL)
+		luk += sc->data[SC_BLOOD_HOWLING]->val1 * 2;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -5475,6 +5479,8 @@ static int status_calc_hit(struct block_list *bl, struct status_change *sc, int 
 		hit -= sc->data[SC_HEAT_BARREL]->val4;
 	if (sc->data[SC_SOULFALCON] != NULL)
 		hit += sc->data[SC_SOULFALCON]->val3;
+	if (sc->data[SC_BLOOD_HOWLING] != NULL)
+		hit += sc->data[SC_BLOOD_HOWLING]->val1 * 10;
 	if (sc->data[SC_ABYSS_SLAYER] != NULL)
 		hit += sc->data[SC_ABYSS_SLAYER]->val3;
 	if (sc->data[SC_INTENSIVE_AIM] != NULL)
@@ -12455,6 +12461,8 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 				status_change_end(bl, (sc_type)sce->val2, INVALID_TIMER);
 			break;
 		case SC_WEREWOLF:
+			if (type == SC_WEREWOLF)
+				status_change_end(bl, SC_BLOOD_HOWLING, INVALID_TIMER);
 			if (vd != NULL && sce->val4 != 0)
 				clif->changelook(bl, LOOK_BODY2, sce->val4);
 			if (status->isdead(bl) == 0)
