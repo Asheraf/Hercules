@@ -6542,6 +6542,8 @@ static unsigned int status_calc_maxhp(struct block_list *bl, struct status_chang
 		maxhp -= maxhp * sc->data[SC_GM_BATTLE2]->val1 / 100;
 	if (sc->data[SC_LUNARSTANCE] != NULL)
 		maxhp += maxhp * sc->data[SC_LUNARSTANCE]->val2 / 100;
+	if (sc->data[SC_WEREWOLF] != NULL)
+		maxhp += maxhp * 10 / 100;
 	if (sc->data[SC_FIRM_FAITH] != NULL)
 		maxhp += maxhp * sc->data[SC_FIRM_FAITH]->val2 / 100;
 #ifdef RENEWAL
@@ -10807,6 +10809,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_KAAHI:
 				val4 = INVALID_TIMER;
 				break;
+			case SC_WEREWOLF:
+				if (vd != NULL)
+					clif->changelook(bl, LOOK_BODY2, 0);
+				break;
 		PRAGMA_GCC46(GCC diagnostic pop)
 		}
 	}
@@ -12447,6 +12453,12 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_ACTIVE_MONSTER_TRANSFORM:
 			if (sce->val2)
 				status_change_end(bl, (sc_type)sce->val2, INVALID_TIMER);
+			break;
+		case SC_WEREWOLF:
+			if (vd != NULL && sce->val4 != 0)
+				clif->changelook(bl, LOOK_BODY2, sce->val4);
+			if (status->isdead(bl) == 0)
+				sc_start(bl, bl, SC_TRANSFORM_DELAY, 100, 1, 3000, DR_WEREWOLF);
 			break;
 		case SC_OVERED_BOOST:
 			switch( bl->type ){

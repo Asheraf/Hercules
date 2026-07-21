@@ -10246,6 +10246,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case DR_WEREWOLF:
+			if (tsc != NULL && tsc->data[type] != NULL) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, status_change_end(bl, type, INVALID_TIMER));
+			} else {
+				int body_style = sd != NULL ? sd->vd.body_style : 0;
+
+				if (sc_start4(src, bl, type, 100, skill_lv, 0, 0, body_style, INFINITE_DURATION, skill_id) != 0
+					&& body_style != 0)
+					clif->changelook(bl, LOOK_BODY2, 0);
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			}
+			break;
 		case IG_GUARDIAN_SHIELD:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				clif->skill_nodamage(bl, bl, skill_id, skill_lv,
@@ -18557,6 +18569,11 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	if( sc && ( sc->data[SC__SHADOWFORM] || sc->data[SC__IGNORANCE] ) )
 		return 0;
 
+	if (skill_id == DR_WEREWOLF && sc != NULL && sc->data[SC_TRANSFORM_DELAY] != NULL) {
+		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+		return 0;
+	}
+
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch( skill_id ) { // Turn off check.
@@ -18586,6 +18603,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SJ_UNIVERSESTANCE:
 		case SJ_SUNSTANCE:
 		case SP_SOULCOLLECT:
+		case DR_WEREWOLF:
 			if (sc && sc->data[skill->get_sc_type(skill_id)])
 				return 1;
 			FALLTHROUGH
