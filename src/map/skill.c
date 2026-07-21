@@ -3963,8 +3963,13 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			 && check_distance_bl(bl, d_bl, sce->val3)
 			) {
 				if (!rmdamage){
-					clif->damage(d_bl, d_bl, 0, 0, damage, 0, BDT_NORMAL, 0);
-					status_fix_damage(NULL, d_bl, damage, 0);
+					int64 devotion_damage = damage;
+					struct status_change *dsc = status->get_sc(d_bl);
+
+					if (dsc != NULL && dsc->data[SC_REBOUND_S] != NULL)
+						devotion_damage -= apply_percentrate64(devotion_damage, dsc->data[SC_REBOUND_S]->val2, 100);
+					clif->damage(d_bl, d_bl, 0, 0, devotion_damage, 0, BDT_NORMAL, 0);
+					status_fix_damage(NULL, d_bl, devotion_damage, 0);
 				} else { //Reflected magics are done directly on the target not on paladin
 					//This check is only for magical skill.
 					//For BF_WEAPON skills types track var rdamage and function battle_calc_return_damage
@@ -8453,6 +8458,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case DK_SERVANTWEAPON:
 		case DK_CHARGINGPIERCE:
 		case DK_VIGOR:
+		case IG_REBOUND_SHIELD:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
@@ -16283,6 +16289,17 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
 			}
+			break;
+		case IG_REBOUND_SHIELD:
+		{
+			int i;
+
+			ARR_FIND(0, MAX_PC_DEVOTION, i, sd->devotion[i] != 0);
+			if (sc == NULL || sc->data[SC_GUARD_STANCE] == NULL || i == MAX_PC_DEVOTION) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+		}
 			break;
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL

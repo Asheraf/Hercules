@@ -7402,8 +7402,13 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			    )
 			 && check_distance_bl(target, d_bl, sce->val3)
 			) {
-				clif->damage(d_bl, d_bl, 0, 0, damage, 0, BDT_NORMAL, 0);
-				status_fix_damage(NULL, d_bl, damage, 0);
+				int64 devotion_damage = damage;
+				struct status_change *dsc = status->get_sc(d_bl);
+
+				if (dsc != NULL && dsc->data[SC_REBOUND_S] != NULL)
+					devotion_damage -= apply_percentrate64(devotion_damage, dsc->data[SC_REBOUND_S]->val2, 100);
+				clif->damage(d_bl, d_bl, 0, 0, devotion_damage, 0, BDT_NORMAL, 0);
+				status_fix_damage(NULL, d_bl, devotion_damage, 0);
 			} else {
 				status_change_end(target, SC_DEVOTION, INVALID_TIMER);
 			}
