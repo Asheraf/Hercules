@@ -1687,6 +1687,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case MG_FROSTDIVER:
 					skillratio += 10 * skill_lv;
 					break;
+				case DR_ICE_TOTEM:
+					skillratio += -100 + 100 * skill_lv;
+					if (sc != NULL && sc->data[SC_TRUTH_OF_ICE] != NULL)
+						skillratio += 5 * st->int_;
+					RE_LVL_DMOD(100);
+					break;
 				case HN_METEOR_STORM_BUSTER: {
 					int socery_lv = sd != NULL ? pc->checkskill(sd, HN_SELFSTUDY_SOCERY) : 0;
 
