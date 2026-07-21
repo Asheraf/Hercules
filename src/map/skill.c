@@ -5947,6 +5947,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_OVERSLASH:
 		case IG_RADIANT_SPEAR:
 		case IG_IMPERIAL_PRESSURE:
+		case KR_NASTY_SLASH:
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
 		case DR_FLICKING_TONADO:
@@ -6286,12 +6287,15 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->blown(src);
 					}
 						FALLTHROUGH
+					case KR_NASTY_SLASH:
 					case DR_NOMERCY_CLAW:
 					case DR_AROUND_FLOWER:
 					case DR_ICE_CLOUD:
 					case DR_WIND_BOMB:
 					case DR_FLICKING_TONADO:
 					case AG_ROCK_DOWN:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
 					case GN_CARTCANNON:
@@ -6397,8 +6401,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if (skill_id == SHC_SAVAGE_IMPACT)
 					status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
 
+				if (skill_id == KR_NASTY_SLASH)
+					skill->blown(src, src, 5, unit->getdir(src), 0x2);
 				else if (skill_id == DR_FLICKING_TONADO)
 					skill->blown(src, src, skill_lv >= 6 ? 5 : 3, unit->getdir(src), 0x2);
+
 				if (skill_id == AS_SPLASHER) {
 					// Prevent double item consumption when the target explodes (item requirements have already been processed in skill_castend_nodamage_id)
 					flag |= 1;
@@ -18859,10 +18866,16 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case KR_NASTY_SLASH:
 		case DR_NOMERCY_CLAW:
 		case DR_CRUEL_BITE:
 		case DR_HUNGER:
 		case DR_BLOOD_HOWLING:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case BO_DUST_EXPLOSION:
 			if (sc == NULL || sc->data[SC_MYSTERY_POWDER] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);

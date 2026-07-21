@@ -4456,6 +4456,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					break;
 				}
+				case KR_NASTY_SLASH:
+					skillratio += -100 + 1150 + 50 * (skill_lv - 1) + 4 * st->str;
+					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
+						skillratio += 300;
+					RE_LVL_DMOD(100);
+					break;
+					RE_LVL_DMOD(100);
+					break;
 				case DR_NOMERCY_CLAW:
 					skillratio += -100 + 80 * skill_lv + 5 * st->str;
 					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
