@@ -1162,6 +1162,9 @@ static int64 battle_calc_cardfix(int attack_type, struct block_list *src, struct
 			if (tsc != NULL && tsc->data[SC_CLIMAX_EARTH] != NULL && s_ele == ELE_EARTH
 			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
 				damage = apply_percentrate64(damage, 200, 100);
+			if (tsc != NULL && tsc->data[SC_CLIMAX_BLOOM] != NULL && s_ele == ELE_FIRE
+			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
+				damage = apply_percentrate64(damage, 200, 100);
 			break;
 		case BF_WEAPON:
 			t_race2 = status->get_race2(target);
@@ -1359,6 +1362,9 @@ static int64 battle_calc_cardfix(int attack_type, struct block_list *src, struct
 			if (tsc != NULL && tsc->data[SC_CLIMAX_EARTH] != NULL && s_ele == ELE_EARTH
 			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
 				damage = apply_percentrate64(damage, 200, 100);
+			if (tsc != NULL && tsc->data[SC_CLIMAX_BLOOM] != NULL && s_ele == ELE_FIRE
+			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
+				damage = apply_percentrate64(damage, 200, 100);
 			break;
 		case BF_MISC:
 			if ( tsd && !(nk&NK_NO_CARDFIX_DEF) ) {
@@ -1392,6 +1398,9 @@ static int64 battle_calc_cardfix(int attack_type, struct block_list *src, struct
 					damage = damage * cardfix / 1000;
 			}
 			if (tsc != NULL && tsc->data[SC_CLIMAX_EARTH] != NULL && s_ele == ELE_EARTH
+			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
+				damage = apply_percentrate64(damage, 200, 100);
+			if (tsc != NULL && tsc->data[SC_CLIMAX_BLOOM] != NULL && s_ele == ELE_FIRE
 			 && (nk & (NK_NO_CARDFIX_DEF | NK_NO_ELEFIX)) == 0)
 				damage = apply_percentrate64(damage, 200, 100);
 			break;
@@ -4339,6 +4348,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		uint16 bonus_skill_id = skill_id;
 		if (skill_id == AG_DESTRUCTIVE_HURRICANE_CLIMAX)
 			bonus_skill_id = AG_DESTRUCTIVE_HURRICANE;
+		else if (skill_id == AG_ALL_BLOOM_ATK || skill_id == AG_ALL_BLOOM_ATK2)
+			bonus_skill_id = AG_ALL_BLOOM;
 		else if (skill_id == AG_VIOLENT_QUAKE_ATK)
 			bonus_skill_id = AG_VIOLENT_QUAKE;
 		int64 skill_damage_bonus = 0;
@@ -4354,6 +4365,9 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 				skill_damage_bonus -= 50;
 			else if (sc->data[SC_CLIMAX]->val1 == 3)
 				skill_damage_bonus += 200;
+		} else if (skill_id == AG_ALL_BLOOM_ATK && sc != NULL && sc->data[SC_CLIMAX] != NULL
+		        && sc->data[SC_CLIMAX]->val1 == 3) {
+			skill_damage_bonus += 300;
 		}
 		if (skill_damage_bonus != 0) {
 			int64 total_rate = cap_value(100 + skill_damage_bonus, 0, INT_MAX);
@@ -4368,6 +4382,10 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 					break;
 				case AG_VIOLENT_QUAKE_ATK:
 					rskill = AG_VIOLENT_QUAKE;
+					break;
+				case AG_ALL_BLOOM_ATK:
+				case AG_ALL_BLOOM_ATK2:
+					rskill = AG_ALL_BLOOM;
 					break;
 				case WL_CHAINLIGHTNING_ATK:
 					rskill = WL_CHAINLIGHTNING;

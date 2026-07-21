@@ -7054,6 +7054,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	 && (element = skill->get_ele(skill_id, skill_lv)) > ELE_NEUTRAL
 	 && skill->get_inf(skill_id) != INF_SUPPORT_SKILL
 	 && skill_id != AG_VIOLENT_QUAKE
+	 && skill_id != AG_ALL_BLOOM
 	 && battle->attr_fix(NULL, NULL, 100, element, tstatus->def_ele, tstatus->ele_lv) <= 0)
 		return 1; //Skills that cause an status should be blocked if the target element blocks its element.
 
@@ -7062,6 +7063,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
 		case AG_VIOLENT_QUAKE:
+		case AG_ALL_BLOOM:
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
 		case HLIF_HEAL: // [orn]
@@ -12614,6 +12616,41 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case AG_ALL_BLOOM:
+		{
+			int area = skill->get_splash(skill_id, skill_lv);
+			int unit_time = skill->get_time(skill_id, skill_lv);
+			int unit_interval = skill->get_unit_interval(skill_id, skill_lv);
+			int climax_lv = sc != NULL && sc->data[SC_CLIMAX] != NULL ? sc->data[SC_CLIMAX]->val1 : 0;
+			int i = 0;
+
+			if (climax_lv == 1) {
+				unit_time /= 2;
+				unit_interval /= 2;
+			}
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			if (climax_lv == 4) {
+				r = skill->get_splash(skill_id, skill_lv);
+				map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+				                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_nodamage_id);
+			} else if (unit_interval > 0) {
+				for (i = 1; i <= unit_time / unit_interval; i++) {
+					int tmpx = x - area + rnd() % (area * 2 + 1);
+					int tmpy = y - area + rnd() % (area * 2 + 1);
+
+					skill->unitsetting(src, AG_ALL_BLOOM_ATK, skill_lv, tmpx, tmpy, flag + i * unit_interval);
+					if (climax_lv == 2) {
+						tmpx = x - area + rnd() % (area * 2 + 1);
+						tmpy = y - area + rnd() % (area * 2 + 1);
+
+						skill->unitsetting(src, AG_ALL_BLOOM_ATK, skill_lv, tmpx, tmpy, flag + i * unit_interval);
+					}
+				}
+				if (climax_lv == 5)
+					skill->unitsetting(src, AG_ALL_BLOOM_ATK2, skill_lv, x, y, flag + i * unit_interval);
+			}
+			break;
+		}
 		case AG_VIOLENT_QUAKE:
 		{
 			int area = skill->get_splash(skill_id, skill_lv);
@@ -13951,11 +13988,22 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 			if (sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 4)
 				limit = 3000;
 			break;
+		case AG_ALL_BLOOM:
+			if (sc != NULL && sc->data[SC_CLIMAX] != NULL) {
+				if (sc->data[SC_CLIMAX]->val1 == 1)
+					limit /= 2;
+				else if (sc->data[SC_CLIMAX]->val1 == 4)
+					limit = 3000;
+			}
+			break;
 		case AG_VIOLENT_QUAKE_ATK:
+		case AG_ALL_BLOOM_ATK:
+		case AG_ALL_BLOOM_ATK2:
 			if (flag > 0)
 				limit = flag;
 			flag = 0;
-			if (sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 2)
+			if (skill_id == AG_VIOLENT_QUAKE_ATK && sc != NULL && sc->data[SC_CLIMAX] != NULL
+				&& sc->data[SC_CLIMAX]->val1 == 2)
 				range = 4;
 			break;
 		case KO_ZENKAI:
@@ -20066,12 +20114,14 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 				break;
 
 			default:
-				if (group->skill_id == AG_VIOLENT_QUAKE_ATK && group->val2 == 1)
+				if ((group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
+					|| group->skill_id == AG_ALL_BLOOM_ATK2) && group->val2 == 1)
 					break;
 				skill->delunit(su);
 		}
 	} else {// skill unit is still active
-		if (group->skill_id == AG_VIOLENT_QUAKE_ATK) {
+		if (group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
+			|| group->skill_id == AG_ALL_BLOOM_ATK2) {
 			if (group->val2 == 0
 			 && (DIFF_TICK(tick, group->tick) >= group->limit - group->interval
 			  || DIFF_TICK(tick, group->tick) >= su->limit - group->interval)
@@ -20148,7 +20198,8 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 				group->bl_flag= BL_NUL;
 			}
 		}
-		if (group->skill_id == AG_VIOLENT_QUAKE_ATK) {
+		if (group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
+			|| group->skill_id == AG_ALL_BLOOM_ATK2) {
 			skill->delunit(su);
 			return 0;
 		}
