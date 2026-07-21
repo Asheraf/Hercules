@@ -5937,6 +5937,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_RADIANT_SPEAR:
 		case IG_IMPERIAL_PRESSURE:
 		case DR_NOMERCY_CLAW:
+		case DR_FLICKING_TONADO:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -6255,6 +6256,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->blown(src);
 						break;
 					case DR_NOMERCY_CLAW:
+					case DR_FLICKING_TONADO:
 					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
@@ -6361,6 +6363,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if (skill_id == SHC_SAVAGE_IMPACT)
 					status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
 
+				else if (skill_id == DR_FLICKING_TONADO)
+					skill->blown(src, src, skill_lv >= 6 ? 5 : 3, unit->getdir(src), 0x2);
 				if (skill_id == AS_SPLASHER) {
 					// Prevent double item consumption when the target explodes (item requirements have already been processed in skill_castend_nodamage_id)
 					flag |= 1;
@@ -18790,6 +18794,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_ENRAGE_WOLF:
 		case DR_ENRAGE_RAPTOR:
 		case DR_SHOOTING_FEATHER:
+		case DR_FLICKING_TONADO:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
