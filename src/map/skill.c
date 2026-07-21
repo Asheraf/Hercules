@@ -16634,6 +16634,11 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		return 0;
 	}
 
+	if (require.ap > 0 && st->ap < (unsigned int)require.ap && sd->auto_cast_current.type == AUTOCAST_NONE) {
+		clif->skill_fail(sd, skill_id, USESKILL_FAIL_AP_INSUFFICIENT, 0, 0);
+		return 0;
+	}
+
 	if( require.zeny > 0 && sd->status.zeny < require.zeny ) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL_MONEY, 0, 0);
 		return 0;
@@ -17102,14 +17107,23 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 
 				break;
 			default:
-				if (sd->auto_cast_current.type != AUTOCAST_NONE) // Auto-cast skills don't consume SP.
+				if (sd->auto_cast_current.type != AUTOCAST_NONE) { // Auto-cast skills don't consume SP or AP.
 					req.sp = 0;
+					req.ap = 0;
+				}
 
 				break;
 		}
 
 		if(req.hp || req.sp)
 			status_zap(&sd->bl, req.hp, req.sp);
+		if (req.ap > 0) {
+			if (sd->battle_status.ap >= (uint32)req.ap)
+				sd->battle_status.ap -= req.ap;
+			else
+				sd->battle_status.ap = 0;
+			clif->updatestatus(sd, SP_AP);
+		}
 
 		if (req.spiritball > 0) {
 			switch(skill_id) {
@@ -17285,6 +17299,7 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 
 	req.sp = cap_value(req.sp * sp_skill_rate_bonus / 100, 0, SHRT_MAX);
 
+	req.ap = skill->dbs->db[idx].ap[skill_lv - 1];
 	if (sc) {
 		if (sc->data[SC__LAZINESS])
 			req.sp += req.sp + sc->data[SC__LAZINESS]->val1 * 10;
@@ -23468,6 +23483,55 @@ static void skill_validate_sp_cost(struct config_setting_t *conf, struct s_skill
 }
 
 /**
+ * Validates a skill's AP cost when reading the skill DB.
+ *
+ * @param conf The libconfig settings block which contains the skill's data.
+ * @param sk The s_skill_db struct where the AP cost should be set it.
+ * @param inherited Whether this record is an inherited entry (thus sk already has a valid value)
+ *
+ **/
+static void skill_validate_ap_cost(struct config_setting_t *conf, struct s_skill_db *sk, bool inherited)
+{
+	nullpo_retv(conf);
+	nullpo_retv(sk);
+
+	if (inherited && libconfig->setting_lookup(conf, "APCost") == NULL)
+		return;
+
+	skill->level_set_value(sk->ap, 0);
+
+	struct config_setting_t *t = libconfig->setting_get_member(conf, "APCost");
+
+	if (t != NULL && config_setting_is_group(t) != 0) {
+		for (int i = 0; i < MAX_SKILL_LEVEL; i++) {
+			char lv[6]; // Big enough to contain "Lv999" in case of custom MAX_SKILL_LEVEL.
+			snprintf(lv, sizeof(lv), "Lv%d", i + 1);
+			int ap_cost;
+
+			if (libconfig->setting_lookup_int(t, lv, &ap_cost) == CONFIG_TRUE) {
+				if (ap_cost >= 0 && ap_cost <= battle_config.max_ap)
+					sk->ap[i] = ap_cost;
+				else
+					ShowWarning("%s: Invalid AP cost %d specified in level %d for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
+						    __func__, ap_cost, i + 1, sk->nameid, conf->file, battle_config.max_ap);
+			}
+		}
+
+		return;
+	}
+
+	int ap_cost;
+
+	if (libconfig->setting_lookup_int(conf, "APCost", &ap_cost) == CONFIG_TRUE) {
+		if (ap_cost >= 0 && ap_cost <= battle_config.max_ap)
+			skill->level_set_value(sk->ap, ap_cost);
+		else
+			ShowWarning("%s: Invalid AP cost %d specified for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
+				    __func__, ap_cost, sk->nameid, conf->file, battle_config.max_ap);
+	}
+}
+
+/**
  * Validates a skill's HP rate cost when reading the skill DB.
  *
  * @param conf The libconfig settings block which contains the skill's data.
@@ -24501,6 +24565,7 @@ static void skill_validate_requirements(struct config_setting_t *conf, struct s_
 	if (t != NULL && config_setting_is_group(t)) {
 		skill->validate_hp_cost(t, sk, inherited);
 		skill->validate_sp_cost(t, sk, inherited);
+		skill->validate_ap_cost(t, sk, inherited);
 		skill->validate_hp_rate_cost(t, sk, inherited);
 		skill->validate_sp_rate_cost(t, sk, inherited);
 		skill->validate_max_hp_trigger(t, sk, inherited);
@@ -25810,6 +25875,7 @@ void skill_defaults(void)
 	skill->validate_castnodex = skill_validate_castnodex;
 	skill->validate_hp_cost = skill_validate_hp_cost;
 	skill->validate_sp_cost = skill_validate_sp_cost;
+	skill->validate_ap_cost = skill_validate_ap_cost;
 	skill->validate_hp_rate_cost = skill_validate_hp_rate_cost;
 	skill->validate_sp_rate_cost = skill_validate_sp_rate_cost;
 	skill->validate_max_hp_trigger = skill_validate_max_hp_trigger;
