@@ -2161,6 +2161,9 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->hit += 2*skill_lv;
 	if (pc->checkskill(sd, SU_POWEROFLIFE) > 0)
 		bstatus->hit += 20;
+	if ((sd->weapontype == W_1HSWORD || sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR)
+		&& (skill_lv = pc->checkskill(sd, IG_SPEAR_SWORD_M)) > 0)
+		bstatus->hit += skill_lv * 3;
 
 	// ----- FLEE CALCULATION -----
 
