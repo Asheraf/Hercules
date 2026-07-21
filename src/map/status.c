@@ -12477,6 +12477,8 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_WERERAPTOR:
 			if (type == SC_WEREWOLF)
 				status_change_end(bl, SC_BLOOD_HOWLING, INVALID_TIMER);
+			if (type == SC_WERERAPTOR)
+				status_change_end(bl, SC_ENRAGE_RAPTOR, INVALID_TIMER);
 			if (vd != NULL && sce->val4 != 0)
 				clif->changelook(bl, LOOK_BODY2, sce->val4);
 			if (status->isdead(bl) == 0)

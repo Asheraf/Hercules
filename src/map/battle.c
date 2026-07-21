@@ -7731,6 +7731,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
 				ATK_ADDRATE(sd->bonus.long_attack_atk_rate);
+			if (sc != NULL && sc->data[SC_ENRAGE_RAPTOR] != NULL && (wd.flag & BF_LONG) != 0)
+				ATK_ADDRATE((int64)sc->data[SC_ENRAGE_RAPTOR]->val1 * 2);
 			if( sc && sc->data[SC_MTF_RANGEATK] )
 				ATK_ADDRATE(sc->data[SC_MTF_RANGEATK]->val1);// temporary it should be 'bonus.long_attack_atk_rate'
 	#endif
