@@ -55,7 +55,7 @@ struct status_change_entry;
 #define MAX_SQUARE_LAYOUT         7 // 15*15 Placement of a maximum unit
 #define MAX_SKILL_UNIT_COUNT      ((MAX_SQUARE_LAYOUT*2+1)*(MAX_SQUARE_LAYOUT*2+1))
 #define MAX_SKILLTIMERSKILL       15
-#define MAX_SKILLUNITGROUP        25
+#define MAX_SKILLUNITGROUP        64
 #define MAX_SKILL_ITEM_REQUIRE    10
 #define MAX_SKILLUNITGROUPTICKSET 25
 #define MAX_SKILL_NAME_LENGTH     32
