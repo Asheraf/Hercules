@@ -3079,6 +3079,19 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case SJ_PROMINENCEKICK:
 						skillratio += 50 + 50 * skill_lv;
 					break;
+				case DK_MADNESS_CRUSHER:
+					skillratio += -100 + 1750 + 4350 * skill_lv + 10 * st->pow;
+					if (sd != NULL) {
+						short index = sd->equip_index[EQI_HAND_R];
+
+						if (index >= 0 && sd->inventory_data[index] != NULL)
+							skillratio += sd->inventory_data[index]->weight / 10 * sd->inventory_data[index]->wlv;
+					}
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
+					 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
+						skillratio *= 2;
+					break;
 				case DK_SERVANTWEAPON_ATK:
 					skillratio += -100 + 600 + 850 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);

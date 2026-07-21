@@ -3402,6 +3402,7 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 		case KN_PIERCE:
 		case LK_SPIRALPIERCE:
 		case RK_HUNDREDSPEAR:
+		case DK_MADNESS_CRUSHER:
 		{
 			struct status_change *ssc = status->get_sc(src);
 
@@ -5281,6 +5282,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_CURSEEXPLOSION:
 		case SP_SHA:
 		case SP_SWHOO:
+		case DK_MADNESS_CRUSHER:
 		case DK_HACKANDSLASHER:
 		case DK_DRAGONIC_AURA:
 		case DK_SERVANTWEAPON_ATK:
