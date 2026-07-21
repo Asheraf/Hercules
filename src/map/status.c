@@ -2380,6 +2380,25 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->aspd_rate2 += skill_lv;
 #endif
 	}
+	if (sc->data[SC_WEREWOLF] != NULL && (skill_lv = pc->checkskill(sd, KR_WOLF_INSTINCT)) > 0) {
+		static const int wolf_instinct_bonus[10][3] = {
+			{ 1, 1, 1 },
+			{ 2, 1, 1 },
+			{ 3, 3, 2 },
+			{ 4, 3, 2 },
+			{ 5, 5, 3 },
+			{ 6, 5, 3 },
+			{ 7, 7, 4 },
+			{ 8, 7, 4 },
+			{ 9, 8, 5 },
+			{ 10, 8, 5 },
+		};
+		int size_index = cap_value(skill_lv, 1, 10) - 1;
+
+		sd->right_weapon.addsize[SZ_SMALL] += wolf_instinct_bonus[size_index][0];
+		sd->right_weapon.addsize[SZ_MEDIUM] += wolf_instinct_bonus[size_index][1];
+		sd->right_weapon.addsize[SZ_BIG] += wolf_instinct_bonus[size_index][2];
+	}
 	bstatus->adelay = 2*bstatus->amotion;
 
 	// ----- DMOTION -----
