@@ -5848,6 +5848,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_HACKANDSLASHER:
 		case DK_DRAGONIC_AURA:
 		case DK_STORMSLASH:
+		case DK_DRAGONIC_BREATH:
 		case DK_SERVANTWEAPON_ATK:
 		case AG_CRYSTAL_IMPACT:
 		case AG_CRIMSON_ARROW_ATK:
@@ -5929,6 +5930,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if ((skill_id == SP_SHA || skill_id == SP_SWHOO) && bl->type != BL_MOB)
 					break;
 
+				if (skill_id == DK_DRAGONIC_BREATH)
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == CD_PETITIO)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == BO_ACIDIFIED_ZONE_WATER || skill_id == BO_ACIDIFIED_ZONE_GROUND
@@ -5937,6 +5940,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					if (bl->type == BL_PC && rnd() % 100 < 1)
 						skill->castend_pos2(src, bl->x, bl->y, skill_id, skill_lv, tick, 0);
 				}
+
 #ifndef RENEWAL
 				switch (skill_id) {
 				case AS_SPLASHER:

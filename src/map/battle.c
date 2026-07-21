@@ -4252,6 +4252,23 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sc != NULL && sc->data[SC_GIANTGROWTH] != NULL && rnd() % 100 < 60)
 						skillratio *= 2;
 					break;
+				case DK_DRAGONIC_BREATH:
+				{
+					int64 bonus;
+
+					skillratio += -100 + 250 + 400 * skill_lv + 7 * st->pow;
+					if (sc != NULL && sc->data[SC_DRAGONIC_AURA] != NULL) {
+						skillratio += 3 * st->pow;
+						bonus = (int64)skill_lv * ((int64)st->max_hp * 25 / 100) * 7 / 100;
+						bonus += (int64)skill_lv * st->max_sp * 7 / 100;
+					} else {
+						bonus = (int64)skill_lv * ((int64)st->max_hp * 25 / 100) * 5 / 100;
+						bonus += (int64)skill_lv * st->max_sp * 5 / 100;
+					}
+					skillratio = (int)cap_value((int64)skillratio + bonus, INT_MIN, INT_MAX);
+					RE_LVL_DMOD(100);
+					break;
+				}
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
@@ -9074,6 +9091,7 @@ static int battle_check_target(struct block_list *src, struct block_list *target
 				switch( battle->get_current_skill(src) ) {
 					case RK_DRAGONBREATH:// it can only hit traps in pvp/gvg maps
 					case RK_DRAGONBREATH_WATER:
+					case DK_DRAGONIC_BREATH:
 						if( !map->list[m].flag.pvp && !map->list[m].flag.gvg )
 							break;
 						FALLTHROUGH
