@@ -5277,6 +5277,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_CURSEEXPLOSION:
 		case SP_SHA:
 		case SP_SWHOO:
+		case DK_HACKANDSLASHER:
 		case DK_SERVANTWEAPON_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
@@ -5326,6 +5327,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case DK_HACKANDSLASHER:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case DK_SERVANT_W_PHANTOM:
 						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0) {
 							enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
