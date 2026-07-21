@@ -1244,6 +1244,9 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 	// In-game tests suggests that this effect applies AFTER the MATK bonus is calculated
 	if (sc->data[SC_APPLEIDUN] != NULL)
 		hp += hp * sc->data[SC_APPLEIDUN]->val3 / 100;
+
+	if (sd != NULL && status_get_hplus(src) > 0)
+		hp = (int)cap_value((int64)hp + (int64)hp * status_get_hplus(src) / 100, INT_MIN, INT_MAX);
 #endif // RENEWAL
 	return hp;
 }

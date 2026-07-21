@@ -4172,6 +4172,11 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 						ShowError("0 enemies targeted by %d:%s, divide per 0 avoided!\n", skill_id, skill->get_name(skill_id));
 				}
 
+#ifdef RENEWAL
+				if (sd != NULL && sstatus->smatk > 0)
+					MATK_ADDRATE(sstatus->smatk);
+#endif
+
 				switch(skill_id){
 					case MG_FIREBOLT:
 					case MG_COLDBOLT:
@@ -4264,6 +4269,13 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		}
 		if (tsd && (i = pc->sub_skillatk_bonus(tsd, skill_id)))
 			ad.damage -= ad.damage * i / 100;
+
+#ifdef RENEWAL
+		if (ad.damage != 0 && tstatus->mres > 0) {
+			double reduction = (double)tstatus->mres / (tstatus->mres + 400.0) * 0.8;
+			ad.damage -= (int64)(ad.damage * reduction);
+		}
+#endif
 
 		ad.damage = battle->calc_defense(BF_MAGIC, src, target, skill_id, skill_lv, ad.damage, flag.imdef, 0);
 
@@ -5977,6 +5989,17 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		if (tsd && skill_id && (i = pc->sub_skillatk_bonus(tsd, skill_id)))
 			ATK_ADDRATE(-i);
 
+#ifdef RENEWAL
+		if (sd != NULL && sstatus->patk > 0)
+			ATK_ADDRATE(sstatus->patk);
+
+		if ((wd.damage != 0 || wd.damage2 != 0) && tstatus->res > 0) {
+			double reduction = (double)tstatus->res / (tstatus->res + 400.0) * 0.8;
+			wd.damage -= (int64)(wd.damage * reduction);
+			wd.damage2 -= (int64)(wd.damage2 * reduction);
+		}
+#endif
+
 		if((!flag.idef || !flag.idef2)
 #ifdef RENEWAL
 			&& (!flag.distinct || flag.tdef)
@@ -6078,7 +6101,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			wd.damage2 = battle->calc_masteryfix(src, target, skill_id, skill_lv, wd.damage2, wd.div_, 1, flag.weapon);
 #else
 		if( sd && flag.cri )
-			ATK_ADDRATE(40);
+			ATK_ADDRATE(40 + sstatus->crate);
 #endif
 	} //Here ends flag.hit section, the rest of the function applies to both hitting and missing attacks
 	else if(wd.div_ < 0) //Since the attack missed...
