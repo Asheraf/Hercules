@@ -4434,6 +4434,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 40 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case DR_SHOOTING_FEATHER:
+					skillratio += -100 + 20 * skill_lv;
+					if (sc != NULL && sc->data[SC_ENRAGE_RAPTOR] != NULL)
+						skillratio += 20 * skill_lv;
+					skillratio += 3 * st->dex;
+					RE_LVL_DMOD(100);
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;

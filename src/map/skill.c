@@ -5732,6 +5732,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			}
 		}
 			break;
+		case DR_SHOOTING_FEATHER:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 		case RG_BACKSTAP: {
 #ifndef RENEWAL
@@ -18785,6 +18789,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case DR_ENRAGE_WOLF:
 		case DR_ENRAGE_RAPTOR:
+		case DR_SHOOTING_FEATHER:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
