@@ -10481,6 +10481,19 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case KR_NATURE_PROTECTION: {
+			int reduce = 50 + min(skill_lv, 5) * 10;
+			int64 hp = tstatus != NULL ? (int64)tstatus->max_hp * 5 * skill_lv / 100 : 0;
+			int64 sp = tstatus != NULL ? (int64)tstatus->max_sp * 3 * skill_lv / 100 : 0;
+
+			if (skill_lv >= 5)
+				reduce = 99;
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, reduce, skill->get_time(skill_id, skill_lv), skill_id));
+			if (hp > 0 || sp > 0)
+				status->heal(bl, hp, sp, STATUS_HEAL_SHOWEFFECT);
+			break;
+		}
 		case DR_WEREWOLF:
 		case DR_WERERAPTOR:
 			if (tsc != NULL && tsc->data[type] != NULL) {

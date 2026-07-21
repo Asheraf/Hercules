@@ -2064,6 +2064,11 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->sprate += skill_lv * 2;
 		sd->sprecov_rate += skill_lv * 10;
 	}
+	if (sc->data[SC_NATURE_PROTECTION] != NULL) {
+		sd->bonus.near_attack_def_rate += sc->data[SC_NATURE_PROTECTION]->val1;
+		sd->bonus.long_attack_def_rate += sc->data[SC_NATURE_PROTECTION]->val1;
+		sd->bonus.magic_def_rate += sc->data[SC_NATURE_PROTECTION]->val1;
+	}
 
 	// ----- HP MAX CALCULATION -----
 
@@ -11431,6 +11436,7 @@ static void status_change_start_stop_action(struct block_list *bl, enum sc_type 
 		case SC_ELECTRICSHOCKER:
 		case SC_WUGBITE:
 		case SC_THORNS_TRAP:
+		case SC_NATURE_PROTECTION:
 		case SC__MANHOLE:
 		case SC__CHAOS:
 		case SC_COLD:
