@@ -3073,6 +3073,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_SECOND_FAITH:
+					skillratio += -100 + 100 + 2300 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:
 				case EL_FIRE_BOMB_ATK:
@@ -5440,7 +5444,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-		|| skill_id == IQ_FIRST_BRAND) && sstatus->cri &&
+		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5448,7 +5452,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
-			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND))
+			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
+			|| skill_id == IQ_SECOND_FAITH))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5511,7 +5516,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			flag.cri = 1;
 	}
 	if (flag.cri) {
-		wd.type = BDT_CRIT;
+		wd.type = skill_id != 0 && skill->get_hit(skill_id, skill_lv) == BDT_MULTIHIT ? BDT_MULTIHIT_CRIT : BDT_CRIT;
 #ifndef RENEWAL
 		flag.idef = flag.idef2 =
 #endif
@@ -5887,7 +5892,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-							|| skill_id == IQ_FIRST_BRAND)
+							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
