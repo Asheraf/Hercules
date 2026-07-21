@@ -4055,6 +4055,7 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 					dir = rnd() % UNIT_DIR_MAX;
 				break;
 			case WL_CRIMSONROCK:
+			case KR_TYPHOON_WING:
 				dir = map->calc_dir(bl,skill->area_temp[4],skill->area_temp[5]);
 				break;
 			case MC_CARTREVOLUTION:
@@ -5965,6 +5966,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case KR_SHARPEN_HAIL:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
+		case KR_TYPHOON_WING:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -15108,6 +15110,17 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                   skill->castend_damage_id);
 			break;
+		case KR_TYPHOON_WING:
+			r = skill->get_splash(skill_id, skill_lv);
+			skill->area_temp[0] = 0;
+			skill->area_temp[1] = 0;
+			skill->area_temp[2] = 0;
+			skill->area_temp[4] = x;
+			skill->area_temp[5] = y;
+			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+			                   skill->castend_damage_id);
+			break;
 		case PR_BENEDICTIO:
 			r = skill->get_splash(skill_id, skill_lv);
 			skill->area_temp[1] = src->id;
@@ -18904,6 +18917,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case KR_SHARPEN_HAIL:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
+		case KR_TYPHOON_WING:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
