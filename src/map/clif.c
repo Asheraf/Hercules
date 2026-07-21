@@ -3740,36 +3740,101 @@ static void clif_updatestatus(struct map_session_data *sd, enum status_point_typ
 			break;
 #endif
 #if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200723 || PACKETVER_ZERO_NUM >= 20221024
+		case SP_AP:
+			WFIFOL(fd, 4) = sd->battle_status.ap;
+			break;
+		case SP_TSTATUSPOINT:
+			WFIFOL(fd, 4) = sd->status.trait_point;
+			break;
+		case SP_MAXAP:
+			WFIFOL(fd, 4) = sd->battle_status.max_ap;
+			break;
 		case SP_POW:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.pow;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.pow;
+			WFIFOL(fd, 10) = sd->battle_status.pow - sd->status.pow;
 			break;
 		case SP_STA:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.sta;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.sta;
+			WFIFOL(fd, 10) = sd->battle_status.sta - sd->status.sta;
 			break;
 		case SP_WIS:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.wis;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.wis;
+			WFIFOL(fd, 10) = sd->battle_status.wis - sd->status.wis;
 			break;
 		case SP_SPL:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.spl;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.spl;
+			WFIFOL(fd, 10) = sd->battle_status.spl - sd->status.spl;
 			break;
 		case SP_CON:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.con;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.con;
+			WFIFOL(fd, 10) = sd->battle_status.con - sd->status.con;
 			break;
 		case SP_CRT:
-			packetId = HEADER_ZC_PAR_4JOB_CHANGE;
-			WFIFOB(fd, 4) = 1;
-			WFIFOB(fd, 5) = sd->status.crt;
+			packetId = HEADER_ZC_COUPLESTATUS;
+			WFIFOL(fd, 2) = type;
+			WFIFOL(fd, 6) = sd->status.crt;
+			WFIFOL(fd, 10) = sd->battle_status.crt - sd->status.crt;
 			break;
+		case SP_UPOW:
+		case SP_USTA:
+		case SP_UWIS:
+		case SP_USPL:
+		case SP_UCON:
+		case SP_UCRT:
+			packetId = HEADER_ZC_STATUS_CHANGE;
+			WFIFOB(fd, 4) = pc->need_trait_point(sd, type - SP_UPOW + SP_POW, 1);
+			break;
+		case SP_PATK:
+			WFIFOL(fd, 4) = sd->battle_status.patk;
+			break;
+		case SP_SMATK:
+			WFIFOL(fd, 4) = sd->battle_status.smatk;
+			break;
+		case SP_RES:
+			WFIFOL(fd, 4) = sd->battle_status.res;
+			break;
+		case SP_MRES:
+			WFIFOL(fd, 4) = sd->battle_status.mres;
+			break;
+		case SP_HPLUS:
+			WFIFOL(fd, 4) = sd->battle_status.hplus;
+			break;
+		case SP_CRATE:
+			WFIFOL(fd, 4) = sd->battle_status.crate;
+			break;
+#else
+		case SP_AP:
+		case SP_TSTATUSPOINT:
+		case SP_MAXAP:
+		case SP_POW:
+		case SP_STA:
+		case SP_WIS:
+		case SP_SPL:
+		case SP_CON:
+		case SP_CRT:
+		case SP_UPOW:
+		case SP_USTA:
+		case SP_UWIS:
+		case SP_USPL:
+		case SP_UCON:
+		case SP_UCRT:
+		case SP_PATK:
+		case SP_SMATK:
+		case SP_RES:
+		case SP_MRES:
+		case SP_HPLUS:
+		case SP_CRATE:
+			return;
 #endif  // PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200723 || PACKETVER_ZERO_NUM >= 20221024
 
 		/**
@@ -4139,6 +4204,29 @@ static void clif_initialstatus(struct map_session_data *sd)
 	clif->updatestatus(sd,SP_INT);
 	clif->updatestatus(sd,SP_DEX);
 	clif->updatestatus(sd,SP_LUK);
+#if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200723 || PACKETVER_ZERO_NUM >= 20221024
+	clif->updatestatus(sd, SP_POW);
+	clif->updatestatus(sd, SP_STA);
+	clif->updatestatus(sd, SP_WIS);
+	clif->updatestatus(sd, SP_SPL);
+	clif->updatestatus(sd, SP_CON);
+	clif->updatestatus(sd, SP_CRT);
+	clif->updatestatus(sd, SP_PATK);
+	clif->updatestatus(sd, SP_SMATK);
+	clif->updatestatus(sd, SP_RES);
+	clif->updatestatus(sd, SP_MRES);
+	clif->updatestatus(sd, SP_HPLUS);
+	clif->updatestatus(sd, SP_CRATE);
+	clif->updatestatus(sd, SP_TSTATUSPOINT);
+	clif->updatestatus(sd, SP_AP);
+	clif->updatestatus(sd, SP_MAXAP);
+	clif->updatestatus(sd, SP_UPOW);
+	clif->updatestatus(sd, SP_USTA);
+	clif->updatestatus(sd, SP_UWIS);
+	clif->updatestatus(sd, SP_USPL);
+	clif->updatestatus(sd, SP_UCON);
+	clif->updatestatus(sd, SP_UCRT);
+#endif
 
 	clif->updatestatus(sd,SP_ATTACKRANGE);
 	clif->updatestatus(sd,SP_ASPD);

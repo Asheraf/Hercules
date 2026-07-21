@@ -1171,10 +1171,20 @@ typedef struct weapon_atk {
 
 //For holding basic status (which can be modified by status changes)
 struct status_data {
-	uint32
-		hp, sp,  // see status_cpy before adding members before hp and sp
-		max_hp, max_sp;
+	// See status_copy before adding members before hp, sp, and ap.
+	uint32 hp;
+	uint32 sp;
+	uint32 ap;
+	uint32 max_hp;
+	uint32 max_sp;
+	uint32 max_ap;
 	uint16 str, agi, vit, int_, dex, luk;
+	uint16 pow;
+	uint16 sta;
+	uint16 wis;
+	uint16 spl;
+	uint16 con;
+	uint16 crt;
 	int atk_percent;
 	int matk_percent;
 	int def_percent;
@@ -1191,6 +1201,12 @@ struct status_data {
 		aspd_rate2,
 #endif
 		aspd_rate;
+	int32 patk;
+	int32 smatk;
+	int32 res;
+	int32 mres;
+	int32 hplus;
+	int32 crate;
 	/**
 	 * defType is RENEWAL dependent and defined in src/map/config/data/const.h
 	 **/

@@ -952,6 +952,7 @@ struct pc_interface {
 
 BEGIN_ZEROED_BLOCK; /* Everything within this block will be memset to 0 when status_defaults() is executed */
 	unsigned int statp[MAX_LEVEL+1];
+	unsigned int traitp[MAX_LEVEL + 1];
 	unsigned int level_penalty[3][RC_MAX][MAX_LEVEL*2+1];
 	/* */
 	struct skill_tree_entry skill_tree[CLASS_COUNT][MAX_SKILL_TREE];
@@ -1088,6 +1089,11 @@ END_ZEROED_BLOCK; /* End */
 	int (*maxparameterincrease) (struct map_session_data* sd, int type);
 	bool (*statusup) (struct map_session_data *sd, int type, int increase);
 	int (*statusup2) (struct map_session_data *sd,int type,int val);
+	int (*gets_trait_point) (int level);
+	int (*need_trait_point) (struct map_session_data *sd, int type, int val);
+	int (*max_trait_parameter_increase) (struct map_session_data *sd, int type);
+	bool (*trait_status_up) (struct map_session_data *sd, int type, int increase);
+	int (*trait_status_up2) (struct map_session_data *sd, int type, int val);
 	int (*skillup) (struct map_session_data *sd,uint16 skill_id);
 	int (*allskillup) (struct map_session_data *sd);
 	int (*resetlvl) (struct map_session_data *sd,int type);

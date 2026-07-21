@@ -2771,6 +2771,9 @@ static void script_load_parameters(void)
 		{"Sp", SP_SP},
 		{"MaxSp", SP_MAXSP},
 		{"StatusPoint", SP_STATUSPOINT},
+		{"TraitPoint", SP_TSTATUSPOINT},
+		{"Ap", SP_AP},
+		{"MaxAp", SP_MAXAP},
 		{"BaseLevel", SP_BASELEVEL},
 		{"SkillPoint", SP_SKILLPOINT},
 		{"Class", SP_CLASS},
@@ -2792,6 +2795,18 @@ static void script_load_parameters(void)
 		{"ModExp", SP_MOD_EXP},
 		{"ModDrop", SP_MOD_DROP},
 		{"ModDeath", SP_MOD_DEATH},
+		{"Pow", SP_POW},
+		{"Sta", SP_STA},
+		{"Wis", SP_WIS},
+		{"Spl", SP_SPL},
+		{"Con", SP_CON},
+		{"Crt", SP_CRT},
+		{"Patk", SP_PATK},
+		{"Smatk", SP_SMATK},
+		{"Res", SP_RES},
+		{"Mres", SP_MRES},
+		{"HPlus", SP_HPLUS},
+		{"CRate", SP_CRATE},
 	};
 
 	script->constdb_comment("Parameters");
@@ -11053,6 +11068,8 @@ static BUILDIN(needed_status_point)
 
 	if (sd == NULL)
 		script_pushint(st, 0);
+	else if (type >= SP_POW && type <= SP_CRT)
+		script_pushint(st, pc->need_trait_point(sd, type, val));
 	else
 		script_pushint(st, pc->need_status_point(sd, type, val));
 

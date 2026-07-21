@@ -457,9 +457,13 @@ static int char_mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 		(p->last_point.x != cp->last_point.x) || (p->last_point.y != cp->last_point.y) ||
 		(p->max_hp != cp->max_hp) || (p->hp != cp->hp) ||
 		(p->max_sp != cp->max_sp) || (p->sp != cp->sp) ||
+		(p->max_ap != cp->max_ap) || (p->ap != cp->ap) ||
 		(p->status_point != cp->status_point) || (p->skill_point != cp->skill_point) ||
+		(p->trait_point != cp->trait_point) ||
 		(p->str != cp->str) || (p->agi != cp->agi) || (p->vit != cp->vit) ||
 		(p->int_ != cp->int_) || (p->dex != cp->dex) || (p->luk != cp->luk) ||
+		(p->pow != cp->pow) || (p->sta != cp->sta) || (p->wis != cp->wis) ||
+		(p->spl != cp->spl) || (p->con != cp->con) || (p->crt != cp->crt) ||
 		(p->option != cp->option) ||
 		(p->party_id != cp->party_id) || (p->guild_id != cp->guild_id) ||
 		(p->pet_id != cp->pet_id) || (p->look.weapon != cp->look.weapon) || (p->hom_id != cp->hom_id) ||
@@ -491,8 +495,10 @@ static int char_mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 
 		if( SQL_ERROR == SQL->Query(inter->sql_handle, "UPDATE `%s` SET `base_level`='%d', `job_level`='%d',"
 			"`base_exp`='%"PRIu64"', `job_exp`='%"PRIu64"', `zeny`='%d',"
-			"`max_hp`='%d',`hp`='%d',`max_sp`='%d',`sp`='%d',`status_point`='%d',`skill_point`='%d',"
+			"`max_hp`='%d',`hp`='%d',`max_sp`='%d',`sp`='%d',`max_ap`='%d',`ap`='%d',"
+			"`status_point`='%d',`skill_point`='%d',`trait_point`='%d',"
 			"`str`='%d',`agi`='%d',`vit`='%d',`int`='%d',`dex`='%d',`luk`='%d',"
+			"`pow`='%d',`sta`='%d',`wis`='%d',`spl`='%d',`con`='%d',`crt`='%d',"
 			"`option`='%u',`party_id`='%d',`guild_id`='%d',`pet_id`='%d',`homun_id`='%d',`elemental_id`='%d',"
 			"`weapon`='%d',`shield`='%d',`head_top`='%d',`head_mid`='%d',`head_bottom`='%d',"
 			"`last_map`='%s',`last_x`='%d',`last_y`='%d',`save_map`='%s',`save_x`='%d',`save_y`='%d', `rename`='%d',"
@@ -502,8 +508,10 @@ static int char_mmo_char_tosql(int char_id, struct mmo_charstatus *p)
 			" WHERE  `account_id`='%d' AND `char_id` = '%d'",
 			char_db, p->base_level, p->job_level,
 			p->base_exp, p->job_exp, p->zeny,
-			p->max_hp, p->hp, p->max_sp, p->sp, p->status_point, p->skill_point,
+			p->max_hp, p->hp, p->max_sp, p->sp, p->max_ap, p->ap,
+			p->status_point, p->skill_point, p->trait_point,
 			p->str, p->agi, p->vit, p->int_, p->dex, p->luk,
+			p->pow, p->sta, p->wis, p->spl, p->con, p->crt,
 			p->option, p->party_id, p->guild_id, p->pet_id, p->hom_id, p->ele_id,
 			p->look.weapon, p->look.shield, p->look.head_top, p->look.head_mid, p->look.head_bottom,
 			mapindex_id2name(p->last_point.map), p->last_point.x, p->last_point.y,
@@ -1217,8 +1225,10 @@ static int char_mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool loa
 	// read char data
 	if (SQL_ERROR == SQL->StmtPrepare(stmt, "SELECT "
 		"`char_id`,`account_id`,`char_num`,`name`,`class`,`base_level`,`job_level`,`base_exp`,`job_exp`,`zeny`,"
-		"`str`,`agi`,`vit`,`int`,`dex`,`luk`,`max_hp`,`hp`,`max_sp`,`sp`,"
-		"`status_point`,`skill_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,`pet_id`,`homun_id`,`elemental_id`,`hair`,"
+		"`str`,`agi`,`vit`,`int`,`dex`,`luk`,`pow`,`sta`,`wis`,`spl`,`con`,`crt`,"
+		"`max_hp`,`hp`,`max_sp`,`sp`,`max_ap`,`ap`,"
+		"`status_point`,`skill_point`,`trait_point`,`option`,`karma`,`manner`,`party_id`,`guild_id`,"
+		"`pet_id`,`homun_id`,`elemental_id`,`hair`,"
 		"`hair_color`,`clothes_color`,`body`,`weapon`,`shield`,`head_top`,`head_mid`,`head_bottom`,`last_map`,`last_x`,`last_y`,"
 		"`save_map`,`save_x`,`save_y`,`partner_id`,`father`,`mother`,`child`,`fame`,`rename`,`delete_date`,`robe`,`slotchange`,"
 		"`char_opt`,`font`,`uniqueitem_counter`,`sex`,`hotkey_rowshift`,`hotkey_rowshift2`,`clan_id`,`last_login`,"
@@ -1242,54 +1252,63 @@ static int char_mmo_char_fromsql(int char_id, struct mmo_charstatus *p, bool loa
 	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 13, SQLDT_SHORT,  &p->int_,               sizeof p->int_,               NULL, NULL)
 	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 14, SQLDT_SHORT,  &p->dex,                sizeof p->dex,                NULL, NULL)
 	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 15, SQLDT_SHORT,  &p->luk,                sizeof p->luk,                NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 16, SQLDT_INT,    &p->max_hp,             sizeof p->max_hp,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 17, SQLDT_INT,    &p->hp,                 sizeof p->hp,                 NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 18, SQLDT_INT,    &p->max_sp,             sizeof p->max_sp,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 19, SQLDT_INT,    &p->sp,                 sizeof p->sp,                 NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 20, SQLDT_INT,    &p->status_point,       sizeof p->status_point,       NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 21, SQLDT_INT,    &p->skill_point,        sizeof p->skill_point,        NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 22, SQLDT_UINT,   &p->option,             sizeof p->option,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 23, SQLDT_UCHAR,  &p->karma,              sizeof p->karma,              NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 24, SQLDT_SHORT,  &p->manner,             sizeof p->manner,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 25, SQLDT_INT,    &p->party_id,           sizeof p->party_id,           NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 26, SQLDT_INT,    &p->guild_id,           sizeof p->guild_id,           NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 27, SQLDT_INT,    &p->pet_id,             sizeof p->pet_id,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 28, SQLDT_INT,    &p->hom_id,             sizeof p->hom_id,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 29, SQLDT_INT,    &p->ele_id,             sizeof p->ele_id,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 30, SQLDT_SHORT,  &p->hair,               sizeof p->hair,               NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 31, SQLDT_SHORT,  &p->hair_color,         sizeof p->hair_color,         NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 32, SQLDT_SHORT,  &p->clothes_color,      sizeof p->clothes_color,      NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 33, SQLDT_INT,    &p->body,               sizeof p->body,               NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 34, SQLDT_INT,    &p->look.weapon,        sizeof p->look.weapon,        NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 35, SQLDT_INT,    &p->look.shield,        sizeof p->look.shield,        NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 36, SQLDT_INT,    &p->look.head_top,      sizeof p->look.head_top,      NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 37, SQLDT_INT,    &p->look.head_mid,      sizeof p->look.head_mid,      NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 38, SQLDT_INT,    &p->look.head_bottom,   sizeof p->look.head_bottom,   NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 39, SQLDT_STRING, &last_map,              sizeof last_map,              NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 40, SQLDT_INT16,  &p->last_point.x,       sizeof p->last_point.x,       NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 41, SQLDT_INT16,  &p->last_point.y,       sizeof p->last_point.y,       NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 42, SQLDT_STRING, &save_map,              sizeof save_map,              NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 43, SQLDT_INT16,  &p->save_point.x,       sizeof p->save_point.x,       NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 44, SQLDT_INT16,  &p->save_point.y,       sizeof p->save_point.y,       NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 45, SQLDT_INT,    &p->partner_id,         sizeof p->partner_id,         NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 46, SQLDT_INT,    &p->father,             sizeof p->father,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 47, SQLDT_INT,    &p->mother,             sizeof p->mother,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 48, SQLDT_INT,    &p->child,              sizeof p->child,              NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 49, SQLDT_INT,    &p->fame,               sizeof p->fame,               NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 50, SQLDT_USHORT, &p->rename,             sizeof p->rename,             NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 51, SQLDT_TIME,   &p->delete_date,        sizeof p->delete_date,        NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 52, SQLDT_INT,    &p->look.robe,          sizeof p->look.robe,          NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 53, SQLDT_USHORT, &p->slotchange,         sizeof p->slotchange,         NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 54, SQLDT_UINT,   &opt,                   sizeof opt,                   NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 55, SQLDT_UCHAR,  &p->font,               sizeof p->font,               NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 56, SQLDT_UINT32, &p->uniqueitem_counter, sizeof p->uniqueitem_counter, NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 57, SQLDT_ENUM,   &sex,                   sizeof sex,                   NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 58, SQLDT_UCHAR,  &p->hotkey_rowshift,    sizeof p->hotkey_rowshift,    NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 59, SQLDT_UCHAR,  &p->hotkey_rowshift2,   sizeof p->hotkey_rowshift2,   NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 60, SQLDT_INT,    &p->clan_id,            sizeof p->clan_id,            NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 61, SQLDT_INT64,  &p->last_login,         sizeof p->last_login,         NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 62, SQLDT_INT,    &p->title_id,           sizeof p->title_id,           NULL, NULL)
-	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 63, SQLDT_INT,    &p->inventorySize,      sizeof p->inventorySize,      NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 16, SQLDT_INT,    &p->pow,                sizeof p->pow,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 17, SQLDT_INT,    &p->sta,                sizeof p->sta,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 18, SQLDT_INT,    &p->wis,                sizeof p->wis,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 19, SQLDT_INT,    &p->spl,                sizeof p->spl,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 20, SQLDT_INT,    &p->con,                sizeof p->con,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 21, SQLDT_INT,    &p->crt,                sizeof p->crt,                NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 22, SQLDT_INT,    &p->max_hp,             sizeof p->max_hp,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 23, SQLDT_INT,    &p->hp,                 sizeof p->hp,                 NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 24, SQLDT_INT,    &p->max_sp,             sizeof p->max_sp,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 25, SQLDT_INT,    &p->sp,                 sizeof p->sp,                 NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 26, SQLDT_INT,    &p->max_ap,             sizeof p->max_ap,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 27, SQLDT_INT,    &p->ap,                 sizeof p->ap,                 NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 28, SQLDT_INT,    &p->status_point,       sizeof p->status_point,       NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 29, SQLDT_INT,    &p->skill_point,        sizeof p->skill_point,        NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 30, SQLDT_INT,    &p->trait_point,        sizeof p->trait_point,        NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 31, SQLDT_UINT,   &p->option,             sizeof p->option,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 32, SQLDT_UCHAR,  &p->karma,              sizeof p->karma,              NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 33, SQLDT_SHORT,  &p->manner,             sizeof p->manner,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 34, SQLDT_INT,    &p->party_id,           sizeof p->party_id,           NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 35, SQLDT_INT,    &p->guild_id,           sizeof p->guild_id,           NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 36, SQLDT_INT,    &p->pet_id,             sizeof p->pet_id,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 37, SQLDT_INT,    &p->hom_id,             sizeof p->hom_id,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 38, SQLDT_INT,    &p->ele_id,             sizeof p->ele_id,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 39, SQLDT_SHORT,  &p->hair,               sizeof p->hair,               NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 40, SQLDT_SHORT,  &p->hair_color,         sizeof p->hair_color,         NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 41, SQLDT_SHORT,  &p->clothes_color,      sizeof p->clothes_color,      NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 42, SQLDT_INT,    &p->body,               sizeof p->body,               NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 43, SQLDT_INT,    &p->look.weapon,        sizeof p->look.weapon,        NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 44, SQLDT_INT,    &p->look.shield,        sizeof p->look.shield,        NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 45, SQLDT_INT,    &p->look.head_top,      sizeof p->look.head_top,      NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 46, SQLDT_INT,    &p->look.head_mid,      sizeof p->look.head_mid,      NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 47, SQLDT_INT,    &p->look.head_bottom,   sizeof p->look.head_bottom,   NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 48, SQLDT_STRING, &last_map,              sizeof last_map,              NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 49, SQLDT_INT16,  &p->last_point.x,       sizeof p->last_point.x,       NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 50, SQLDT_INT16,  &p->last_point.y,       sizeof p->last_point.y,       NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 51, SQLDT_STRING, &save_map,              sizeof save_map,              NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 52, SQLDT_INT16,  &p->save_point.x,       sizeof p->save_point.x,       NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 53, SQLDT_INT16,  &p->save_point.y,       sizeof p->save_point.y,       NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 54, SQLDT_INT,    &p->partner_id,         sizeof p->partner_id,         NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 55, SQLDT_INT,    &p->father,             sizeof p->father,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 56, SQLDT_INT,    &p->mother,             sizeof p->mother,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 57, SQLDT_INT,    &p->child,              sizeof p->child,              NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 58, SQLDT_INT,    &p->fame,               sizeof p->fame,               NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 59, SQLDT_USHORT, &p->rename,             sizeof p->rename,             NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 60, SQLDT_TIME,   &p->delete_date,        sizeof p->delete_date,        NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 61, SQLDT_INT,    &p->look.robe,          sizeof p->look.robe,          NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 62, SQLDT_USHORT, &p->slotchange,         sizeof p->slotchange,         NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 63, SQLDT_UINT,   &opt,                   sizeof opt,                   NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 64, SQLDT_UCHAR,  &p->font,               sizeof p->font,               NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 65, SQLDT_UINT32, &p->uniqueitem_counter, sizeof p->uniqueitem_counter, NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 66, SQLDT_ENUM,   &sex,                   sizeof sex,                   NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 67, SQLDT_UCHAR,  &p->hotkey_rowshift,    sizeof p->hotkey_rowshift,    NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 68, SQLDT_UCHAR,  &p->hotkey_rowshift2,   sizeof p->hotkey_rowshift2,   NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 69, SQLDT_INT,    &p->clan_id,            sizeof p->clan_id,            NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 70, SQLDT_INT64,  &p->last_login,         sizeof p->last_login,         NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 71, SQLDT_INT,    &p->title_id,           sizeof p->title_id,           NULL, NULL)
+	 || SQL_ERROR == SQL->StmtBindColumn(stmt, 72, SQLDT_INT,    &p->inventorySize,      sizeof p->inventorySize,      NULL, NULL)
 	) {
 		SqlStmt_ShowDebug(stmt);
 		SQL->StmtFree(stmt);

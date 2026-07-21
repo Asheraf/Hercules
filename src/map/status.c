@@ -145,6 +145,7 @@ static void initDummyData(void)
 	status->dummy.hp =
 		status->dummy.max_hp =
 		status->dummy.max_sp =
+		status->dummy.max_ap =
 		status->dummy.str =
 		status->dummy.agi =
 		status->dummy.vit =
@@ -172,12 +173,14 @@ static void initDummyData(void)
 	status->dummy_unit_params.max_stats = 99;
 }
 
-//For copying a status_data structure from b to a, without overwriting current Hp and Sp
+// For copying a status_data structure from b to a, without overwriting current HP, SP, and AP.
 static void status_copy(struct status_data *a, const struct status_data *b)
 {
 	nullpo_retv(a);
 	nullpo_retv(b);
-	memcpy((void*)&a->max_hp, (const void*)&b->max_hp, sizeof(struct status_data)-(sizeof(a->hp)+sizeof(a->sp)));
+	const size_t size = sizeof(struct status_data) - (sizeof(a->hp) + sizeof(a->sp) + sizeof(a->ap));
+
+	memcpy((void *)&a->max_hp, (const void *)&b->max_hp, size);
 }
 
 /**
@@ -1481,9 +1484,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	sd->max_weight = status->dbs->max_weight_base[pc->class2idx(sd->status.class_)]+sd->status.str*300;
 
 	if(opt&SCO_FIRST) {
-		//Load Hp/SP from char-received data.
+		// Load HP/SP/AP from char-received data.
 		sd->battle_status.hp = sd->status.hp;
 		sd->battle_status.sp = sd->status.sp;
+		sd->battle_status.ap = sd->status.ap;
 		sd->regen.skill = &sd->skill_regen;
 		sd->regen.sitting = &sd->sitting_regen;
 		sd->weight=0;
@@ -1528,11 +1532,14 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	memset(&sd->special_state,0,sizeof(sd->special_state));
 
 	if (!sd->state.permanent_speed) {
-		memset(&bstatus->max_hp, 0, sizeof(struct status_data)-(sizeof(bstatus->hp)+sizeof(bstatus->sp)));
+		memset(&bstatus->max_hp, 0,
+			sizeof(struct status_data) - (sizeof(bstatus->hp) + sizeof(bstatus->sp) + sizeof(bstatus->ap)));
 		bstatus->speed = DEFAULT_WALK_SPEED;
 	} else {
 		int pSpeed = bstatus->speed;
-		memset(&bstatus->max_hp, 0, sizeof(struct status_data)-(sizeof(bstatus->hp)+sizeof(bstatus->sp)));
+
+		memset(&bstatus->max_hp, 0,
+			sizeof(struct status_data) - (sizeof(bstatus->hp) + sizeof(bstatus->sp) + sizeof(bstatus->ap)));
 		bstatus->speed = pSpeed;
 	}
 
@@ -1913,6 +1920,18 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	bstatus->dex = cap_value(i,0,USHRT_MAX);
 	i = bstatus->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
 	bstatus->luk = cap_value(i,0,USHRT_MAX);
+	i = bstatus->pow + sd->status.pow;
+	bstatus->pow = cap_value(i, 0, USHRT_MAX);
+	i = bstatus->sta + sd->status.sta;
+	bstatus->sta = cap_value(i, 0, USHRT_MAX);
+	i = bstatus->wis + sd->status.wis;
+	bstatus->wis = cap_value(i, 0, USHRT_MAX);
+	i = bstatus->spl + sd->status.spl;
+	bstatus->spl = cap_value(i, 0, USHRT_MAX);
+	i = bstatus->con + sd->status.con;
+	bstatus->con = cap_value(i, 0, USHRT_MAX);
+	i = bstatus->crt + sd->status.crt;
+	bstatus->crt = cap_value(i, 0, USHRT_MAX);
 
 	// ------ BASE ATTACK CALCULATION ------
 
@@ -1997,11 +2016,26 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	else if(!bstatus->max_sp)
 		bstatus->max_sp = 1;
 
-	// ----- RESPAWN HP/SP -----
+	// ----- AP MAX CALCULATION -----
+	int base_max_ap = sd->status.max_ap;
+	if (base_max_ap <= 0)
+		base_max_ap = 200;
+	i64 = (int64)base_max_ap + bstatus->max_ap;
+	bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);
+	if (battle_config.ap_rate != 100) {
+		i64 = (int64)bstatus->max_ap * battle_config.ap_rate / 100;
+		bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);
+	}
+	if (bstatus->max_ap > (unsigned int)battle_config.max_ap)
+		bstatus->max_ap = battle_config.max_ap;
+
+	// ----- RESPAWN HP/SP/AP -----
 	//
 	//Calc respawn hp and store it on base_status
 	bstatus->hp = status->get_restart_hp(sd, bstatus);
 	bstatus->sp = status->get_restart_sp(sd, bstatus);
+	bstatus->ap = (uint32)cap_value((int64)bstatus->max_ap * battle_config.restart_ap_rate / 100,
+		0, bstatus->max_ap);
 
 	// ----- MISC CALCULATION -----
 	status->calc_misc(&sd->bl, bstatus, sd->status.base_level);
@@ -3520,6 +3554,18 @@ static void status_calc_bl_(struct block_list *bl, e_scb_flag flag, enum e_statu
 			clif->updatestatus(sd,SP_DEX);
 		if(bst.luk != st->luk)
 			clif->updatestatus(sd,SP_LUK);
+		if (bst.pow != st->pow)
+			clif->updatestatus(sd, SP_POW);
+		if (bst.sta != st->sta)
+			clif->updatestatus(sd, SP_STA);
+		if (bst.wis != st->wis)
+			clif->updatestatus(sd, SP_WIS);
+		if (bst.spl != st->spl)
+			clif->updatestatus(sd, SP_SPL);
+		if (bst.con != st->con)
+			clif->updatestatus(sd, SP_CON);
+		if (bst.crt != st->crt)
+			clif->updatestatus(sd, SP_CRT);
 		if(bst.hit != st->hit)
 			clif->updatestatus(sd,SP_HIT);
 		if(bst.flee != st->flee)
@@ -3598,6 +3644,22 @@ static void status_calc_bl_(struct block_list *bl, e_scb_flag flag, enum e_statu
 			clif->updatestatus(sd,SP_HP);
 		if(bst.sp != st->sp)
 			clif->updatestatus(sd,SP_SP);
+		if (bst.max_ap != st->max_ap)
+			clif->updatestatus(sd, SP_MAXAP);
+		if (bst.ap != st->ap)
+			clif->updatestatus(sd, SP_AP);
+		if (bst.patk != st->patk)
+			clif->updatestatus(sd, SP_PATK);
+		if (bst.smatk != st->smatk)
+			clif->updatestatus(sd, SP_SMATK);
+		if (bst.res != st->res)
+			clif->updatestatus(sd, SP_RES);
+		if (bst.mres != st->mres)
+			clif->updatestatus(sd, SP_MRES);
+		if (bst.hplus != st->hplus)
+			clif->updatestatus(sd, SP_HPLUS);
+		if (bst.crate != st->crate)
+			clif->updatestatus(sd, SP_CRATE);
 #ifdef RENEWAL
 		if(bst.equip_atk != st->equip_atk || bst.buff_extra_batk != st->buff_extra_batk)
 			clif->updatestatus(sd,SP_ATK2);
@@ -3904,7 +3966,9 @@ static void status_calc_misc(struct block_list *bl, struct status_data *st, int 
 		st->batk =
 		st->hit = st->flee =
 		st->def2 = st->mdef2 =
-		st->cri = st->flee2 = 0;
+		st->cri = st->flee2 =
+		st->patk = st->smatk =
+		st->hplus = st->crate = 0;
 
 #ifdef RENEWAL // renewal formulas
 	if ( bl->type == BL_HOM ) {
@@ -3922,6 +3986,14 @@ static void status_calc_misc(struct block_list *bl, struct status_data *st, int 
 		st->flee += level + st->agi + (bl->type == BL_MER ? 0: (bl->type == BL_PC ? st->luk / 5 : 0) + 100); //base level + ( every 1 agi = +1 flee ) + (every 5 luk = +1 flee) + 100
 		st->def2 += (int)(((float)level + st->vit) / 2 + (bl->type == BL_PC ? ((float)st->agi / 5) : 0)); //base level + (every 2 vit = +1 def) + (every 5 agi = +1 def)
 		st->mdef2 += (int)(bl->type == BL_PC ? (st->int_ + ((float)level / 4) + ((float)(st->dex + st->vit) / 5)) : ((float)(st->int_ + level) / 4)); //(every 4 base level = +1 mdef) + (every 1 int = +1 mdef) + (every 5 dex = +1 mdef) + (every 5 vit = +1 mdef)
+		st->hit += 2 * st->con;
+		st->flee += 2 * st->con;
+		st->patk = cap_value(st->patk + st->pow / 3 + st->con / 5, 0, SHRT_MAX);
+		st->smatk = cap_value(st->smatk + st->spl / 3 + st->con / 5, 0, SHRT_MAX);
+		st->res = cap_value(st->res + st->sta + st->sta / 3 * 5, 0, SHRT_MAX);
+		st->mres = cap_value(st->mres + st->wis + st->wis / 3 * 5, 0, SHRT_MAX);
+		st->hplus = cap_value(st->hplus + st->crt, 0, SHRT_MAX);
+		st->crate = cap_value(st->crate + st->crt / 3, 0, SHRT_MAX);
 	}
 #else // not RENEWAL
 	st->matk_min = status->base_matk_min(st);

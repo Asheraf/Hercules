@@ -173,6 +173,7 @@ struct Battle_Config {
 	int zeny_penalty;
 	int restart_hp_rate;
 	int restart_sp_rate;
+	int restart_ap_rate;
 	int mvp_exp_rate;
 	int mvp_hp_rate;
 	int monster_hp_rate;
@@ -257,8 +258,10 @@ struct Battle_Config {
 	int max_aspd;
 	int max_walk_speed; //Maximum walking speed after buffs [Skotlex]
 	int max_sp;
+	int max_ap;
 	int max_lv, aura_lv;
 	int max_parameter;
+	int max_trait_parameter;
 	int max_cart_weight;
 	int skill_log;
 	int battle_log;
@@ -357,6 +360,7 @@ struct Battle_Config {
 	int backstab_bow_penalty;
 	int hp_rate;
 	int sp_rate;
+	int ap_rate;
 	int bone_drop;
 	int buyer_name;
 	int dancing_weaponswitch_fix;
@@ -652,6 +656,7 @@ struct Battle_Config {
 	int feature_goldpc_default_mode;
 
 	int venom_dust_exp; // Enable exp given by venom dust
+	int trait_points_job_change;
 };
 
 /* criteria for battle_config.idletime_criteria */
