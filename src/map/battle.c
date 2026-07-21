@@ -3251,6 +3251,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 500 + 1000 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_THIRD_PUNISH:
+					skillratio += -100 + 450 + 1800 * skill_lv + 10 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -5448,7 +5452,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH) && sstatus->cri &&
+		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
+		|| skill_id == IQ_THIRD_PUNISH) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5457,7 +5462,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
-			|| skill_id == IQ_SECOND_FAITH))
+			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5896,7 +5901,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH)
+							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
+							|| skill_id == IQ_THIRD_PUNISH)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

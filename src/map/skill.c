@@ -2066,6 +2066,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			if (sd != NULL)
 				pc->addservantball(sd, 1);
 			break;
+		case IQ_THIRD_PUNISH:
+			status_change_end(bl, SC_SECOND_BRAND, INVALID_TIMER);
+			break;
 		case RK_DRAGONBREATH:
 			sc_start4(src, bl, SC_BURNING, 15, skill_lv, 1000, src->id, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5337,6 +5340,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANTWEAPON_ATK:
 		case AG_CRYSTAL_IMPACT:
 		case AG_CRIMSON_ARROW_ATK:
+		case IQ_THIRD_PUNISH:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case AG_FROZEN_SLASH:
@@ -5403,6 +5407,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case DK_HACKANDSLASHER:
 					case DK_STORMSLASH:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
+					case IQ_THIRD_PUNISH:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						if (sd != NULL) {
+							int limit = 5;
+
+							if (sc != NULL && sc->data[SC_RAISINGDRAGON] != NULL
+								&& sc->data[SC_RAISINGDRAGON]->val1 > 0)
+								limit += min(sc->data[SC_RAISINGDRAGON]->val1, MAX_SPIRITBALL - limit);
+
+							for (int i = 0; i < limit; i++)
+								pc->addspiritball(sd, skill->get_time(skill_id, skill_lv), limit);
+						}
 						break;
 					case DK_SERVANT_W_PHANTOM:
 						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0) {
@@ -16228,6 +16245,13 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch( skill_id ) {
+		case IQ_THIRD_PUNISH:
+			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
+				&& sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case MC_VENDING:
 		case ALL_BUYING_STORE:
 			if (map->list[sd->bl.m].flag.novending) {
@@ -17402,6 +17426,20 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 						clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 						return 0;
 					}
+				}
+			}
+			break;
+		case IQ_THIRD_PUNISH:
+			{
+				if (target == NULL) {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					return 0;
+				}
+
+				struct status_change *tsc = status->get_sc(target);
+				if (tsc == NULL || tsc->data[SC_SECOND_BRAND] == NULL) {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					return 0;
 				}
 			}
 			break;
