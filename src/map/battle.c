@@ -2561,6 +2561,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 								skillratio += (10000 - min(10000, sd->inventory_data[index]->weight)) / 10;
 							skillratio = skillratio * (100 + (status->get_lv(src)-100) / 2) / 100 + 50 * pc->checkskill(sd,LK_SPIRALPIERCE);
 						}
+						if (sc != NULL && sc->data[SC_DRAGONIC_AURA] != NULL)
+							skillratio += sc->data[SC_DRAGONIC_AURA]->val1 * 160;
 						if (sc != NULL && sc->data[SC_CHARGINGPIERCE_COUNT] != NULL
 						 && sc->data[SC_CHARGINGPIERCE_COUNT]->val1 >= 10)
 							skillratio *= 2;
@@ -3092,6 +3094,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case DK_HACKANDSLASHER:
 				case DK_HACKANDSLASHER_ATK:
 					skillratio += -100 + 500 + 1000 * skill_lv + 7 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
+				case DK_DRAGONIC_AURA:
+					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
+					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
+						skillratio += 150 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
 				case SJ_FALLINGSTAR_ATK:
@@ -5554,9 +5562,16 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case RK_DRAGONBREATH:
 			case RK_DRAGONBREATH_WATER:
 				wd.damage = (int64)((status_get_hp(src) / 50) + (status_get_max_sp(src) / 4)) * skill_lv;
-				wd.damage = wd.damage * status->get_lv(src) / 150;
-				if (sd != NULL)
-					wd.damage = wd.damage * (95 + 5 * pc->checkskill(sd, RK_DRAGONTRAINING)) / 100;
+				if (status->get_lv(src) > 100)
+					wd.damage = wd.damage * status->get_lv(src) / 100;
+				if (sd != NULL) {
+					if (pc->checkskill(sd, DK_DRAGONIC_AURA) > 0)
+						wd.damage = wd.damage * (90 + 10 * pc->checkskill(sd, RK_DRAGONTRAINING) + sstatus->pow / 5) / 100;
+					else
+						wd.damage = wd.damage * (90 + 10 * pc->checkskill(sd, RK_DRAGONTRAINING)) / 100;
+				}
+				if (sc != NULL && sc->data[SC_DRAGONIC_AURA] != NULL)
+					wd.damage += wd.damage * sc->data[SC_DRAGONIC_AURA]->val1 * 10 / 100;
 #ifdef RENEWAL
 				wd.damage = battle->attr_fix(src, target, battle->calc_cardfix2(src, target, wd.damage, s_ele, nk, wd.flag), s_ele, tstatus->def_ele, tstatus->ele_lv);
 #endif
@@ -6049,7 +6064,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			ATK_ADDRATE(-i);
 
 #ifdef RENEWAL
-		if (sd != NULL && sstatus->patk > 0)
+		if (sd != NULL && sstatus->patk > 0 && ((skill_id != RK_DRAGONBREATH && skill_id != RK_DRAGONBREATH_WATER)
+			|| pc->checkskill(sd, DK_DRAGONIC_AURA) > 0))
 			ATK_ADDRATE(sstatus->patk);
 
 		if ((wd.damage != 0 || wd.damage2 != 0) && tstatus->res > 0) {

@@ -5282,6 +5282,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_SHA:
 		case SP_SWHOO:
 		case DK_HACKANDSLASHER:
+		case DK_DRAGONIC_AURA:
 		case DK_SERVANTWEAPON_ATK:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
@@ -5331,6 +5332,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case DK_DRAGONIC_AURA:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case DK_HACKANDSLASHER:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
@@ -5418,6 +5422,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),
 					                    skill->splash_target(src), src, skill_id, skill_lv, tick,
 					                    flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
+
+				if (skill_id == DK_DRAGONIC_AURA)
+					sc_start(src, src, SC_DRAGONIC_AURA, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 
 				if (skill_id == AS_SPLASHER) {
 					// Prevent double item consumption when the target explodes (item requirements have already been processed in skill_castend_nodamage_id)
