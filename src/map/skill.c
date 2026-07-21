@@ -2346,6 +2346,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_FLAME_BOMB:
 			status_change_end(bl, SC_SECOND_BRAND, INVALID_TIMER);
 			break;
+		case IQ_THIRD_CONSECRATION:
+			status_change_end(bl, SC_SECOND_BRAND, INVALID_TIMER);
+			break;
 		case RL_S_STORM:
 			skill->break_equip(bl, EQP_HEAD_TOP, max(skill_lv * 500, (sstatus->dex * skill_lv * 10) - (tstatus->agi * 20)), BCT_ENEMY);
 			break;
@@ -5353,6 +5356,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_SECOND_FAITH:
 		case IQ_SECOND_JUDGEMENT:
 		case IQ_THIRD_FLAME_BOMB:
+		case IQ_THIRD_CONSECRATION:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5372,6 +5376,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					&& (tsc == NULL || (tsc->data[SC_FIRST_BRAND] == NULL && tsc->data[SC_SECOND_BRAND] == NULL)))
 					break;
 				if (skill_id == IQ_THIRD_FLAME_BOMB && (tsc == NULL || tsc->data[SC_SECOND_BRAND] == NULL))
+					break;
+				if (skill_id == IQ_THIRD_CONSECRATION && (tsc == NULL || tsc->data[SC_SECOND_BRAND] == NULL))
 					break;
 				if (skill_id == DK_SERVANT_W_DEMOL && (tsc == NULL || tsc->data[SC_SERVANT_SIGN] == NULL
 					 || tsc->data[SC_SERVANT_SIGN]->val1 != src->id))
@@ -5448,6 +5454,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_SECOND_FAITH:
 					case IQ_SECOND_JUDGEMENT:
 					case IQ_THIRD_FLAME_BOMB:
+					case IQ_THIRD_CONSECRATION:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
@@ -16766,6 +16773,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case IQ_THIRD_CONSECRATION:
+			if (sc == NULL || (sc->data[SC_SECOND_JUDGE] == NULL && sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+			break;
 		case SR_CRESCENTELBOW:
 			if( sc && sc->data[SC_CRESCENTELBOW] ) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_DUPLICATE, 0, 0);
@@ -17406,6 +17419,15 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 			break;
 		}
 		case IQ_THIRD_FLAME_BOMB: {
+			struct status_change *tsc = target != NULL ? status->get_sc(target) : NULL;
+
+			if (tsc == NULL || tsc->data[SC_SECOND_BRAND] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
+		}
+		case IQ_THIRD_CONSECRATION: {
 			struct status_change *tsc = target != NULL ? status->get_sc(target) : NULL;
 
 			if (tsc == NULL || tsc->data[SC_SECOND_BRAND] == NULL) {
