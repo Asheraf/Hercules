@@ -1510,6 +1510,7 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	// these are not zeroed. [zzo]
 	sd->hprate=100;
 	sd->sprate=100;
+	sd->aprate = 100;
 	sd->castrate=100;
 	sd->delayrate=100;
 	sd->dsprate=100;
@@ -1518,6 +1519,12 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	sd->matk_rate = 100;
 	sd->critical_rate = sd->hit_rate = sd->flee_rate = sd->flee2_rate = 100;
 	sd->def_rate = sd->def2_rate = sd->mdef_rate = sd->mdef2_rate = 100;
+	sd->patk_rate = 100;
+	sd->smatk_rate = 100;
+	sd->res_rate = 100;
+	sd->mres_rate = 100;
+	sd->hplus_rate = 100;
+	sd->crate_rate = 100;
 	sd->regen.state.block = 0;
 
 	// zeroed arrays
@@ -1920,17 +1927,17 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	bstatus->dex = cap_value(i,0,USHRT_MAX);
 	i = bstatus->luk + sd->status.luk + sd->param_bonus[5] + sd->param_equip[5];
 	bstatus->luk = cap_value(i,0,USHRT_MAX);
-	i = bstatus->pow + sd->status.pow;
+	i = bstatus->pow + sd->status.pow + sd->param_bonus[6] + sd->param_equip[6];
 	bstatus->pow = cap_value(i, 0, USHRT_MAX);
-	i = bstatus->sta + sd->status.sta;
+	i = bstatus->sta + sd->status.sta + sd->param_bonus[7] + sd->param_equip[7];
 	bstatus->sta = cap_value(i, 0, USHRT_MAX);
-	i = bstatus->wis + sd->status.wis;
+	i = bstatus->wis + sd->status.wis + sd->param_bonus[8] + sd->param_equip[8];
 	bstatus->wis = cap_value(i, 0, USHRT_MAX);
-	i = bstatus->spl + sd->status.spl;
+	i = bstatus->spl + sd->status.spl + sd->param_bonus[9] + sd->param_equip[9];
 	bstatus->spl = cap_value(i, 0, USHRT_MAX);
-	i = bstatus->con + sd->status.con;
+	i = bstatus->con + sd->status.con + sd->param_bonus[10] + sd->param_equip[10];
 	bstatus->con = cap_value(i, 0, USHRT_MAX);
-	i = bstatus->crt + sd->status.crt;
+	i = bstatus->crt + sd->status.crt + sd->param_bonus[11] + sd->param_equip[11];
 	bstatus->crt = cap_value(i, 0, USHRT_MAX);
 
 	// ------ BASE ATTACK CALCULATION ------
@@ -2022,6 +2029,12 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		base_max_ap = 200;
 	i64 = (int64)base_max_ap + bstatus->max_ap;
 	bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);
+	if (sd->aprate < 0)
+		sd->aprate = 0;
+	if (sd->aprate != 100) {
+		i64 = (int64)bstatus->max_ap * sd->aprate / 100;
+		bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);
+	}
 	if (battle_config.ap_rate != 100) {
 		i64 = (int64)bstatus->max_ap * battle_config.ap_rate / 100;
 		bstatus->max_ap = (unsigned int)cap_value(i64, 0, INT_MAX);
@@ -2039,6 +2052,31 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	// ----- MISC CALCULATION -----
 	status->calc_misc(&sd->bl, bstatus, sd->status.base_level);
+
+	if (sd->patk_rate < 0)
+		sd->patk_rate = 0;
+	if (sd->patk_rate != 100)
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk * sd->patk_rate / 100, 0, SHRT_MAX);
+	if (sd->smatk_rate < 0)
+		sd->smatk_rate = 0;
+	if (sd->smatk_rate != 100)
+		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk * sd->smatk_rate / 100, 0, SHRT_MAX);
+	if (sd->res_rate < 0)
+		sd->res_rate = 0;
+	if (sd->res_rate != 100)
+		bstatus->res = (int32)cap_value((int64)bstatus->res * sd->res_rate / 100, 0, SHRT_MAX);
+	if (sd->mres_rate < 0)
+		sd->mres_rate = 0;
+	if (sd->mres_rate != 100)
+		bstatus->mres = (int32)cap_value((int64)bstatus->mres * sd->mres_rate / 100, 0, SHRT_MAX);
+	if (sd->hplus_rate < 0)
+		sd->hplus_rate = 0;
+	if (sd->hplus_rate != 100)
+		bstatus->hplus = (int32)cap_value((int64)bstatus->hplus * sd->hplus_rate / 100, 0, SHRT_MAX);
+	if (sd->crate_rate < 0)
+		sd->crate_rate = 0;
+	if (sd->crate_rate != 100)
+		bstatus->crate = (int32)cap_value((int64)bstatus->crate * sd->crate_rate / 100, 0, SHRT_MAX);
 
 	//Equipment modifiers for misc settings
 	if(sd->matk_rate < 0)
@@ -3152,6 +3190,52 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			|SCB_MATK|SCB_HIT|SCB_FLEE
 #endif
 			;
+	}
+
+	if ((flag & SCB_POW) != 0) {
+		st->pow = bst->pow;
+		flag |= SCB_PATK;
+	}
+	if ((flag & SCB_STA) != 0) {
+		st->sta = bst->sta;
+		flag |= SCB_RES;
+	}
+	if ((flag & SCB_WIS) != 0) {
+		st->wis = bst->wis;
+		flag |= SCB_MRES;
+	}
+	if ((flag & SCB_SPL) != 0) {
+		st->spl = bst->spl;
+		flag |= SCB_SMATK;
+	}
+	if ((flag & SCB_CON) != 0) {
+		st->con = bst->con;
+		flag |= SCB_HIT | SCB_FLEE | SCB_PATK | SCB_SMATK;
+	}
+	if ((flag & SCB_CRT) != 0) {
+		st->crt = bst->crt;
+		flag |= SCB_HPLUS | SCB_CRATE;
+	}
+
+	if (flag & SCB_PATK)
+		st->patk = bst->patk;
+	if (flag & SCB_SMATK)
+		st->smatk = bst->smatk;
+	if (flag & SCB_RES)
+		st->res = bst->res;
+	if (flag & SCB_MRES)
+		st->mres = bst->mres;
+	if (flag & SCB_HPLUS)
+		st->hplus = bst->hplus;
+	if (flag & SCB_CRATE)
+		st->crate = bst->crate;
+	if ((flag & SCB_MAXAP) != 0) {
+		st->max_ap = bst->max_ap;
+		if (st->ap > st->max_ap) {
+			st->ap = st->max_ap;
+			if (sd != NULL)
+				clif->updatestatus(sd, SP_AP);
+		}
 	}
 
 	if ((flag & SCB_ATK_PERC) != 0)
@@ -14715,6 +14799,19 @@ static bool status_read_scdb_libconfig_sub_calcflag(struct config_setting_t *it,
 			{ "DefPerc", SCB_DEF_PERC },
 			{ "MatkPerc", SCB_MATK_PERC },
 			{ "MdefPerc", SCB_MDEF_PERC },
+			{ "Maxap", SCB_MAXAP },
+			{ "Pow", SCB_POW },
+			{ "Sta", SCB_STA },
+			{ "Wis", SCB_WIS },
+			{ "Spl", SCB_SPL },
+			{ "Con", SCB_CON },
+			{ "Crt", SCB_CRT },
+			{ "Patk", SCB_PATK },
+			{ "Smatk", SCB_SMATK },
+			{ "Res", SCB_RES },
+			{ "Mres", SCB_MRES },
+			{ "Hplus", SCB_HPLUS },
+			{ "Crate", SCB_CRATE },
 			{ "All", SCB_ALL },
 		};
 

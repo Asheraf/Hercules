@@ -361,7 +361,9 @@ struct map_session_data {
 	struct weapon_data right_weapon, left_weapon;
 
 BEGIN_ZEROED_BLOCK; // this block will be globally zeroed at the beginning of status_calc_pc()
-	int param_bonus[6],param_equip[6]; //Stores card/equipment bonuses.
+	// Stores classic and trait card/equipment bonuses.
+	int param_bonus[12];
+	int param_equip[12];
 	int subele[ELE_MAX];
 	int subrace[RC_MAX];
 	int subrace2[RC2_MAX];
@@ -465,9 +467,16 @@ END_ZEROED_BLOCK;
 	struct s_autobonus autobonus[MAX_PC_BONUS], autobonus2[MAX_PC_BONUS], autobonus3[MAX_PC_BONUS]; //Auto script on attack, when attacked, on skill usage
 
 	int castrate,delayrate,hprate,sprate,dsprate;
+	int aprate;
 	int hprecov_rate,sprecov_rate;
 	int matk_rate;
 	int critical_rate,hit_rate,flee_rate,flee2_rate,def_rate,def2_rate,mdef_rate,mdef2_rate;
+	int patk_rate;
+	int smatk_rate;
+	int res_rate;
+	int mres_rate;
+	int hplus_rate;
+	int crate_rate;
 	int itemid;
 	int itemindex; //Used item's index in sd->inventory [Skotlex]
 	int catch_target_class;

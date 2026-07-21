@@ -142,6 +142,13 @@ bonus bLuk,`n`;                   | LUK + `n`
 bonus bAgiVit,`n`;                | AGI + `n`, VIT + `n`
 bonus bAgiDexStr,`n`;             | STR + `n`, AGI + `n`, DEX + `n`
 bonus bAllStats,`n`;              | STR + `n`, AGI + `n`, VIT + `n`, INT + `n`, DEX + `n`, LUK + `n`
+bonus bPow,`n`;                   | POW + `n`
+bonus bSta,`n`;                   | STA + `n`
+bonus bWis,`n`;                   | WIS + `n`
+bonus bSpl,`n`;                   | SPL + `n`
+bonus bCon,`n`;                   | CON + `n`
+bonus bCrt,`n`;                   | CRT + `n`
+bonus bAllTraitStats,`n`;         | POW + `n`, STA + `n`, WIS + `n`, SPL + `n`, CON + `n`, CRT + `n`
 
 HP/SP                             | Description
 :-------------------------------- | :-------------------------
@@ -149,6 +156,8 @@ bonus bMaxHP,`n`;                 | MaxHP + `n`
 bonus bMaxHPrate,`n`;             | MaxHP + `n`%
 bonus bMaxSP,`n`;                 | MaxSP + `n`
 bonus bMaxSPrate,`n`;             | MaxSP + `n`%
+bonus bMaxAP,`n`;                 | MaxAP + `n`
+bonus bMaxAPrate,`n`;             | MaxAP + `n`%
 
 Attack/Def                        | Description
 :-------------------------------- | :-------------------------
@@ -160,6 +169,10 @@ bonus bDef,`n`;                   | Equipment DEF + `n`
 bonus bDef2,`n`;                  | VIT based DEF + `n`
 bonus bDefRate,`n`;               | Equipment DEF + `n`%
 bonus bDef2Rate,`n`;              | VIT based DEF + `n`%
+bonus bPatk,`n`;                  | Physical trait attack + `n`
+bonus bPAtkRate,`n`;              | Physical trait attack + `n`%
+bonus bRes,`n`;                   | Physical trait resistance + `n`
+bonus bResRate,`n`;               | Physical trait resistance + `n`%
 
 Magic Attack/Def                  | Description
 :-------------------------------- | :-------------------------
@@ -169,6 +182,10 @@ bonus bMdef,`n`;                  | Equipment MDEF + `n`
 bonus bMdef2,`n`;                 | INT based MDEF + `n`
 bonus bMdefRate,`n`;              | Equipment MDEF + `n`%
 bonus bMdef2Rate,`n`;             | INT based MDEF + `n`%
+bonus bSmatk,`n`;                 | Magical trait attack + `n`
+bonus bSMatkRate,`n`;             | Magical trait attack + `n`%
+bonus bMres,`n`;                  | Magical trait resistance + `n`
+bonus bMResRate,`n`;              | Magical trait resistance + `n`%
 
 Other Stats                       | Description
 :-------------------------------- | :-------------------------
@@ -180,6 +197,10 @@ bonus bFlee,`n`;                  | Flee + `n`
 bonus bFleeRate,`n`;              | Flee + `n`%
 bonus bFlee2,`n`;                 | Perfect Dodge + `n`
 bonus bFlee2Rate,`n`;             | Perfect Dodge + `n`%
+bonus bHplus,`n`;                 | Healing power + `n`
+bonus bHPlusRate,`n`;             | Healing power + `n`%
+bonus bCrate,`n`;                 | Trait critical rate + `n`
+bonus bCRateRate,`n`;             | Trait critical rate + `n`%
 bonus bPerfectHitRate,`n`;        | On-target impact attack probability `n`% (only the highest among all is applied)
 bonus bPerfectHitAddRate,`n`;     | On-target impact attack probability + `n`%
 bonus bSpeedRate,`n`;             | Moving speed + `n`% (only the highest among all is applied)

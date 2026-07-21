@@ -2498,6 +2498,15 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->param_bonus[type-SP_STR]+=val;
 			break;
+		case SP_POW:
+		case SP_STA:
+		case SP_WIS:
+		case SP_SPL:
+		case SP_CON:
+		case SP_CRT:
+			if (sd->state.lr_flag != 2)
+				sd->param_bonus[type - SP_POW + 6] += val;
+			break;
 		case SP_ATK1:
 			if(!sd->state.lr_flag) {
 				bonus = bst->rhw.atk + val;
@@ -2589,6 +2598,37 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 			} else
 				sd->bonus.arrow_cri += val*10;
 			break;
+		case SP_PATK:
+		case SP_SMATK:
+		case SP_RES:
+		case SP_MRES:
+		case SP_HPLUS:
+		case SP_CRATE:
+			if (sd->state.lr_flag != 2) {
+				switch (type) {
+				case SP_PATK:
+					bst->patk = (int)cap_value((int64)bst->patk + val, SHRT_MIN, SHRT_MAX);
+					break;
+				case SP_SMATK:
+					bst->smatk = (int)cap_value((int64)bst->smatk + val, SHRT_MIN, SHRT_MAX);
+					break;
+				case SP_RES:
+					bst->res = (int)cap_value((int64)bst->res + val, SHRT_MIN, SHRT_MAX);
+					break;
+				case SP_MRES:
+					bst->mres = (int)cap_value((int64)bst->mres + val, SHRT_MIN, SHRT_MAX);
+					break;
+				case SP_HPLUS:
+					bst->hplus = (int)cap_value((int64)bst->hplus + val, SHRT_MIN, SHRT_MAX);
+					break;
+				case SP_CRATE:
+					bst->crate = (int)cap_value((int64)bst->crate + val, SHRT_MIN, SHRT_MAX);
+					break;
+				default:
+					break;
+				}
+			}
+			break;
 		case SP_ATKELE:
 			if(val >= ELE_MAX) {
 				ShowError("pc_bonus: SP_ATKELE: Invalid element %d\n", val);
@@ -2641,6 +2681,11 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 			val += (int)bst->max_sp;
 			bst->max_sp = (unsigned int)val;
 			break;
+		case SP_MAXAP:
+			if (sd->state.lr_flag == 2)
+				break;
+			bst->max_ap = (unsigned int)cap_value((int64)bst->max_ap + val, 0, INT_MAX);
+			break;
 	#ifndef RENEWAL_CAST
 		case SP_VARCASTRATE:
 	#endif
@@ -2655,6 +2700,10 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 		case SP_MAXSPRATE:
 			if(sd->state.lr_flag != 2)
 				sd->sprate+=val;
+			break;
+		case SP_MAXAPRATE:
+			if (sd->state.lr_flag != 2)
+				sd->aprate = (int)cap_value((int64)sd->aprate + val, INT_MIN, INT_MAX);
 			break;
 		case SP_SPRATE:
 			if(sd->state.lr_flag != 2)
@@ -2883,6 +2932,30 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 			if(sd->state.lr_flag != 2)
 				sd->mdef2_rate += val;
 			break;
+		case SP_PATK_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->patk_rate = (int)cap_value((int64)sd->patk_rate + val, INT_MIN, INT_MAX);
+			break;
+		case SP_SMATK_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->smatk_rate = (int)cap_value((int64)sd->smatk_rate + val, INT_MIN, INT_MAX);
+			break;
+		case SP_RES_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->res_rate = (int)cap_value((int64)sd->res_rate + val, INT_MIN, INT_MAX);
+			break;
+		case SP_MRES_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->mres_rate = (int)cap_value((int64)sd->mres_rate + val, INT_MIN, INT_MAX);
+			break;
+		case SP_HPLUS_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->hplus_rate = (int)cap_value((int64)sd->hplus_rate + val, INT_MIN, INT_MAX);
+			break;
+		case SP_CRATE_RATE:
+			if (sd->state.lr_flag != 2)
+				sd->crate_rate = (int)cap_value((int64)sd->crate_rate + val, INT_MIN, INT_MAX);
+			break;
 		case SP_RESTART_FULL_RECOVER:
 			if(sd->state.lr_flag != 2)
 				sd->special_state.restart_full_recover = 1;
@@ -2958,6 +3031,12 @@ static int pc_bonus(struct map_session_data *sd, int type, int val)
 				sd->param_bonus[SP_INT-SP_STR]+=val;
 				sd->param_bonus[SP_DEX-SP_STR]+=val;
 				sd->param_bonus[SP_LUK-SP_STR]+=val;
+			}
+			break;
+		case SP_ALL_TRAIT_STATS:
+			if (sd->state.lr_flag != 2) {
+				for (i = 6; i < 12; i++)
+					sd->param_bonus[i] += val;
 			}
 			break;
 		case SP_AGI_VIT: // [Valaris]
@@ -8640,6 +8719,7 @@ static int64 pc_readparam(const struct map_session_data *sd, int type)
 			break;
 		case SP_MAXHPRATE:       val = sd->hprate; break;
 		case SP_MAXSPRATE:       val = sd->sprate; break;
+		case SP_MAXAPRATE:       val = sd->aprate; break;
 		case SP_SPRATE:          val = sd->dsprate; break;
 		case SP_SPEED_RATE:      val = sd->bonus.speed_rate; break;
 		case SP_SPEED_ADDRATE:   val = sd->bonus.speed_add_rate; break;
@@ -8671,6 +8751,12 @@ static int64 pc_readparam(const struct map_session_data *sd, int type)
 		case SP_DEF2_RATE:       val = sd->def2_rate; break;
 		case SP_MDEF_RATE:       val = sd->mdef_rate; break;
 		case SP_MDEF2_RATE:      val = sd->mdef2_rate; break;
+		case SP_PATK_RATE:       val = sd->patk_rate; break;
+		case SP_SMATK_RATE:      val = sd->smatk_rate; break;
+		case SP_RES_RATE:        val = sd->res_rate; break;
+		case SP_MRES_RATE:       val = sd->mres_rate; break;
+		case SP_HPLUS_RATE:      val = sd->hplus_rate; break;
+		case SP_CRATE_RATE:      val = sd->crate_rate; break;
 		case SP_RESTART_FULL_RECOVER: val = sd->special_state.restart_full_recover?1:0; break;
 		case SP_NO_CASTCANCEL:   val = sd->special_state.no_castcancel?1:0; break;
 		case SP_NO_CASTCANCEL2:  val = sd->special_state.no_castcancel2?1:0; break;
