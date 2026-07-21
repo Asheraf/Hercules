@@ -1699,6 +1699,17 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 5 * st->int_;
 					RE_LVL_DMOD(100);
 					break;
+				case KR_ICE_PILLAR:
+					if ((flag & SKILL_ALTDMG_FLAG) != 0)
+						skillratio += -100 + 450 + 50 * (skill_lv - 1);
+					else {
+						skillratio += -100 + 720 + 120 * (skill_lv - 1);
+						if (sc != NULL && sc->data[SC_TRUTH_OF_ICE] != NULL)
+							skillratio += 600;
+					}
+					skillratio += 4 * st->int_;
+					RE_LVL_DMOD(100);
+					break;
 				case HN_METEOR_STORM_BUSTER: {
 					int socery_lv = sd != NULL ? pc->checkskill(sd, HN_SELFSTUDY_SOCERY) : 0;
 
@@ -5887,6 +5898,10 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		int64 skill_damage_bonus = 0;
 		if (sd != NULL)
 			skill_damage_bonus = pc->skillatk_bonus(sd, bonus_skill_id);
+		if (sc != NULL && sc->data[SC_ICE_PILLAR] != NULL
+		 && (skill_id == DR_ICE_TOTEM || skill_id == DR_ICE_CLOUD || skill_id == KR_ICE_PILLAR
+		    || skill_id == KR_ICE_SPLASH))
+			skill_damage_bonus += 15;
 		if (skill_id == AG_DESTRUCTIVE_HURRICANE && sc != NULL && sc->data[SC_CLIMAX] != NULL) {
 			if (sc->data[SC_CLIMAX]->val1 == 3)
 				skill_damage_bonus += 150;

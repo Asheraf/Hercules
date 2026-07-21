@@ -15111,6 +15111,25 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				                   skill->castend_damage_id);
 			}
 			break;
+		case KR_ICE_PILLAR:
+			if ((sg = skill->unitsetting(src, skill_id, skill_lv, x, y, 0)) != NULL) {
+				r = skill->get_splash(skill_id, skill_lv);
+				map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+				                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+				                   skill->castend_damage_id);
+				sg->interval = 500;
+				map->foreachinrange(skill->unit_timer_sub_onplace, &sg->unit.data[0].bl, sg->unit.data[0].range,
+				                    sg->bl_flag, &sg->unit.data[0].bl, tick);
+				if (src->prev != NULL && status->isdead(src) == false && src->m == sg->unit.data[0].bl.m
+				 && (int)distance_xy(src->x, src->y, sg->unit.data[0].bl.x,
+				    sg->unit.data[0].bl.y) <= (int)sg->unit.data[0].range) {
+					status_change_end(src, SC_ICE_PILLAR, INVALID_TIMER);
+					sc_start(src, src, SC_ICE_PILLAR, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+				}
+				sg->val1 = DIFF_TICK32(tick, sg->tick) + 500;
+				sg->val2 = 1;
+			}
+			break;
 		case KR_CLAW_WAVE:
 			r = skill->get_splash(skill_id, skill_lv);
 			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
@@ -16856,6 +16875,16 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 		skill->del_unitgroup(group);
 		return NULL;
 	}
+	if (skill_id == KR_ICE_PILLAR) {
+		for (i = 0; i < group->unit.count; i++) {
+			struct skill_unit *su = &group->unit.data[i];
+
+			if (su->alive != 0 && su->range >= 0) {
+				group->val3 = su->bl.id;
+				break;
+			}
+		}
+	}
 
 	//success, unit created.
 	switch( skill_id ) {
@@ -17242,6 +17271,11 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 	}
 
 	switch (sg->unit_id) {
+		case UNT_ICE_PILLAR:
+			if (battle->check_target(&src->bl, bl, BCT_ENEMY) > 0)
+				skill->attack(skill->get_type(sg->skill_id, sg->skill_lv), ss, &src->bl, bl, sg->skill_id, sg->skill_lv,
+				              tick, SD_ANIMATION | SKILL_ALTDMG_FLAG);
+			break;
 		case UNT_FIREWALL:
 		case UNT_KAEN: {
 			int count=0;
@@ -23592,6 +23626,32 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 		}
 	}
 
+	if (group->unit_id == UNT_ICE_PILLAR) {
+		if (su->bl.id == group->val3 && group->val2 < 8 && DIFF_TICK32(tick, group->tick) >= group->val1) {
+			struct block_list *src = map->id2bl(group->src_id);
+			int scheduled = group->val1;
+			int count_before = group->val2;
+
+			group->val2++;
+			group->val1 = scheduled + (count_before == 0 ? 500 : 1000);
+			if (count_before == 1)
+				group->interval = skill->get_unit_interval(group->skill_id, group->skill_lv);
+
+			if ((skill->get_unit_flag(group->skill_id) & UF_PATHCHECK) != 0)
+				map->foreachinshootrange(skill->unit_timer_sub_onplace, bl, su->range, group->bl_flag, bl, tick);
+			else
+				map->foreachinrange(skill->unit_timer_sub_onplace, bl, su->range, group->bl_flag, bl, tick);
+
+			if (src != NULL && src->prev != NULL && status->isdead(src) == false && src->m == su->bl.m
+			 && (int)distance_xy(src->x, src->y, su->bl.x, su->bl.y) <= (int)su->range) {
+				status_change_end(src, SC_ICE_PILLAR, INVALID_TIMER);
+				sc_start(src, src, SC_ICE_PILLAR, 100, group->skill_lv,
+				         skill->get_time2(group->skill_id, group->skill_lv), group->skill_id);
+			}
+		}
+		return 0;
+	}
+
 	//Don't continue if unit or even group is expired and has been deleted.
 	if( !su->alive )
 		return 0;
@@ -28481,7 +28541,16 @@ static int skill_validate_unit_id_sub(int unit_id)
 	if (unit_id == 0 || (unit_id >= UNT_SAFETYWALL && unit_id <= UNT_MYSTERY_ILLUSION)
 		|| unit_id == UNT_HYUN_ROKS_BREEZE || unit_id == UNT_TWINKLING_GALAXY || unit_id == UNT_STAR_CANNON
 		|| unit_id == UNT_STAR_BURST || unit_id == UNT_SHINKIROU || unit_id == UNT_FUUMASHOUAKU
-		|| unit_id == UNT_KUNAIKAITEN || unit_id == UNT_KUNAIWAIKYOKU || unit_id == UNT_GLACIAL_MONOLITH)
+		|| unit_id == UNT_KUNAIKAITEN || unit_id == UNT_KUNAIWAIKYOKU || unit_id == UNT_GLACIAL_MONOLITH
+		|| unit_id == UNT_STRANTUM_TREMOR || unit_id == UNT_VIOLENT_QUAKE || unit_id == UNT_ALL_BLOOM
+		|| unit_id == UNT_TORNADO_STORM || unit_id == UNT_FLORAL_FLARE_ROAD || unit_id == UNT_ASTRAL_STRIKE
+		|| unit_id == UNT_CROSS_RAIN || unit_id == UNT_PNEUMATICUS_PROCELLA || unit_id == UNT_ABYSS_SQUARE
+		|| unit_id == UNT_ACIDIFIED_ZONE_WATER || unit_id == UNT_ACIDIFIED_ZONE_GROUND
+		|| unit_id == UNT_ACIDIFIED_ZONE_WIND || unit_id == UNT_ACIDIFIED_ZONE_FIRE || unit_id == UNT_LIGHTNING_LAND
+		|| unit_id == UNT_VENOM_SWAMP || unit_id == UNT_CONFLAGRATION || unit_id == UNT_GRENADES_DROPPING
+		|| unit_id == UNT_MISSION_BOMBARD || unit_id == UNT_GROUND_GRAVITATION || unit_id == UNT_TOTEM_OF_TUTELARY
+		|| unit_id == UNT_JACK_FROST_NOVA || unit_id == UNT_ICE_PILLAR || unit_id == UNT_DEEPBLINDTRAP
+		|| unit_id == UNT_SOLIDTRAP || unit_id == UNT_SWIFTTRAP || unit_id == UNT_FLAMETRAP)
 		return unit_id;
 
 	return -1;
