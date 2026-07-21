@@ -2137,6 +2137,16 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 200 + 1200 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_ASTRAL_STRIKE:
+					skillratio += -100 + 700 + 2600 * skill_lv + 10 * st->spl;
+					if (tst->race == RC_UNDEAD || tst->race == RC_DRAGON)
+						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
+				case AG_ASTRAL_STRIKE_ATK:
+					skillratio += -100 + 650 * skill_lv + 10 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_ALL_BLOOM_ATK:
 					skillratio += -100 + 200 + 1200 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
@@ -4373,6 +4383,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		uint16 bonus_skill_id = skill_id;
 		if (skill_id == AG_DESTRUCTIVE_HURRICANE_CLIMAX)
 			bonus_skill_id = AG_DESTRUCTIVE_HURRICANE;
+		else if (skill_id == AG_ASTRAL_STRIKE_ATK)
+			bonus_skill_id = AG_ASTRAL_STRIKE;
 		else if (skill_id == AG_ALL_BLOOM_ATK || skill_id == AG_ALL_BLOOM_ATK2)
 			bonus_skill_id = AG_ALL_BLOOM;
 		else if (skill_id == AG_VIOLENT_QUAKE_ATK)
@@ -4415,6 +4427,9 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			switch(skill_id){
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					rskill = AG_DESTRUCTIVE_HURRICANE;
+					break;
+				case AG_ASTRAL_STRIKE_ATK:
+					rskill = AG_ASTRAL_STRIKE;
 					break;
 				case AG_VIOLENT_QUAKE_ATK:
 					rskill = AG_VIOLENT_QUAKE;

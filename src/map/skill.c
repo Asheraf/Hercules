@@ -5636,6 +5636,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			FALLTHROUGH
 		case AG_DESTRUCTIVE_HURRICANE:
 		case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
+		case AG_ASTRAL_STRIKE:
+		case AG_ASTRAL_STRIKE_ATK:
 		case MG_SOULSTRIKE:
 		case NPC_DARKSTRIKE:
 		case MG_COLDBOLT:
@@ -12716,6 +12718,13 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			}
 			break;
 		}
+		case AG_ASTRAL_STRIKE:
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
 		case PR_BENEDICTIO:
 			r = skill->get_splash(skill_id, skill_lv);
 			skill->area_temp[1] = src->id;
@@ -15338,6 +15347,9 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_TORNADO_STORM:
 		case UNT_FLORAL_FLARE_ROAD:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
+			break;
+		case UNT_ASTRAL_STRIKE:
+			skill->attack(BF_MAGIC, ss, &src->bl, bl, AG_ASTRAL_STRIKE_ATK, sg->skill_lv, tick, 0);
 			break;
 		case UNT_B_TRAP:
 			if (tsc != NULL && tsc->data[type])
