@@ -5948,6 +5948,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_RADIANT_SPEAR:
 		case IG_IMPERIAL_PRESSURE:
 		case KR_NASTY_SLASH:
+		case KR_DOUBLE_SLASH:
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
 		case DR_FLICKING_TONADO:
@@ -6288,6 +6289,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					}
 						FALLTHROUGH
 					case KR_NASTY_SLASH:
+					case KR_DOUBLE_SLASH:
 					case DR_NOMERCY_CLAW:
 					case DR_AROUND_FLOWER:
 					case DR_ICE_CLOUD:
@@ -18867,6 +18869,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case KR_NASTY_SLASH:
+		case KR_DOUBLE_SLASH:
 		case DR_NOMERCY_CLAW:
 		case DR_CRUEL_BITE:
 		case DR_HUNGER:
