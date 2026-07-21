@@ -2108,6 +2108,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 50 + 330 * skill_lv + 3 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_STRANTUM_TREMOR:
+					skillratio += -100 + 100 + 730 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_MYSTERY_ILLUSION:
 					skillratio += -100 + 950 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
