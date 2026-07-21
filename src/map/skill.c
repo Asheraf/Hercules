@@ -5948,6 +5948,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DR_ICE_CLOUD:
 		case DR_WIND_BOMB:
 		case KR_ICE_SPLASH:
+		case KR_THUNDERING_FOCUS:
 		case AG_CRYSTAL_IMPACT:
 		case AG_CRIMSON_ARROW_ATK:
 		case IQ_THIRD_PUNISH:
@@ -9881,6 +9882,30 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				else
 					map->foreachinrange(skill->area_sub, bl, splash, BL_CHAR,
 					                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			}
+			break;
+		case KR_THUNDERING_FOCUS:
+			{
+				struct status_change *sc = status->get_sc(src);
+				int charge = 1;
+
+				if (sc != NULL && sc->data[SC_THUNDERING_ROD_MAX] != NULL) {
+					skill->castend_nodamage_id(src, bl, KR_THUNDERING_FOCUS_S, skill_lv, tick, flag);
+					break;
+				}
+				if (sc != NULL && sc->data[SC_THUNDERING_ROD] != NULL)
+					charge += sc->data[SC_THUNDERING_ROD]->val3;
+				charge = min(6, charge);
+
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sc_start4(src, src, SC_THUNDERING_ROD, 100, skill_id, skill_lv, charge, 0,
+				          skill->get_time(skill_id, skill_lv), skill_id);
+				if (charge == 6)
+					sc_start(src, src, SC_THUNDERING_ROD_MAX, 100, 1, skill->get_time(skill_id, skill_lv), skill_id);
+				skill->area_temp[1] = 0;
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),
+				                    skill->splash_target(src),
+				                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
 			break;
 
