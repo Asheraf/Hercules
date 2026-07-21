@@ -5284,6 +5284,12 @@ static int status_calc_watk(struct block_list *bl, struct status_change *sc, int
 static int status_calc_ematk(struct block_list *bl, struct status_change *sc, int matk)
 {
 #ifdef RENEWAL
+	struct map_session_data *sd = BL_CAST(BL_PC, bl);
+	int skill_lv;
+
+	if (sd != NULL && (skill_lv = pc->checkskill(sd, DR_NATURE_LOGIC)) > 0)
+		matk += 20 + skill_lv * 5;
+
 	if (!sc || !sc->count)
 		return cap_value(matk, battle_config.matk_min, battle_config.matk_max);
 	if (sc->data[SC_PLUSMAGICPOWER])
