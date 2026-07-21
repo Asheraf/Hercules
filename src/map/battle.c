@@ -2085,6 +2085,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 2800 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case AG_DESTRUCTIVE_HURRICANE:
+					skillratio += -100 + 600 + 3250 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
+				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
+					skillratio += -100 + 12500;
+					break;
 				default:
 					battle->calc_skillratio_magic_unknown(&attack_type, src, target, &skill_id, &skill_lv, &skillratio, &flag);
 					break;
@@ -4139,6 +4146,10 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 	}
 
 	switch(skill_id) {
+		case AG_DESTRUCTIVE_HURRICANE:
+			if (sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 2)
+				ad.blewcount = 2;
+			break;
 		case MG_FIREWALL:
 			if ( tstatus->def_ele == ELE_FIRE || battle->check_undead(tstatus->race, tstatus->def_ele) )
 				ad.blewcount = 0; //No knockback
@@ -4294,12 +4305,29 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			}
 		}
 #endif
+		uint16 bonus_skill_id = skill_id;
+		if (skill_id == AG_DESTRUCTIVE_HURRICANE_CLIMAX)
+			bonus_skill_id = AG_DESTRUCTIVE_HURRICANE;
+		int64 skill_damage_bonus = 0;
+		if (sd != NULL)
+			skill_damage_bonus = pc->skillatk_bonus(sd, bonus_skill_id);
+		if (skill_id == AG_DESTRUCTIVE_HURRICANE && sc != NULL && sc->data[SC_CLIMAX] != NULL) {
+			if (sc->data[SC_CLIMAX]->val1 == 3)
+				skill_damage_bonus += 150;
+			else if (sc->data[SC_CLIMAX]->val1 == 5)
+				skill_damage_bonus -= 20;
+		}
+		if (skill_damage_bonus != 0) {
+			int64 total_rate = cap_value(100 + skill_damage_bonus, 0, INT_MAX);
+
+			ad.damage = apply_percentrate64(ad.damage, (int)total_rate, 100);
+		}
 		if(sd) {
 			uint16 rskill;/* redirect skill */
-			//Damage bonuses
-			if ((i = pc->skillatk_bonus(sd, skill_id)))
-				ad.damage += ad.damage*i/100;
 			switch(skill_id){
+				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
+					rskill = AG_DESTRUCTIVE_HURRICANE;
+					break;
 				case WL_CHAINLIGHTNING_ATK:
 					rskill = WL_CHAINLIGHTNING;
 					break;
@@ -4335,8 +4363,11 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			))
 				flag.imdef = 1;
 		}
-		if (tsd && (i = pc->sub_skillatk_bonus(tsd, skill_id)))
-			ad.damage -= ad.damage * i / 100;
+		if (tsd != NULL && (i = pc->sub_skillatk_bonus(tsd, bonus_skill_id)) != 0) {
+			int64 total_rate = cap_value(100 - (int64)i, 0, INT_MAX);
+
+			ad.damage = apply_percentrate64(ad.damage, (int)total_rate, 100);
+		}
 
 #ifdef RENEWAL
 		if (ad.damage != 0 && tstatus->mres > 0) {

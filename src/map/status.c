@@ -1844,6 +1844,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	if (sc->data[SC_DEADLY_DEFEASANCE] != NULL)
 		sd->special_state.no_magic_damage = 0;
+	if (sc->data[SC_CLIMAX_DES_HU] != NULL)
+		sd->magic_atk_ele[ELE_WIND] += 30;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -5050,6 +5052,8 @@ static int status_calc_matk(struct block_list *bl, struct status_change *sc, int
 		matk += sc->data[SC_SKF_MATK]->val1;
 	if (sc->data[SC_ALMIGHTY] != NULL)
 		matk += sc->data[SC_ALMIGHTY]->val2;
+	if (sc->data[SC_CLIMAX_DES_HU] != NULL)
+		matk += 100;
 
 	return cap_value(matk, battle_config.matk_min, battle_config.matk_max);
 }

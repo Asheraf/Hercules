@@ -2396,6 +2396,11 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case SP_CURSEEXPLOSION:
 			status_change_end(bl, SC_SOULCURSE, INVALID_TIMER);
 			break;
+		case AG_DESTRUCTIVE_HURRICANE:
+			if (sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 1)
+				skill->castend_damage_id(src, bl, AG_DESTRUCTIVE_HURRICANE_CLIMAX, skill_lv, tick,
+				                         SD_LEVEL | SD_ANIMATION | 1);
+			break;
 		case SP_SHA:
 			sc_start(src, bl, SC_SP_SHA, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5624,6 +5629,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AL_HOLYLIGHT:
 			status_change_end(bl, SC_PLATINUM_ALTER, INVALID_TIMER);
 			FALLTHROUGH
+		case AG_DESTRUCTIVE_HURRICANE:
+		case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 		case MG_SOULSTRIKE:
 		case NPC_DARKSTRIKE:
 		case MG_COLDBOLT:
@@ -8013,6 +8020,25 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src,skill_id,skill_lv,tick, flag|BCT_ENEMY|1,
 			                    skill->castend_damage_id);
 			status_change_end(src, SC_HIDING, INVALID_TIMER);
+			break;
+
+		case AG_DESTRUCTIVE_HURRICANE:
+			{
+				struct status_change *sc = status->get_sc(src);
+				int climax_lv = sc != NULL && sc->data[SC_CLIMAX] != NULL ? sc->data[SC_CLIMAX]->val1 : 0;
+				int splash = climax_lv == 5 ? 9 : skill->get_splash(skill_id, skill_lv);
+
+				skill->area_temp[1] = 0;
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				if (climax_lv == 4) {
+					sc_start(src, src, SC_CLIMAX_DES_HU, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+					break;
+				}
+				if (climax_lv == 1)
+					clif->skill_nodamage(src, bl, AG_DESTRUCTIVE_HURRICANE_CLIMAX, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, splash, BL_CHAR, src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			}
 			break;
 
 		case ASC_METEORASSAULT:
