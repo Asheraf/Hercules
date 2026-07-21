@@ -4607,6 +4607,8 @@ static unsigned short status_calc_agi(struct block_list *bl, struct status_chang
 		agi += sc->data[SC_ARCLOUSEDASH]->val2;
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		agi += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_PREENING] != NULL)
+		agi += sc->data[SC_PREENING]->val1 * 2;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -4809,6 +4811,8 @@ static unsigned short status_calc_dex(struct block_list *bl, struct status_chang
 		dex -= dex * sc->data[SC__STRIPACCESSARY]->val2 / 100;
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		dex += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_PREENING] != NULL)
+		dex += sc->data[SC_PREENING]->val1 * 2;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -5605,6 +5609,8 @@ static int status_calc_flee(struct block_list *bl, struct status_change *sc, int
 		flee += sc->data[SC_ARMORSCROLL]->val2;
 	if (sc->data[SC_MYSTICPOWDER])
 		flee += sc->data[SC_MYSTICPOWDER]->val2;
+	if (sc->data[SC_PREENING] != NULL)
+		flee += sc->data[SC_PREENING]->val1 * 10;
 	if (sc->data[SC_HANDICAPSTATE_DEEPBLIND] != NULL)
 		flee = 0;
 
@@ -12477,8 +12483,10 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_WERERAPTOR:
 			if (type == SC_WEREWOLF)
 				status_change_end(bl, SC_BLOOD_HOWLING, INVALID_TIMER);
-			if (type == SC_WERERAPTOR)
+			if (type == SC_WERERAPTOR) {
 				status_change_end(bl, SC_ENRAGE_RAPTOR, INVALID_TIMER);
+				status_change_end(bl, SC_PREENING, INVALID_TIMER);
+			}
 			if (vd != NULL && sce->val4 != 0)
 				clif->changelook(bl, LOOK_BODY2, sce->val4);
 			if (status->isdead(bl) == 0)

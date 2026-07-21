@@ -10308,6 +10308,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IG_HOLY_SHIELD:
 		case DR_ENRAGE_WOLF:
 		case DR_ENRAGE_RAPTOR:
+		case DR_PREENING:
 		case DR_BLOOD_HOWLING:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
@@ -18812,6 +18813,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case DR_ENRAGE_WOLF:
 		case DR_ENRAGE_RAPTOR:
+		case DR_PREENING:
 		case DR_SHOOTING_FEATHER:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
