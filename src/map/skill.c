@@ -10297,6 +10297,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IG_GUARD_STANCE:
 		case IG_ATTACK_STANCE:
 		case DR_TRUTH_OF_ICE:
+		case DR_TRUTH_OF_WIND:
 			if (tsce != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, status_change_end(bl, type, INVALID_TIMER));
 				map->freeblock_unlock();
@@ -10305,6 +10306,8 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			if (skill_id == SP_SOULCOLLECT) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, sc_start2(src, bl, type, 100, skill_lv, pc->checkskill(sd, SP_SOULENERGY), max(1000, skill->get_time(skill_id, skill_lv)), skill_id));
 			} else {
+				if (skill_id == DR_TRUTH_OF_WIND)
+					status_change_end(bl, SC_TRUTH_OF_ICE, INVALID_TIMER);
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			}
 			break;
@@ -18648,14 +18651,14 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}
-	if ((skill_id == DR_WEREWOLF && sc != NULL && (sc->data[SC_WERERAPTOR] != NULL
-		|| sc->data[SC_TRUTH_OF_ICE] != NULL))
-	 || (skill_id == DR_WERERAPTOR && sc != NULL && (sc->data[SC_WEREWOLF] != NULL
-	 	|| sc->data[SC_TRUTH_OF_ICE] != NULL))) {
+	if ((skill_id == DR_WEREWOLF && sc != NULL && (sc->data[SC_WERERAPTOR] != NULL || sc->data[SC_TRUTH_OF_ICE] != NULL
+		|| sc->data[SC_TRUTH_OF_WIND] != NULL))
+	 || (skill_id == DR_WERERAPTOR && sc != NULL && (sc->data[SC_WEREWOLF] != NULL || sc->data[SC_TRUTH_OF_ICE] != NULL
+	 	|| sc->data[SC_TRUTH_OF_WIND] != NULL))) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}
-	if (skill_id == DR_TRUTH_OF_ICE && sc != NULL && (sc->data[SC_WEREWOLF] != NULL
+	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND) && sc != NULL && (sc->data[SC_WEREWOLF] != NULL
 		|| sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
