@@ -5953,6 +5953,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_CRIMSON_ARROW_ATK:
 		case IQ_THIRD_PUNISH:
 		case KR_THUNDERING_FOCUS_S:
+		case KR_THUNDERING_ORB:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case SHC_DANCING_KNIFE:
@@ -15171,6 +15172,28 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
 			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                   skill->castend_damage_id);
+			break;
+		case KR_THUNDERING_ORB:
+			{
+				int charge = 1;
+
+				if (sc != NULL && sc->data[SC_THUNDERING_ROD_MAX] != NULL) {
+					skill->castend_pos2(src, x, y, KR_THUNDERING_ORB_S, skill_lv, tick, flag);
+					break;
+				}
+				if (sc != NULL && sc->data[SC_THUNDERING_ROD] != NULL)
+					charge += sc->data[SC_THUNDERING_ROD]->val3;
+				charge = min(6, charge);
+
+				sc_start4(src, src, SC_THUNDERING_ROD, 100, skill_id, skill_lv, charge, 0,
+				          skill->get_time(skill_id, skill_lv), skill_id);
+				if (charge == 6)
+					sc_start(src, src, SC_THUNDERING_ROD_MAX, 100, 1, skill->get_time(skill_id, skill_lv), skill_id);
+				r = skill->get_splash(skill_id, skill_lv);
+				map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+				                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+				                   skill->castend_damage_id);
+			}
 			break;
 		case KR_TYPHOON_WING:
 			r = skill->get_splash(skill_id, skill_lv);
