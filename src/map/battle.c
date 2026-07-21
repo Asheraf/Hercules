@@ -1793,6 +1793,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case KR_EARTH_STAMP:
+					skillratio += -100 + 1000 + 70 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {
+						skillratio += 4 * st->int_;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case KR_GROUND_BLOOM:
 					skillratio += -100 + 6000 + 2000 * (skill_lv - 1);
 					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {

@@ -15230,6 +15230,25 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                   skill->castend_damage_id);
 			break;
+		case KR_EARTH_STAMP:
+			if (sd != NULL) {
+				int stacks = 1;
+				int ground_bloom_lv = pc->checkskill(sd, KR_EARTH_BUD);
+
+				if (ground_bloom_lv > 0) {
+					if (sd->sc.data[SC_GROUND_GROW] != NULL)
+						stacks += sd->sc.data[SC_GROUND_GROW]->val3;
+					if (stacks < 13)
+						sc_start4(src, src, SC_GROUND_GROW, 100, 0, 0, stacks, 0, 10000, skill_id);
+					else
+						skill->castend_nodamage_id(src, src, KR_GROUND_BLOOM, ground_bloom_lv, tick, 0);
+				}
+			}
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+			                   skill->castend_damage_id);
+			break;
 		case KR_THUNDERING_ORB_S:
 			status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
 			status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
