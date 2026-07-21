@@ -1846,6 +1846,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->special_state.no_magic_damage = 0;
 	if (sc->data[SC_CLIMAX_DES_HU] != NULL)
 		sd->magic_atk_ele[ELE_WIND] += 30;
+	if (sc->data[SC_CLIMAX_CRYIMP] != NULL) {
+		sd->subele[ELE_WATER] += 30;
+		sd->magic_atk_ele[ELE_WATER] += 30;
+	}
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -5397,6 +5401,8 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 		def -= sc->data[SC_MVPCARD_TAOGUNKA]->val2;
 	if (sc->data[SC_SOULGOLEM] != NULL)
 		def += sc->data[SC_SOULGOLEM]->val2;
+	if (sc->data[SC_CLIMAX_CRYIMP] != NULL)
+		def += 300;
 
 	return (defType)cap_value(def,DEFTYPE_MIN,DEFTYPE_MAX);
 }
@@ -5520,6 +5526,8 @@ static defType status_calc_mdef(struct block_list *bl, struct status_change *sc,
 		mdef -= sc->data[SC_MVPCARD_TAOGUNKA]->val3;
 	if (sc->data[SC_SOULGOLEM] != NULL)
 		mdef += sc->data[SC_SOULGOLEM]->val3;
+	if (sc->data[SC_CLIMAX_CRYIMP] != NULL)
+		mdef += 100;
 
 	return (defType)cap_value(mdef,DEFTYPE_MIN,DEFTYPE_MAX);
 }
