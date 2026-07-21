@@ -3081,6 +3081,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 2000 + 500 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_THIRD_FLAME_BOMB:
+					skillratio += -100 + 650 * skill_lv + 10 * st->pow + st->max_hp / 5;
+					RE_LVL_DMOD(100);
+					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:
 				case EL_FIRE_BOMB_ATK:
@@ -5185,6 +5189,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	if(skill_id) {
 		wd.flag |= battle->range_type(src, target, skill_id, skill_lv);
 		switch(skill_id) {
+			case IQ_THIRD_FLAME_BOMB:
+				if (sd != NULL)
+					wd.div_ = cap_value(sd->spiritball / 5, 1, 3);
+				break;
 #ifndef RENEWAL
 			case MO_FINGEROFFENSIVE:
 				if(sd) {
