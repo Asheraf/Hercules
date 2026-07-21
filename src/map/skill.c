@@ -8021,6 +8021,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    skill->castend_damage_id);
 			status_change_end(src, SC_HIDING, INVALID_TIMER);
 			break;
+		case AG_RAIN_OF_CRYSTAL:
+			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			skill->unitsetting(src, skill_id, skill_lv, src->x, src->y, 0);
+			break;
 
 		case AG_DESTRUCTIVE_HURRICANE:
 			{
@@ -15194,6 +15198,9 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 			clif->skill_damage(ss, bl, tick, status_get_amotion(ss), 0,
 				skill->attack(skill->get_type(sg->skill_id, sg->skill_lv), ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, SD_ANIMATION | SD_SPLASH),
 				1, sg->skill_id, sg->skill_lv, BDT_SKILL);
+			break;
+		case UNT_RAIN_OF_CRYSTAL:
+			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_B_TRAP:
 			if (tsc != NULL && tsc->data[type])
@@ -24900,7 +24907,7 @@ static void skill_validate_requirements(struct config_setting_t *conf, struct s_
  **/
 static int skill_validate_unit_id_sub(int unit_id)
 {
-	if (unit_id == 0 || (unit_id >= UNT_SAFETYWALL && unit_id <= UNT_BOOKOFCREATINGSTAR))
+	if (unit_id == 0 || (unit_id >= UNT_SAFETYWALL && unit_id <= UNT_RAIN_OF_CRYSTAL))
 		return unit_id;
 
 	return -1;
