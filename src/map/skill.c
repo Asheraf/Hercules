@@ -5967,6 +5967,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 		case KR_TYPHOON_WING:
+		case KR_FEATHER_SPRINKLE:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -10168,6 +10169,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				party->foreachsamemap(skill->area_sub, sd, range, src, skill_id, skill_lv, tick,
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
+			break;
+
+		case KR_FEATHER_SPRINKLE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 
 		case KN_BRANDISHSPEAR:
@@ -18918,6 +18924,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 		case KR_TYPHOON_WING:
+		case KR_FEATHER_SPRINKLE:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;

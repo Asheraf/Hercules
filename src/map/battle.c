@@ -4504,6 +4504,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 300;
 					RE_LVL_DMOD(100);
 					break;
+				case KR_FEATHER_SPRINKLE:
+					skillratio += -100 + 1100 + 90 * (skill_lv - 1) + 4 * st->dex;
+					if (sc != NULL && sc->data[SC_ENRAGE_RAPTOR] != NULL)
+						skillratio += 390;
+					RE_LVL_DMOD(100);
+					break;
 				case DR_CRUEL_BITE:
 					skillratio += -100 + 60 * skill_lv + 4 * st->str;
 					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
@@ -5472,7 +5478,11 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
-	if (skill_id == DR_FLICKING_TONADO)
+	if (skill_id == NW_THE_VIGILANTE_AT_NIGHT || skill_id == NW_ONLY_ONE_BULLET || skill_id == NW_SPIRAL_SHOOTING
+		|| skill_id == NW_MAGAZINE_FOR_ONE || skill_id == NW_WILD_FIRE || skill_id == DR_FLICKING_TONADO
+		|| skill_id == KR_FEATHER_SPRINKLE || skill_id == BO_ACIDIFIED_ZONE_WATER_ATK
+		|| skill_id == BO_ACIDIFIED_ZONE_GROUND_ATK || skill_id == BO_ACIDIFIED_ZONE_WIND_ATK
+		|| skill_id == BO_ACIDIFIED_ZONE_FIRE_ATK)
 		return BF_LONG;
 	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_RUSH_QUAKE
 		|| skill_id == MT_RUSH_STRIKE || skill_id == ABC_UNLUCKY_RUSH || skill_id == DR_CRUEL_BITE
