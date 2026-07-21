@@ -8248,6 +8248,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case DK_SERVANTWEAPON:
 		case DK_CHARGINGPIERCE:
+		case DK_VIGOR:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;

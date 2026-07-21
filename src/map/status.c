@@ -10108,6 +10108,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				if (sd != NULL)
 					pc->addservantball(sd, MAX_SERVANTBALL);
 				break;
+			case SC_VIGOR:
+				val2 = max(0, 100 - 10 * (val1 - 1));
+				break;
 			case SC_SOULREAPER:
 				val2 = 10 + 5 * val1; // Chance of Getting A Soul Sphere.
 				break;

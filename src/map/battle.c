@@ -6355,6 +6355,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				hp = 2*hp/100; //2% hp loss per hit
 			status_zap(src, hp, 0);
 		}
+		if (skill_id == 0 && (wd.flag & BF_SHORT) != 0 && sc->data[SC_VIGOR] != NULL)
+			status_zap(src, sc->data[SC_VIGOR]->val2, 0);
 		status_change_end(src,SC_CAMOUFLAGE, INVALID_TIMER);
 	}
 
@@ -6425,6 +6427,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			} else
 				battle->reflect_damage(target, src, &wd, skill_id);
 		}
+	}
+	if (skill_id == 0 && sc != NULL && sc->data[SC_VIGOR] != NULL
+	 && (wd.flag & BF_SHORT) != 0 && flag.infdef == 0) {
+		int mod = 100 + sc->data[SC_VIGOR]->val1 * 15;
+
+		if (tstatus->race == RC_DEMIHUMAN || tstatus->race == RC_ANGEL)
+			mod += sc->data[SC_VIGOR]->val1 * 10;
+		wd.damage += wd.damage * mod / 100;
 	}
 	map->freeblock_lock();
 	//Reject Sword bugreport:4493 by Daegaladh
