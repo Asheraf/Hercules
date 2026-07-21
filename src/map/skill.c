@@ -9664,6 +9664,15 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			skill->unitsetting(src, skill_id, skill_lv, src->x, src->y, 0);
 			break;
+		case AG_ENERGY_CONVERSION:
+			if (status_get_sp(src) == status_get_max_sp(src)) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			status->heal(bl, 0, skill_lv * (skill_lv + 1) * 40, STATUS_HEAL_FORCED);
+			break;
 		case AG_FROZEN_SLASH:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
