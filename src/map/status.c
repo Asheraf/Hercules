@@ -2173,6 +2173,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	if (sd->patk_rate < 0)
 		sd->patk_rate = 0;
+	if ((skill_lv = pc->checkskill(sd, AT_SIXTH_SENSE)) > 0)
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 2, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, TR_STAGE_MANNER)) > 0 && (sd->weapontype == W_BOW || sd->weapontype == W_MUSICAL
 		|| sd->weapontype == W_WHIP)) {
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 3, 0, SHRT_MAX);
@@ -2254,6 +2256,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->cri = bstatus->cri * sd->critical_rate/100;
 	if (pc->checkskill(sd, SU_POWEROFLIFE) > 0)
 		bstatus->cri += 20;
+	if ((skill_lv = pc->checkskill(sd, AT_SIXTH_SENSE)) > 0)
+		bstatus->cri = (int32)cap_value((int64)bstatus->cri + skill_lv * 20, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, SHC_SHADOW_SENSE)) > 0) {
 		if (sd->weapontype == W_DAGGER || sd->weapontype == W_DOUBLE_DD || sd->weapontype == W_DOUBLE_DS
 			|| sd->weapontype == W_DOUBLE_DA)
