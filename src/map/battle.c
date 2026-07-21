@@ -1786,6 +1786,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case KR_EARTH_DRILL:
+					skillratio += -100 + 1510 + 60 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {
+						skillratio += 4 * st->int_;
+					}
+					RE_LVL_DMOD(100);
+					break;
+				case KR_GROUND_BLOOM:
+					skillratio += -100 + 6000 + 2000 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {
+						skillratio += 15 * st->int_;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case DR_AROUND_FLOWER:
 					skillratio += -100 + 100 * skill_lv;
 					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL) {

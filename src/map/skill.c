@@ -5755,6 +5755,23 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case KR_EARTH_DRILL:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			if (sd != NULL) {
+				int stacks = 1;
+				int ground_bloom_lv = pc->checkskill(sd, KR_EARTH_BUD);
+
+				if (ground_bloom_lv > 0) {
+					if (sc != NULL && sc->data[SC_GROUND_GROW] != NULL)
+						stacks += sc->data[SC_GROUND_GROW]->val3;
+					if (stacks < 13)
+						sc_start4(src, src, SC_GROUND_GROW, 100, 0, 0, stacks, 0, 10000, skill_id);
+					else
+						skill->castend_nodamage_id(src, src, KR_GROUND_BLOOM, ground_bloom_lv, tick, 0);
+				}
+			}
+			break;
 
 		case RG_BACKSTAP: {
 #ifndef RENEWAL
@@ -5969,6 +5986,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case KR_CHOP_CHOP:
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
+		case KR_GROUND_BLOOM:
 		case KR_CLAW_WAVE:
 		case KR_SHARPEN_HAIL:
 		case DR_FLICKING_TONADO:
@@ -9834,6 +9852,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case KR_IRON_HOWLING:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case KR_GROUND_BLOOM:
+		{
+			int64 heal;
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			status_change_end(src, SC_GROUND_GROW, INVALID_TIMER);
+			heal = (int64)status_get_max_hp(src) * skill_lv * 3 / 100;
+			if (heal > 0)
+				status->heal(src, heal, 0, STATUS_HEAL_DEFAULT);
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+		}
 			break;
 		case RG_RAID:
 			skill->area_temp[1] = 0;
