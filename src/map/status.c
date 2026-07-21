@@ -6090,6 +6090,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 				val = max( val, sc->data[SC_WIND_STEP_OPTION]->val2 );
 			if( sc->data[SC_FULL_THROTTLE] )
 				val = max( val, 25);
+			if (sc->data[SC_WERERAPTOR] != NULL)
+				val = max(val, 25);
 			if (sc->data[SC_WILD_WALK] != NULL)
 				val = max(val, sc->data[SC_WILD_WALK]->val2);
 			if (sc->data[SC_SHADOW_CLOCK] != NULL)
@@ -10826,6 +10828,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				if (vd != NULL)
 					clif->changelook(bl, LOOK_BODY2, 0);
 				break;
+			case SC_WERERAPTOR:
+				if (vd != NULL)
+					clif->changelook(bl, LOOK_BODY2, 0);
+				break;
 		PRAGMA_GCC46(GCC diagnostic pop)
 		}
 	}
@@ -12468,12 +12474,13 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 				status_change_end(bl, (sc_type)sce->val2, INVALID_TIMER);
 			break;
 		case SC_WEREWOLF:
+		case SC_WERERAPTOR:
 			if (type == SC_WEREWOLF)
 				status_change_end(bl, SC_BLOOD_HOWLING, INVALID_TIMER);
 			if (vd != NULL && sce->val4 != 0)
 				clif->changelook(bl, LOOK_BODY2, sce->val4);
 			if (status->isdead(bl) == 0)
-				sc_start(bl, bl, SC_TRANSFORM_DELAY, 100, 1, 3000, DR_WEREWOLF);
+				sc_start(bl, bl, SC_TRANSFORM_DELAY, 100, 1, 3000, type == SC_WEREWOLF ? DR_WEREWOLF : DR_WERERAPTOR);
 			break;
 		case SC_OVERED_BOOST:
 			switch( bl->type ){

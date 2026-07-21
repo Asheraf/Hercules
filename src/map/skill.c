@@ -10285,6 +10285,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case DR_WEREWOLF:
+		case DR_WERERAPTOR:
 			if (tsc != NULL && tsc->data[type] != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, status_change_end(bl, type, INVALID_TIMER));
 			} else {
@@ -18607,7 +18608,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	if( sc && ( sc->data[SC__SHADOWFORM] || sc->data[SC__IGNORANCE] ) )
 		return 0;
 
-	if (skill_id == DR_WEREWOLF && sc != NULL && sc->data[SC_TRANSFORM_DELAY] != NULL) {
+	if ((skill_id == DR_WEREWOLF || skill_id == DR_WERERAPTOR) && sc != NULL && sc->data[SC_TRANSFORM_DELAY] != NULL) {
+		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+		return 0;
+	}
+	if ((skill_id == DR_WEREWOLF && sc != NULL && sc->data[SC_WERERAPTOR] != NULL)
+	 || (skill_id == DR_WERERAPTOR && sc != NULL && sc->data[SC_WEREWOLF] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}
@@ -18642,6 +18648,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SJ_SUNSTANCE:
 		case SP_SOULCOLLECT:
 		case DR_WEREWOLF:
+		case DR_WERERAPTOR:
 			if (sc && sc->data[skill->get_sc_type(skill_id)])
 				return 1;
 			FALLTHROUGH
