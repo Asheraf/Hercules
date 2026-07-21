@@ -5949,6 +5949,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_IMPERIAL_PRESSURE:
 		case KR_NASTY_SLASH:
 		case KR_DOUBLE_SLASH:
+		case KR_CHOP_CHOP:
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
 		case KR_CLAW_WAVE:
@@ -6039,6 +6040,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					break;
 
 				if ((skill_id == SP_SHA || skill_id == SP_SWHOO) && bl->type != BL_MOB)
+					break;
+
+				if (skill_id == KR_CHOP_CHOP
+					&& abs(src->x - bl->x) + abs(src->y - bl->y) > skill->get_splash(skill_id, skill_lv))
 					break;
 
 				if (skill_id == DK_DRAGONIC_BREATH)
@@ -9932,6 +9937,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SKE_SKY_SUN:
 		case SKE_DAWN_BREAK:
 		case SKE_MIDNIGHT_KICK:
+		case KR_CHOP_CHOP:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
+			break;
 		case SH_HOWLING_OF_CHUL_HO:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
@@ -10143,6 +10152,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+
 		case KN_BRANDISHSPEAR:
 		case ML_BRANDISH:
 			skill->brandishspear(src, bl, skill_id, skill_lv, tick, flag);
@@ -18883,6 +18893,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case KR_NASTY_SLASH:
 		case KR_DOUBLE_SLASH:
+		case KR_CHOP_CHOP:
 		case DR_NOMERCY_CLAW:
 		case DR_CRUEL_BITE:
 		case DR_HUNGER:
