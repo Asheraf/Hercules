@@ -5665,6 +5665,15 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			}
 			break;
 
+		case KR_SHARPEN_GUST:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = bl->id;
+			map->foreachinpath(skill->attack_area, src->m, src->x, src->y, bl->x, bl->y,
+			                   skill->get_splash(skill_id, skill_lv), skill->get_range(skill_id,
+			                    skill_lv) + 2, skill->splash_target(src),
+			                   skill->get_type(skill_id,
+			                                   skill_lv), src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
+			break;
 		case AG_STORM_CANNON:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->area_temp[1] = bl->id;
@@ -18889,6 +18898,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_ENRAGE_RAPTOR:
 		case DR_PREENING:
 		case DR_SHOOTING_FEATHER:
+		case KR_SHARPEN_GUST:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {

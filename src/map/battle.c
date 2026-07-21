@@ -4486,6 +4486,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case KR_SHARPEN_GUST:
+					skillratio += -100 + 1000 + 80 * (skill_lv - 1) + 5 * st->dex;
+					if (sc != NULL && sc->data[SC_ENRAGE_RAPTOR] != NULL)
+						skillratio += 550;
+					RE_LVL_DMOD(100);
+					break;
 				case DR_CRUEL_BITE:
 					skillratio += -100 + 60 * skill_lv + 4 * st->str;
 					if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL)
