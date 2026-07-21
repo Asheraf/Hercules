@@ -6435,6 +6435,14 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				sc_start(src, &sd->bl, SC_NOVAEXPLOSING, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 		}
 			break;
+		case AG_CRYSTAL_IMPACT_ATK:
+			if (sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 5 && (flag & 1) == 0) {
+				skill->area_temp[1] = bl->id;
+				map->foreachinrange(skill->area_sub, bl, 2, skill->splash_target(src),
+				                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			} else
+				skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case SP_SOULEXPLOSION:
 			if (!((tsc != NULL &&
 				(tsc->data[SC_SOULLINK] != NULL ||
