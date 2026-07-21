@@ -2399,6 +2399,25 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->right_weapon.addsize[SZ_MEDIUM] += wolf_instinct_bonus[size_index][1];
 		sd->right_weapon.addsize[SZ_BIG] += wolf_instinct_bonus[size_index][2];
 	}
+	if (sc->data[SC_WERERAPTOR] != NULL && (skill_lv = pc->checkskill(sd, KR_RAPTORIAL_INSTINCT)) > 0) {
+		static const int raptorial_instinct_bonus[10][3] = {
+			{ 1, 1, 1 },
+			{ 1, 1, 2 },
+			{ 2, 3, 3 },
+			{ 2, 3, 4 },
+			{ 3, 5, 5 },
+			{ 3, 5, 6 },
+			{ 4, 7, 7 },
+			{ 4, 7, 8 },
+			{ 5, 8, 9 },
+			{ 5, 8, 10 },
+		};
+		int size_index = cap_value(skill_lv, 1, 10) - 1;
+
+		sd->right_weapon.addsize[SZ_SMALL] += raptorial_instinct_bonus[size_index][0];
+		sd->right_weapon.addsize[SZ_MEDIUM] += raptorial_instinct_bonus[size_index][1];
+		sd->right_weapon.addsize[SZ_BIG] += raptorial_instinct_bonus[size_index][2];
+	}
 	bstatus->adelay = 2*bstatus->amotion;
 
 	// ----- DMOTION -----
