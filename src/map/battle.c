@@ -1327,6 +1327,7 @@ static int64 battle_calc_cardfix(int attack_type, struct block_list *src, struct
 						}
 					}
 					cardfix = cardfix * (100-tsd->subsize[sstatus->size]) / 100;
+					cardfix = cardfix * (100-tsd->weapon_subsize[sstatus->size]) / 100;
 					cardfix = cardfix * (100-tsd->subrace2[s_race2]) / 100;
 					cardfix = cardfix * (100-tsd->subrace[sstatus->race]) / 100;
 					cardfix = cardfix * (100-tsd->subrace[is_boss(src)?RC_BOSS:RC_NONBOSS]) / 100;

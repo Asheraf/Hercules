@@ -368,6 +368,7 @@ BEGIN_ZEROED_BLOCK; // this block will be globally zeroed at the beginning of st
 	int subrace[RC_MAX];
 	int subrace2[RC2_MAX];
 	int subsize[3];
+	int weapon_subsize[3];
 	int reseff[SC_COMMON_MAX-SC_COMMON_MIN+1];
 	int weapon_coma_ele[ELE_MAX];
 	int weapon_coma_race[RC_MAX];
