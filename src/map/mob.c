@@ -2973,7 +2973,8 @@ static int mob_dead(struct mob_data *md, struct block_list *src, int type)
 		mvp_sd = NULL;
 	}
 
-	rebirth =  ( md->sc.data[SC_KAIZEL] || (md->sc.data[SC_REBIRTH] && !md->state.rebirth) );
+	rebirth = md->sc.data[SC_KAIZEL] != NULL || md->sc.data[SC_ULTIMATE_S] != NULL
+	       || (md->sc.data[SC_REBIRTH] != NULL && md->state.rebirth == 0);
 	if( !rebirth ) { // Only trigger event on final kill
 		md->status.hp = 0; //So that npc_event invoked functions KNOW that mob is dead
 		if( src ) {

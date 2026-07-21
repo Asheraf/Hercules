@@ -468,6 +468,17 @@ static int status_damage(struct block_list *src, struct block_list *target, int6
 		return (int)(hp+sp);
 	}
 
+	if (sc != NULL && sc->data[SC_ULTIMATE_S] != NULL && map_flag_gvg2(target->m) == 0) {
+		status->revive(target, 100, 100);
+		status->change_clear(target, 0);
+		clif->skill_nodamage(target, target, ALL_RESURRECTION, 1, 1);
+
+		if (target->type == BL_MOB)
+			BL_UCAST(BL_MOB, target)->state.rebirth = 1;
+
+		return (int)(hp + sp);
+	}
+
 	if (target->type == BL_MOB && sc != NULL && sc->data[SC_REBIRTH] != NULL) {
 		struct mob_data *t_md = BL_UCAST(BL_MOB, target);
 		if (!t_md->state.rebirth) {

@@ -8473,6 +8473,19 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                         src, skill_id, skill_lv, tick, flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case IG_ULTIMATE_SACRIFICE:
+			if ((flag & 1) == 0)
+				status->set_hp(src, 1, STATUS_HEAL_DEFAULT);
+
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				clif->skill_nodamage(bl, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+			} else {
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv),
+				                         src, skill_id, skill_lv, tick, flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case SL_KAITE:
 		case SL_KAAHI:
 		case SL_KAIZEL:
@@ -16286,6 +16299,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch( skill_id ) {
 		case IG_GUARDIAN_SHIELD:
+		case IG_ULTIMATE_SACRIFICE:
 			if (sc == NULL || sc->data[SC_GUARD_STANCE] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
