@@ -5962,6 +5962,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DR_NOMERCY_CLAW:
 		case DR_AROUND_FLOWER:
 		case KR_CLAW_WAVE:
+		case KR_SHARPEN_HAIL:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 		case AG_FROZEN_SLASH:
@@ -6309,6 +6310,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case DR_AROUND_FLOWER:
 					case DR_ICE_CLOUD:
 					case DR_WIND_BOMB:
+					case KR_SHARPEN_HAIL:
 					case DR_FLICKING_TONADO:
 					case AG_ROCK_DOWN:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -18899,6 +18901,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case DR_PREENING:
 		case DR_SHOOTING_FEATHER:
 		case KR_SHARPEN_GUST:
+		case KR_SHARPEN_HAIL:
 		case DR_FLICKING_TONADO:
 		case DR_LOW_FLIGHT:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
