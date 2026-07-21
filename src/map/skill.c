@@ -10339,6 +10339,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case DR_ENRAGE_RAPTOR:
 		case DR_PREENING:
 		case DR_BLOOD_HOWLING:
+		case DR_NATURE_SHIELD:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;

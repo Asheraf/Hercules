@@ -4675,6 +4675,8 @@ static unsigned short status_calc_vit(struct block_list *bl, struct status_chang
 		vit += sc->data[SC_2011RWC]->val1;
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		vit += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_NATURE_SHIELD] != NULL)
+		vit += sc->data[SC_NATURE_SHIELD]->val1;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -4749,6 +4751,8 @@ static unsigned short status_calc_int(struct block_list *bl, struct status_chang
 	}
 	if (sc->data[SC_UNIVERSESTANCE] != NULL)
 		int_ += sc->data[SC_UNIVERSESTANCE]->val2;
+	if (sc->data[SC_NATURE_SHIELD] != NULL)
+		int_ += sc->data[SC_NATURE_SHIELD]->val1;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == RINGNBL_EFF_ALLSTATS)
@@ -5691,6 +5695,8 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 
 	if (sc->data[SC_STONEHARDSKIN])
 		def += sc->data[SC_STONEHARDSKIN]->val1;
+	if (sc->data[SC_NATURE_SHIELD] != NULL)
+		def += sc->data[SC_NATURE_SHIELD]->val1 * 10;
 	if (sc->data[SC_DRUMBATTLE])
 		def += sc->data[SC_DRUMBATTLE]->val3;
 
@@ -5850,6 +5856,8 @@ static defType status_calc_mdef(struct block_list *bl, struct status_change *sc,
 
 	if(sc->data[SC_STONESKIN]) // [Aegis] Technically this uses MDEFPercent/DEFPercent + sth else
 		mdef += sc->data[SC_STONESKIN]->val3;
+	if (sc->data[SC_NATURE_SHIELD] != NULL)
+		mdef += sc->data[SC_NATURE_SHIELD]->val1;
 	if(sc->data[SC_EARTH_INSIGNIA] && sc->data[SC_EARTH_INSIGNIA]->val1 == 3)
 		mdef += 50;
 	if(sc->data[SC_ENDURE])// It has been confirmed that eddga card grants 1 MDEF, not 0, not 10, but 1.
