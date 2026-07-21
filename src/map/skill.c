@@ -5952,6 +5952,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_CRYSTAL_IMPACT:
 		case AG_CRIMSON_ARROW_ATK:
 		case IQ_THIRD_PUNISH:
+		case KR_THUNDERING_FOCUS_S:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case SHC_DANCING_KNIFE:
@@ -9883,6 +9884,14 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					map->foreachinrange(skill->area_sub, bl, splash, BL_CHAR,
 					                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
+			break;
+		case KR_THUNDERING_FOCUS_S:
+			skill->area_temp[1] = 0;
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
+			status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), skill->splash_target(src),
+			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			break;
 		case KR_THUNDERING_FOCUS:
 			{
