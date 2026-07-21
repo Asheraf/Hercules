@@ -8438,6 +8438,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SJ_UNIVERSESTANCE:
 		case SJ_SUNSTANCE:
 		case SP_SOULCOLLECT:
+		case IG_GUARD_STANCE:
 			if (tsce != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, status_change_end(bl, type, INVALID_TIMER));
 				map->freeblock_unlock();

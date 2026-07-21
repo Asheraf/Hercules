@@ -4964,6 +4964,8 @@ static int status_calc_watk(struct block_list *bl, struct status_change *sc, int
 		watk += sc->data[SC_SOULFALCON]->val2;
 	if (sc->data[SC_POWERFUL_FAITH] != NULL)
 		watk += sc->data[SC_POWERFUL_FAITH]->val2;
+	if (sc->data[SC_GUARD_STANCE] != NULL)
+		watk -= sc->data[SC_GUARD_STANCE]->val3;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == SC_INCATKRATE)
@@ -5431,6 +5433,8 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 		def -= sc->data[SC_MVPCARD_TAOGUNKA]->val2;
 	if (sc->data[SC_SOULGOLEM] != NULL)
 		def += sc->data[SC_SOULGOLEM]->val2;
+	if (sc->data[SC_GUARD_STANCE] != NULL)
+		def += sc->data[SC_GUARD_STANCE]->val2;
 	if (sc->data[SC_CLIMAX_CRYIMP] != NULL)
 		def += 300;
 
@@ -10118,6 +10122,21 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 4 + 2 * val1;
 				total_tick = INFINITE_DURATION;
 				break;
+			case SC_GUARD_STANCE:
+			{
+				int incompatible_skill_id = skill->name2id("IG_ATTACK_STANCE");
+				if (incompatible_skill_id != 0) {
+					enum sc_type incompatible_status = skill->get_sc_type(incompatible_skill_id);
+					if (incompatible_status > SC_NONE && incompatible_status < SC_MAX)
+						status_change_end(bl, incompatible_status, INVALID_TIMER);
+				}
+
+				val1 = cap_value(val1, 1, 5);
+				val2 = 50 + 50 * val1;
+				val3 = 50 * val1;
+				total_tick = INFINITE_DURATION;
+				break;
+			}
 			case SC_NEWMOON:
 				val2 = 7;
 				tick_time = 1000;
