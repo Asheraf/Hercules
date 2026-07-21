@@ -2371,6 +2371,13 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	else if ( pc_isridingdragon(sd) )
 		bstatus->aspd_rate -= 250 - 50 * pc->checkskill(sd, RK_DRAGONTRAINING);
 #endif
+	if (sc->data[SC_WEREWOLF] != NULL && (skill_lv = pc->checkskill(sd, DR_BEASTY_NOSE)) > 0) {
+#ifndef RENEWAL_ASPD
+		bstatus->aspd_rate -= 10 * skill_lv;
+#else
+		bstatus->aspd_rate2 += skill_lv;
+#endif
+	}
 	bstatus->adelay = 2*bstatus->amotion;
 
 	// ----- DMOTION -----
