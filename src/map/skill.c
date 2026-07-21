@@ -3615,6 +3615,10 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 		case WL_CHAINLIGHTNING_ATK:
 			dmg.dmotion = clif->skill_damage(src,bl,tick,dmg.amotion,dmg.dmotion,damage,1,WL_CHAINLIGHTNING_ATK,-2,BDT_SKILL);
 			break;
+		case AG_STORM_CANNON:
+			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id,
+			                                 skill_lv, BDT_SPLASH);
+			break;
 		case LG_OVERBRAND_BRANDISH:
 		case LG_OVERBRAND:
 			/* Fall through */
@@ -5076,6 +5080,15 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			}
 			break;
 
+		case AG_STORM_CANNON:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = bl->id;
+			map->foreachinpath(skill->attack_area, src->m, src->x, src->y, bl->x, bl->y,
+			                   skill->get_splash(skill_id, skill_lv), skill->get_maxcount(skill_id,
+			                    skill_lv), skill->splash_target(src),
+			                   skill->get_type(skill_id,
+			                                   skill_lv), src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
+			break;
 		case NC_FLAMELAUNCHER:
 			if (sd) pc->overheat(sd,1);
 			/* Fall through */
