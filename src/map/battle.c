@@ -3077,6 +3077,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 100 + 2300 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_SECOND_JUDGEMENT:
+					skillratio += -100 + 2000 + 500 * skill_lv + 7 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:
 				case EL_FIRE_BOMB_ATK:
