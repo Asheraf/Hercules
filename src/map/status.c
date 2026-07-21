@@ -2057,6 +2057,9 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	if((skill_lv=pc->checkskill(sd,BS_HILTBINDING))>0) // it doesn't work in RE.
 		bstatus->batk += 4;
 #endif
+	if (sc->data[SC_WEREWOLF] == NULL && sc->data[SC_WERERAPTOR] == NULL
+		&& (skill_lv = pc->checkskill(sd, KR_EARTH_BUD)) > 0)
+		sd->hprate += skill_lv * 2;
 
 	// ----- HP MAX CALCULATION -----
 
