@@ -5956,6 +5956,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case KR_THUNDERING_ORB:
 		case KR_THUNDERING_ORB_S:
 		case KR_THUNDERING_CALL:
+		case KR_THUNDERING_CALL_S:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case SHC_DANCING_KNIFE:
@@ -6234,6 +6235,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							break;
 						}
 						FALLTHROUGH
+					case KR_THUNDERING_CALL_S:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
+						status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
+						break;
 					case DK_DRAGONIC_AURA:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
