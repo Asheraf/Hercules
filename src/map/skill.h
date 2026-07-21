@@ -1872,6 +1872,7 @@ struct s_skill_db {
 	int blewcount[MAX_SKILL_LEVEL];
 	int hp[MAX_SKILL_LEVEL],sp[MAX_SKILL_LEVEL],mhp[MAX_SKILL_LEVEL],hp_rate[MAX_SKILL_LEVEL],sp_rate[MAX_SKILL_LEVEL],zeny[MAX_SKILL_LEVEL];
 	int ap[MAX_SKILL_LEVEL];
+	int give_ap[MAX_SKILL_LEVEL];
 	int msp[MAX_SKILL_LEVEL];
 	int weapon;
 	int ammo;
@@ -2168,6 +2169,7 @@ struct skill_interface {
 	bool (*items_required) (struct map_session_data *sd, int skill_id, int skill_lv);
 	int (*check_condition_castend) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, struct block_list *target);
 	int (*get_any_item_index) (struct map_session_data *sd, int skill_id, int skill_lv);
+	void (*give_ap) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 	int (*consume_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, short type);
 	struct skill_condition (*get_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 	int (*check_pc_partner) (struct map_session_data *sd, uint16 skill_id, uint16* skill_lv, int range, int cast_flag);
@@ -2286,6 +2288,7 @@ struct skill_interface {
 	void (*validate_hp_cost) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
 	void (*validate_sp_cost) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
 	void (*validate_ap_cost) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
+	void (*validate_give_ap) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
 	void (*validate_hp_rate_cost) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
 	void (*validate_sp_rate_cost) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);
 	void (*validate_max_hp_trigger) (struct config_setting_t *conf, struct s_skill_db *sk, bool inherited);

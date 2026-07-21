@@ -6589,8 +6589,10 @@ static int skill_castend_id(int tid, int64 tick, int id, intptr_t data)
 		{
 			if (!skill->check_condition_castend(sd, ud->skill_id, ud->skill_lv, target))
 				break;
-			else
-				skill->consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
+			else {
+				skill->consume_requirement(sd, ud->skill_id, ud->skill_lv, 1);
+				skill->give_ap(sd, ud->skill_id, ud->skill_lv);
+			}
 		}
 #ifdef OFFICIAL_WALKPATH
 		if( !path->search_long(NULL, src, src->m, src->x, src->y, target->x, target->y, CELL_CHKWALL) )
@@ -12132,8 +12134,10 @@ static int skill_castend_pos(int tid, int64 tick, int id, intptr_t data)
 				if( ud->skill_id == SA_LANDPROTECTOR )
 					clif->skill_poseffect(&sd->bl,ud->skill_id,ud->skill_lv,sd->bl.x,sd->bl.y,tick);
 				break;
-			}else
-				skill->consume_requirement(sd,ud->skill_id,ud->skill_lv,1);
+			} else {
+				skill->consume_requirement(sd, ud->skill_id, ud->skill_lv, 1);
+				skill->give_ap(sd, ud->skill_id, ud->skill_lv);
+			}
 		}
 
 		if( (src->type == BL_MER || src->type == BL_HOM) && !skill->check_condition_mercenary(src, ud->skill_id, ud->skill_lv, 1) )
@@ -17078,6 +17082,31 @@ static int skill_get_any_item_index(struct map_session_data *sd, int skill_id, i
 	}
 
 	return any_item_index;
+}
+
+/**
+ * Gives a skill's configured AP to a player.
+ *
+ * @param sd The player receiving the AP.
+ * @param skill_id The skill ID.
+ * @param skill_lv The skill level.
+ **/
+static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
+{
+	nullpo_retv(sd);
+
+	int idx = skill->get_index(skill_id);
+	if (idx == 0 || skill_lv < 1 || skill_lv > MAX_SKILL_LEVEL)
+		return;
+
+	int64 add_ap = skill->dbs->db[idx].give_ap[skill_lv - 1];
+	if (add_ap <= 0 || sd->battle_status.max_ap == 0)
+		return;
+
+	uint32 old_ap = sd->battle_status.ap;
+	sd->battle_status.ap = (uint32)cap_value((int64)sd->battle_status.ap + add_ap, 0, sd->battle_status.max_ap);
+	if (old_ap != sd->battle_status.ap)
+		clif->updatestatus(sd, SP_AP);
 }
 
 // type&2: consume items (after skill was used)
@@ -23532,6 +23561,55 @@ static void skill_validate_ap_cost(struct config_setting_t *conf, struct s_skill
 }
 
 /**
+ * Validates a skill's AP gain when reading the skill DB.
+ *
+ * @param conf The libconfig settings block which contains the skill's data.
+ * @param sk The s_skill_db struct where the AP gain should be set.
+ * @param inherited Whether this record is an inherited entry (thus sk already has a valid value)
+ *
+ **/
+static void skill_validate_give_ap(struct config_setting_t *conf, struct s_skill_db *sk, bool inherited)
+{
+	nullpo_retv(conf);
+	nullpo_retv(sk);
+
+	if (inherited && libconfig->setting_lookup(conf, "GiveAp") == NULL)
+		return;
+
+	skill->level_set_value(sk->give_ap, 0);
+
+	struct config_setting_t *t = libconfig->setting_get_member(conf, "GiveAp");
+
+	if (t != NULL && config_setting_is_group(t) != 0) {
+		for (int i = 0; i < MAX_SKILL_LEVEL; i++) {
+			char lv[6]; // Big enough to contain "Lv999" in case of custom MAX_SKILL_LEVEL.
+			snprintf(lv, sizeof(lv), "Lv%d", i + 1);
+			int give_ap;
+
+			if (libconfig->setting_lookup_int(t, lv, &give_ap) == CONFIG_TRUE) {
+				if (give_ap >= 0 && give_ap <= battle_config.max_ap)
+					sk->give_ap[i] = give_ap;
+				else
+					ShowWarning("%s: Invalid AP gain %d specified in level %d for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
+						    __func__, give_ap, i + 1, sk->nameid, conf->file, battle_config.max_ap);
+			}
+		}
+
+		return;
+	}
+
+	int give_ap;
+
+	if (libconfig->setting_lookup_int(conf, "GiveAp", &give_ap) == CONFIG_TRUE) {
+		if (give_ap >= 0 && give_ap <= battle_config.max_ap)
+			skill->level_set_value(sk->give_ap, give_ap);
+		else
+			ShowWarning("%s: Invalid AP gain %d specified for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
+				    __func__, give_ap, sk->nameid, conf->file, battle_config.max_ap);
+	}
+}
+
+/**
  * Validates a skill's HP rate cost when reading the skill DB.
  *
  * @param conf The libconfig settings block which contains the skill's data.
@@ -25222,6 +25300,7 @@ static bool skill_read_skilldb(const char *filename)
 		skill->validate_cast_def_rate(conf, &tmp_db, inherited);
 		skill->validate_number_of_instances(conf, &tmp_db, inherited);
 		skill->validate_knock_back_tiles(conf, &tmp_db, inherited);
+		skill->validate_give_ap(conf, &tmp_db, inherited);
 		skill->validate_cast_time(conf, &tmp_db, inherited);
 		skill->validate_act_delay(conf, &tmp_db, inherited);
 		skill->validate_walk_delay(conf, &tmp_db, inherited);
@@ -25758,6 +25837,7 @@ void skill_defaults(void)
 	skill->items_required = skill_items_required;
 	skill->check_condition_castend = skill_check_condition_castend;
 	skill->get_any_item_index = skill_get_any_item_index;
+	skill->give_ap = skill_give_ap;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;
@@ -25876,6 +25956,7 @@ void skill_defaults(void)
 	skill->validate_hp_cost = skill_validate_hp_cost;
 	skill->validate_sp_cost = skill_validate_sp_cost;
 	skill->validate_ap_cost = skill_validate_ap_cost;
+	skill->validate_give_ap = skill_validate_give_ap;
 	skill->validate_hp_rate_cost = skill_validate_hp_rate_cost;
 	skill->validate_sp_rate_cost = skill_validate_sp_rate_cost;
 	skill->validate_max_hp_trigger = skill_validate_max_hp_trigger;
