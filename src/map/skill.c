@@ -2871,6 +2871,36 @@ static int skill_onskillusage(struct map_session_data *sd, struct block_list *bl
 
 	return 1;
 }
+
+static void skill_update_pulse_of_madness(struct block_list *src)
+{
+	struct status_change *sc;
+	struct status_change_entry *pulse;
+	int skill_lv;
+
+	nullpo_retv(src);
+
+	sc = status->get_sc(src);
+	if (sc == NULL || (pulse = sc->data[SC_PULSE_OF_MADNESS]) == NULL)
+		return;
+
+	skill_lv = cap_value(pulse->val1, 1, 5);
+	if (rnd() % 100 >= 20 + 10 * (skill_lv - 1))
+		return;
+
+	if (sc->data[SC_INSANE3] != NULL) {
+		sc_start(src, src, SC_INSANE3, 100, 1, skill->get_time2(AT_PULSE_OF_MADNESS, skill_lv), AT_PULSE_OF_MADNESS);
+	} else if (sc->data[SC_INSANE2] != NULL) {
+		status_change_end(src, SC_INSANE2, INVALID_TIMER);
+		sc_start(src, src, SC_INSANE3, 100, 1, skill->get_time2(AT_PULSE_OF_MADNESS, skill_lv), AT_PULSE_OF_MADNESS);
+	} else if (sc->data[SC_INSANE] != NULL) {
+		status_change_end(src, SC_INSANE, INVALID_TIMER);
+		sc_start(src, src, SC_INSANE2, 100, 1, skill->get_time2(AT_PULSE_OF_MADNESS, skill_lv), AT_PULSE_OF_MADNESS);
+	} else {
+		sc_start(src, src, SC_INSANE, 100, 1, skill->get_time2(AT_PULSE_OF_MADNESS, skill_lv), AT_PULSE_OF_MADNESS);
+	}
+}
+
 /* Split off from skill->additional_effect, which is never called when the
  * attack skill kills the enemy. Place in this function counter status effects
  * when using skills (eg: Asura's sp regen penalty, or counter-status effects
@@ -10472,6 +10502,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case DK_VIGOR:
 		case IG_REBOUND_SHIELD:
 		case IG_HOLY_SHIELD:
+		case AT_PULSE_OF_MADNESS:
 		case DR_ENRAGE_WOLF:
 		case DR_ENRAGE_RAPTOR:
 		case DR_PREENING:
@@ -19170,6 +19201,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
 				&& sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
+		case AT_PULSE_OF_MADNESS:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
 			}
@@ -29852,6 +29889,7 @@ void skill_defaults(void)
 	skill->addtimerskill = skill_addtimerskill;
 	skill->additional_effect = skill_additional_effect;
 	skill->counter_additional_effect = skill_counter_additional_effect;
+	skill->update_pulse_of_madness = skill_update_pulse_of_madness;
 	skill->blown = skill_blown;
 	skill->break_equip = skill_break_equip;
 	skill->strip_equip = skill_strip_equip;

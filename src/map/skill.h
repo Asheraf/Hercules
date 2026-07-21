@@ -2627,6 +2627,7 @@ struct skill_interface {
 	int (*addtimerskill) (struct block_list *src, int64 tick, int target, int x, int y, uint16 skill_id, uint16 skill_lv, int type, int flag);
 	int (*additional_effect) (struct block_list* src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int attack_type, int dmg_lv, int64 tick);
 	int (*counter_additional_effect) (struct block_list* src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int attack_type, int64 tick);
+	void (*update_pulse_of_madness) (struct block_list *src);
 	int (*blown) (struct block_list* src, struct block_list* target, int count, enum unit_dir dir, int flag);
 	int (*break_equip) (struct block_list *bl, uint32 where, int rate, int flag);
 	int (*strip_equip) (struct block_list *bl, uint32 where, int rate, int lv, int time);
