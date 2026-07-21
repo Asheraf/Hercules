@@ -5919,6 +5919,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_OVERSLASH:
 		case IG_RADIANT_SPEAR:
 		case IG_IMPERIAL_PRESSURE:
+		case DR_NOMERCY_CLAW:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -6236,6 +6237,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						clif->blown(src);
 						break;
+					case DR_NOMERCY_CLAW:
 					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
@@ -9837,6 +9839,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case NPC_HELLJUDGEMENT:
 		case NPC_PULSESTRIKE:
 		case LG_MOONSLASHER:
+		case DR_NOMERCY_CLAW:
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 
@@ -18739,6 +18742,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case DR_ENRAGE_WOLF:
+		case DR_NOMERCY_CLAW:
 		case BO_DUST_EXPLOSION:
 			if (sc == NULL || sc->data[SC_MYSTERY_POWDER] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
