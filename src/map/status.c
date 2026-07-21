@@ -3232,8 +3232,11 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		flag |= SCB_HPLUS | SCB_CRATE;
 	}
 
-	if (flag & SCB_PATK)
+	if ((flag & SCB_PATK) != 0) {
 		st->patk = bst->patk;
+		if (sc != NULL && sc->data[SC_POWERFUL_FAITH] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_POWERFUL_FAITH]->val3, 0, SHRT_MAX);
+	}
 	if (flag & SCB_SMATK)
 		st->smatk = bst->smatk;
 	if (flag & SCB_RES)
@@ -4936,6 +4939,8 @@ static int status_calc_watk(struct block_list *bl, struct status_change *sc, int
 		watk += watk * sc->data[SC_SUNSTANCE]->val2 / 100;
 	if (sc->data[SC_SOULFALCON] != NULL)
 		watk += sc->data[SC_SOULFALCON]->val2;
+	if (sc->data[SC_POWERFUL_FAITH] != NULL)
+		watk += sc->data[SC_POWERFUL_FAITH]->val2;
 
 #ifdef RENEWAL
 	if (sc->data[SC_NIBELUNGEN] != NULL && sc->data[SC_NIBELUNGEN]->val2 == SC_INCATKRATE)
@@ -10173,6 +10178,14 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 3 * val1; // Holy MATK % Increase
 				val3 = 5 * val1; // ATK % Increase
 				break;
+			case SC_POWERFUL_FAITH:
+			{
+				status_change_end(bl, SC_FIRM_FAITH, INVALID_TIMER);
+				status_change_end(bl, SC_SINCERE_FAITH, INVALID_TIMER);
+				val2 = 5 + 5 * val1;
+				val3 = 5 + 2 * val1;
+				break;
+			}
 
 			default:
 				if (status->change_start_unknown_sc(src, bl, type, calc_flag, rate, val1, val2, val3, val4, total_tick, flag)) {
