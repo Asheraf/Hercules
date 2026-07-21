@@ -1722,6 +1722,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case DR_WIND_BOMB:
+					skillratio += -100 + 50 * skill_lv;
+					if (sc != NULL && sc->data[SC_TRUTH_OF_WIND] != NULL) {
+						skillratio += 5 * st->int_;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case AL_HOLYLIGHT:
 					skillratio += 25;
 					if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
@@ -5514,6 +5521,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 	sc = status->get_sc(src);
 	if (skill_id == DR_CUTTING_WIND && sc != NULL && sc->data[SC_TRUTH_OF_WIND] != NULL)
 		ad.div_ = 4;
+	if (skill_id == DR_WIND_BOMB && sc != NULL && sc->data[SC_TRUTH_OF_WIND] != NULL)
+		ad.div_ = 6;
 	if (skill_id == AG_CRYSTAL_IMPACT && sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 2)
 		ad.div_ = 2;
 	if (skill_id == AG_CRIMSON_ARROW_ATK && sc != NULL && sc->data[SC_CLIMAX] != NULL)
