@@ -12792,6 +12792,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case MH_XENO_SLASHER:
 		case SU_CN_POWDERING:
 		case SU_SV_ROOTTWIST:
+		case AG_MYSTERY_ILLUSION:
 		case SJ_BOOKOFCREATINGSTAR:
 			flag |= 1; // Set flag to 1 to prevent deleting ammo (it will be deleted on group-delete).
 			FALLTHROUGH
@@ -15200,6 +15201,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 				1, sg->skill_id, sg->skill_lv, BDT_SKILL);
 			break;
 		case UNT_RAIN_OF_CRYSTAL:
+		case UNT_MYSTERY_ILLUSION:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_B_TRAP:
@@ -24907,7 +24909,10 @@ static void skill_validate_requirements(struct config_setting_t *conf, struct s_
  **/
 static int skill_validate_unit_id_sub(int unit_id)
 {
-	if (unit_id == 0 || (unit_id >= UNT_SAFETYWALL && unit_id <= UNT_RAIN_OF_CRYSTAL))
+	if (unit_id == 0 || (unit_id >= UNT_SAFETYWALL && unit_id <= UNT_MYSTERY_ILLUSION)
+		|| unit_id == UNT_HYUN_ROKS_BREEZE || unit_id == UNT_TWINKLING_GALAXY || unit_id == UNT_STAR_CANNON
+		|| unit_id == UNT_STAR_BURST || unit_id == UNT_SHINKIROU || unit_id == UNT_FUUMASHOUAKU
+		|| unit_id == UNT_KUNAIKAITEN || unit_id == UNT_KUNAIWAIKYOKU || unit_id == UNT_GLACIAL_MONOLITH)
 		return unit_id;
 
 	return -1;
