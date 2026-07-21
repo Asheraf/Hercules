@@ -4955,6 +4955,9 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		if ( sc->data[SC_WATER_BARRIER] )
 			damage = damage * ( 100 - 20 ) / 100;
 
+		if ((flag & (BF_WEAPON | BF_MAGIC)) != 0 && sc->data[SC_IRON_HOWLING] != NULL)
+			damage = damage * (100 - (5 + 5 * sc->data[SC_IRON_HOWLING]->val1)) / 100;
+
 		if( sc->data[SC_FIRE_EXPANSION_SMOKE_POWDER] ) {
 			if( (flag&(BF_SHORT|BF_WEAPON)) == (BF_SHORT|BF_WEAPON) )
 				damage -= 15 * damage / 100;//15% reduction to physical melee attacks

@@ -9785,6 +9785,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src, bl, SC_STUN, (20 + 10 * skill_lv), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id));
 			break;
+		case KR_IRON_HOWLING:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case RG_RAID:
 			skill->area_temp[1] = 0;
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -18876,6 +18880,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case DR_ENRAGE_WOLF:
 		case KR_CLAW_WAVE:
+		case KR_IRON_HOWLING:
 			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
