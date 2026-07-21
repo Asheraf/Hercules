@@ -3853,6 +3853,17 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 			return 0;
 		}
 
+		if ((sce = sc->data[SC_GUARDIAN_S]) != NULL && damage > 0 && (flag & BF_WEAPON) != 0) {
+			clif->specialeffect(bl, 675, AREA);
+			sce->val2 -= (int)cap_value(damage, INT_MIN, INT_MAX);
+			if (sce->val2 >= 0)
+				damage = 0;
+			else
+				damage = -sce->val2;
+			if (sce->val2 <= 0)
+				status_change_end(bl, SC_GUARDIAN_S, INVALID_TIMER);
+		}
+
 		if( sc->data[SC_MEIKYOUSISUI] && rnd()%100 < 40 ) // custom value
 			damage = 0;
 

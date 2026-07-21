@@ -10137,6 +10137,17 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				total_tick = INFINITE_DURATION;
 				break;
 			}
+			case SC_GUARDIAN_S:
+			{
+				struct status_data *source_status = status->get_status_data(src);
+				if (source_status == NULL)
+					source_status = st;
+
+				val1 = cap_value(val1, 1, 5);
+				val2 = (int)cap_value(((int64)source_status->max_hp * 30 / 100) * (25 * val1) / 100 + 15 * source_status->sta,
+				                 0, INT_MAX);
+				break;
+			}
 			case SC_NEWMOON:
 				val2 = 7;
 				tick_time = 1000;

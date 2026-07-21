@@ -8456,6 +8456,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case IG_GUARDIAN_SHIELD:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				clif->skill_nodamage(bl, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+			} else {
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv),
+				                         src, skill_id, skill_lv, tick, flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case SL_KAITE:
 		case SL_KAAHI:
 		case SL_KAIZEL:
@@ -16268,6 +16278,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch( skill_id ) {
+		case IG_GUARDIAN_SHIELD:
+			if (sc == NULL || sc->data[SC_GUARD_STANCE] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
 				&& sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
