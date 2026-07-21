@@ -5954,6 +5954,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_PUNISH:
 		case KR_THUNDERING_FOCUS_S:
 		case KR_THUNDERING_ORB:
+		case KR_THUNDERING_ORB_S:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case SHC_DANCING_KNIFE:
@@ -15168,6 +15169,14 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			}
 			break;
 		case KR_CLAW_WAVE:
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+			                   skill->castend_damage_id);
+			break;
+		case KR_THUNDERING_ORB_S:
+			status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
+			status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
 			r = skill->get_splash(skill_id, skill_lv);
 			map->foreachinarea(skill->area_sub, src->m, x-r, y-r, x+r, y+r, skill->splash_target(src),
 			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,

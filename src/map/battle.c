@@ -1750,6 +1750,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						RE_LVL_DMOD(100);
 					}
 					break;
+				case KR_THUNDERING_ORB_S:
+					skillratio += -100 + 1750 + 100 * (skill_lv - 1) + 8 * st->int_;
+					RE_LVL_DMOD(100);
+					break;
 				case DR_CUTTING_WIND:
 					skillratio += -100 + 50 * skill_lv;
 					if (sc != NULL && sc->data[SC_TRUTH_OF_WIND] != NULL) {
