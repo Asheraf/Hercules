@@ -1710,6 +1710,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 4 * st->int_;
 					RE_LVL_DMOD(100);
 					break;
+				case KR_ICE_SPLASH:
+					skillratio += -100 + 1140 + 70 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_ICE] != NULL) {
+						skillratio += 4 * st->int_;
+						RE_LVL_DMOD(100);
+					}
+					break;
 				case HN_METEOR_STORM_BUSTER: {
 					int socery_lv = sd != NULL ? pc->checkskill(sd, HN_SELFSTUDY_SOCERY) : 0;
 

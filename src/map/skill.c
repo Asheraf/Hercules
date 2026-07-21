@@ -5947,6 +5947,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANTWEAPON_ATK:
 		case DR_ICE_CLOUD:
 		case DR_WIND_BOMB:
+		case KR_ICE_SPLASH:
 		case AG_CRYSTAL_IMPACT:
 		case AG_CRIMSON_ARROW_ATK:
 		case IQ_THIRD_PUNISH:
@@ -6313,6 +6314,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case DR_AROUND_FLOWER:
 					case DR_ICE_CLOUD:
 					case DR_WIND_BOMB:
+					case KR_ICE_SPLASH:
 					case KR_SHARPEN_HAIL:
 					case DR_FLICKING_TONADO:
 					case AG_ROCK_DOWN:
