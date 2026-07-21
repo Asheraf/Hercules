@@ -2058,6 +2058,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case RK_WINDCUTTER:
 			sc_start(src, bl, SC_FEAR, 3 + 2 * skill_lv, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case DK_SERVANT_W_PHANTOM:
+			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
+			         skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case RK_DRAGONBREATH:
 			sc_start4(src, bl, SC_BURNING, 15, skill_lv, 1000, src->id, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5242,6 +5246,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_SHA:
 		case SP_SWHOO:
 		case DK_SERVANTWEAPON_ATK:
+		case DK_SERVANT_W_PHANTOM:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -5285,6 +5290,16 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case DK_SERVANT_W_PHANTOM:
+						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0) {
+							enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+							if (unit->move_pos(src, bl->x, bl->y, 0, true) == 0)
+								skill->blown(src, src, 1, unit_get_opposite_dir(dir), 0);
+						}
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						clif->blown(src);
+						break;
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
 					case GN_CARTCANNON:
@@ -5339,7 +5354,26 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->area_temp[0] = map->foreachinrange(skill->area_sub, bl, (skill_id == AS_SPLASHER)?1:skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id, skill_lv, tick, BCT_ENEMY, skill->area_sub_count);
 
 				// recursive invocation of skill->castend_damage_id() with flag|1
-				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), skill->splash_target(src), src, skill_id, skill_lv, tick, flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
+				if (skill_id == DK_SERVANT_W_PHANTOM && sd != NULL && sd->servantball_old > 0) {
+					for (int i = 0; i < MAX_SERVANT_SIGN; i++) {
+						struct block_list *sign_target = map->id2bl(sd->servant_sign[i]);
+
+						if (sign_target == NULL || sign_target->m != src->m || distance_bl(bl, sign_target) > 3)
+							continue;
+
+						struct status_change *sign_sc = status->get_sc(sign_target);
+						if (sign_sc == NULL || sign_sc->data[SC_SERVANT_SIGN] == NULL
+						 || sign_sc->data[SC_SERVANT_SIGN]->val1 != src->id)
+							continue;
+
+						map->foreachinrange(skill->area_sub, sign_target, skill->get_splash(skill_id, skill_lv),
+						                    skill->splash_target(src), src, skill_id, skill_lv, tick,
+						                    flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
+					}
+				} else
+					map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),
+					                    skill->splash_target(src), src, skill_id, skill_lv, tick,
+					                    flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
 
 				if (skill_id == AS_SPLASHER) {
 					// Prevent double item consumption when the target explodes (item requirements have already been processed in skill_castend_nodamage_id)
@@ -16691,6 +16725,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 
 	if (require.spiritball > 0) {
 		switch(skill_id) {
+		case DK_SERVANT_W_PHANTOM:
+			break;
 		case DK_SERVANT_W_SIGN:
 			if (sd->servantball < require.spiritball) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_EMPTY_SERVANTWEAPON, require.spiritball, 0);
@@ -16943,6 +16979,12 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 		case PR_BENEDICTIO:
 			skill->check_pc_partner(sd, skill_id, &skill_lv, 1, 1);
 			break;
+		case DK_SERVANT_W_PHANTOM:
+			if (target == NULL || (target->type != BL_PC && target->type != BL_MOB)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+			break;
 		case DK_SERVANT_W_SIGN:
 			if (target == NULL || (target->type != BL_PC && target->type != BL_MOB)
 			 || sd->servantball == 0) {
@@ -17065,6 +17107,8 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 	st = &sd->battle_status;
 
 	require = skill->get_requirement(sd,skill_id,skill_lv);
+	if (skill_id == DK_SERVANT_W_PHANTOM)
+		sd->servantball_old = min(sd->servantball, require.spiritball);
 
 	if( require.hp > 0 && st->hp <= (unsigned int)require.hp) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL_HP_INSUFFICIENT, 0, 0);
@@ -17247,6 +17291,11 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 			case DK_SERVANT_W_SIGN:
 				pc->delservantball(sd, req.spiritball);
 				break;
+			case DK_SERVANT_W_PHANTOM:
+				if (sd->servantball_old == 0)
+					sd->servantball_old = min(sd->servantball, req.spiritball);
+				pc->delservantball(sd, sd->servantball_old);
+				break;
 			default:
 				pc->delspiritball(sd, req.spiritball, 0);
 				break;
@@ -17266,6 +17315,9 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 
 	if( type&2 )
 	{
+		if (skill_id == DK_SERVANT_W_PHANTOM)
+			sd->servantball_old = 0;
+
 		struct status_change *sc = &sd->sc;
 		int n;
 

@@ -1789,6 +1789,17 @@ static int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill
 			}
 		}
 		break;
+	case DK_SERVANT_W_PHANTOM:
+		if (sd != NULL) {
+			struct status_change *tsc = status->get_sc(target);
+
+			if (tsc == NULL || tsc->data[SC_SERVANT_SIGN] == NULL
+			 || tsc->data[SC_SERVANT_SIGN]->val1 != src->id) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+		}
+		break;
 	}
 
 	// moved here to prevent Suffragium from ending if skill fails

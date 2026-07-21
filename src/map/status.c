@@ -5250,6 +5250,8 @@ static int status_calc_flee(struct block_list *bl, struct status_change *sc, int
 		flee += sc->data[SC_ARMORSCROLL]->val2;
 	if (sc->data[SC_MYSTICPOWDER])
 		flee += sc->data[SC_MYSTICPOWDER]->val2;
+	if (sc->data[SC_HANDICAPSTATE_DEEPBLIND] != NULL)
+		flee = 0;
 
 	return cap_value(flee, battle_config.flee_min, battle_config.flee_max);
 }
@@ -5272,6 +5274,8 @@ static int status_calc_flee2(struct block_list *bl, struct status_change *sc, in
 		flee2 -= flee2 * sc->data[SC__UNLUCKY]->val2 / 100;
 	if (sc->data[SC_FREYJASCROLL])
 		flee2 += sc->data[SC_FREYJASCROLL]->val2;
+	if (sc->data[SC_HANDICAPSTATE_DEEPBLIND] != NULL)
+		flee2 = 0;
 
 	return cap_value(flee2, battle_config.flee2_min, battle_config.flee2_max);
 }
