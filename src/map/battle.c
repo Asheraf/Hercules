@@ -2992,6 +2992,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SH_HOGOGONG_STRIKE:
+					skillratio += -100 + 180 + 200 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL) {
+						skillratio += 10 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						if (pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0) {
+							skillratio += 70 + 150 * skill_lv;
+							skillratio += 10 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						}
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case SH_HOWLING_OF_CHUL_HO:
 					skillratio += -100 + 600 + 1050 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -6169,6 +6181,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 		|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 		&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
+		|| skill_id == SH_HOGOGONG_STRIKE
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6190,6 +6203,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 			|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 			&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
+			|| skill_id == SH_HOGOGONG_STRIKE
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6653,7 +6667,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
-							|| skill_id == SH_CHUL_HO_SONIC_CLAW)
+							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

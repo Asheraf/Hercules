@@ -6408,6 +6408,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			if ((flag & 1) != 0)
 				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SH_HOGOGONG_STRIKE:
+			if ((flag & 1) != 0 && tsc != NULL && tsc->data[SC_HOGOGONG] != NULL)
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 		case GC_CROSSRIPPERSLASHER:
 			if( sd && !(sc && sc->data[SC_ROLLINGCUTTER]) )
@@ -9244,6 +9248,15 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
 			                    flag | BCT_ENEMY | 1, skill->castend_damage_id);
 		}
+			break;
+		case SH_HOGOGONG_STRIKE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[0] = 0;
+			skill->area_temp[1] = bl->id;
+			skill->area_temp[2] = 0;
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id,
+			                    skill_lv, tick,
+			                    flag | BCT_ENEMY | 1, skill->castend_damage_id);
 			break;
 		case KN_BRANDISHSPEAR:
 		case ML_BRANDISH:
@@ -19381,6 +19394,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	int64 add_ap = skill->dbs->db[idx].give_ap[skill_lv - 1];
 	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP || skill_id == WH_SWIFTTRAP
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
+		add_ap++;
+	if (skill_id == SH_HOGOGONG_STRIKE && pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0)
 		add_ap++;
 	if (skill_id == TR_RHYTHMSHOOTING)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
