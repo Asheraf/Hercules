@@ -10749,6 +10749,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val3 += 10000;
 				tick_time = val3;
 				break;
+			case SC_COLD_FORCE:
+				val2 += 10;
+				val3 += 10000;
+				tick_time = val3;
+				break;
 			case SC_JAWAII_SERENADE:
 				val2 = 3 * val1;
 				if ((val3 & 2) != 0)
@@ -10778,6 +10783,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				break;
 			case SC_FLAMETECHNIC_OPTION:
 				val3 = ELE_FIRE;
+				break;
+			case SC_COLD_FORCE_OPTION:
+				val3 = ELE_WATER;
 				break;
 			case SC_RELIGIO:
 				val1 = cap_value(val1, 1, 5);
@@ -14110,6 +14118,19 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 					elemental->change_mode(BL_CAST(BL_ELEM, bl), EL_MODE_PASSIVE);
 				if (s_bl != NULL)
 					status_change_end(s_bl, SC_FLAMEARMOR_OPTION, INVALID_TIMER);
+				break;
+			}
+			sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);
+			return 0;
+
+		case SC_COLD_FORCE:
+			if (status->charge(bl, 0, sce->val2) == 0) {
+				struct block_list *s_bl = battle->get_master(bl);
+
+				if (bl->type == BL_ELEM)
+					elemental->change_mode(BL_CAST(BL_ELEM, bl), EL_MODE_PASSIVE);
+				if (s_bl != NULL)
+					status_change_end(s_bl, SC_COLD_FORCE_OPTION, INVALID_TIMER);
 				break;
 			}
 			sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);

@@ -400,6 +400,7 @@ static int elemental_clean_single_effect(struct elemental_data *ed, uint16 skill
 			case SC_TIDAL_WEAPON_OPTION:
 			case SC_FLAMETECHNIC_OPTION:
 			case SC_FLAMEARMOR_OPTION:
+			case SC_COLD_FORCE_OPTION:
 				if( bl ) status_change_end(bl,type,INVALID_TIMER); // Master
 				status_change_end(&ed->bl,type-1,INVALID_TIMER); // Elemental Spirit
 				break;
@@ -446,6 +447,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&ed->bl, SC_TIDAL_WEAPON, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_FLAMETECHNIC, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_FLAMEARMOR, INVALID_TIMER);
+	status_change_end(&ed->bl, SC_COLD_FORCE, INVALID_TIMER);
 
 	if( (sd = ed->master) == NULL )
 		return 0;
@@ -477,6 +479,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&sd->bl, SC_TIDAL_WEAPON_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_FLAMETECHNIC_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_FLAMEARMOR_OPTION, INVALID_TIMER);
+	status_change_end(&sd->bl, SC_COLD_FORCE_OPTION, INVALID_TIMER);
 
 	return 1;
 }
