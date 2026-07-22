@@ -4641,7 +4641,12 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 
 #ifdef RENEWAL
 		if (ad.damage != 0 && tstatus->mres > 0) {
-			double reduction = (double)tstatus->mres / (tstatus->mres + 400.0) * 0.8;
+			int mres = tstatus->mres;
+
+			if (sc != NULL && sc->data[SC_ARGUTUS_VITA] != NULL)
+				mres -= (int)((int64)mres * sc->data[SC_ARGUTUS_VITA]->val2 / 100);
+
+			double reduction = (double)mres / (mres + 400.0) * 0.8;
 			ad.damage -= (int64)(ad.damage * reduction);
 		}
 #endif
