@@ -3871,6 +3871,10 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 		case EL_STONE_RAIN:
 			dmg.dmotion = clif->skill_damage(dsrc,bl,tick,dmg.amotion,dmg.dmotion,damage,dmg.div_,skill_id,-1,(flag&1)?BDT_MULTIHIT:BDT_SPLASH);
 			break;
+		case EM_EL_FLAMEROCK:
+			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
+			                                 BDT_MULTIHIT);
+			break;
 		case WM_SEVERE_RAINSTORM_MELEE:
 			dmg.dmotion = clif->skill_damage(src,bl,tick,dmg.amotion,dmg.dmotion,damage,dmg.div_,WM_SEVERE_RAINSTORM,-2,BDT_SPLASH);
 			break;
@@ -6157,6 +6161,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case TR_METALIC_FURY:
 		case EM_PSYCHIC_STREAM:
 		case TR_ROSEBLOSSOM_ATK:
+		case EM_EL_FLAMEROCK:
 		case HN_JUPITEL_THUNDER_STORM:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
@@ -6426,6 +6431,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						          skill->get_time(skill_id, skill_lv), skill_id);
 						skill->area_temp[3] = 0;
 					}
+						break;
+					case EM_EL_FLAMEROCK:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case CD_DIVINUS_FLOS:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
