@@ -2176,6 +2176,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case CD_FRAMEN:
+					skillratio += -100 + 1550 * skill_lv + 5 * st->spl;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, CD_FIDUS_ANIMUS);
+					if (tst->race == RC_UNDEAD || tst->race == RC_DEMON)
+						skillratio += 50 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case IG_CROSS_RAIN:
 					if (sc != NULL && sc->data[SC_HOLY_S] != NULL)
 						skillratio += -100 + (650 + 15 * pc->checkskill(sd, IG_SPEAR_SWORD_M)) * skill_lv;
