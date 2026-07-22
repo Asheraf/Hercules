@@ -2341,6 +2341,24 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		for (int size = SZ_SMALL; size <= SZ_BIG; size++)
 			sd->weapon_subsize[size] += defense_bonus[size][skill_index];
 	}
+	if ((skill_lv = pc->checkskill(sd, IQ_WILL_OF_FAITH)) > 0 && sd->weapontype == W_KNUCKLE) {
+		static const int race_attack[10] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+		int skill_index = cap_value(skill_lv, 1, 10) - 1;
+
+		sd->right_weapon.addrace[RC_UNDEAD] += race_attack[skill_index];
+		sd->right_weapon.addrace[RC_DEMON] += race_attack[skill_index];
+		if (battle_config.left_cardfix_to_right == 0) {
+			sd->left_weapon.addrace[RC_UNDEAD] += race_attack[skill_index];
+			sd->left_weapon.addrace[RC_DEMON] += race_attack[skill_index];
+		}
+#ifdef RENEWAL
+		sd->race_tolerance[RC_UNDEAD] += skill_index + 1;
+		sd->race_tolerance[RC_DEMON] += skill_index + 1;
+#else
+		sd->subrace[RC_UNDEAD] += skill_index + 1;
+		sd->subrace[RC_DEMON] += skill_index + 1;
+#endif
+	}
 
 	if (sc->count) {
 		if (sc->data[SC_CONCENTRATION]) { // Update the card-bonus data
