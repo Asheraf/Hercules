@@ -8236,6 +8236,32 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                     src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case TR_NIPELHEIM_REQUIEM:
+			if ((flag & 1) != 0) {
+				int curse_chance = 4 * skill_lv;
+				int depression_chance = 5 * skill_lv;
+
+				if (dstmd != NULL && (dstmd->status.mode & MD_BOSS) != 0)
+					break;
+
+				if ((flag & 2) != 0) {
+					curse_chance *= 2;
+					depression_chance *= 2;
+				}
+
+				sc_start(src, bl, SC_CURSE, curse_chance, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				sc_start(src, bl, SC_HANDICAPSTATE_DEPRESSION, depression_chance, skill_lv,
+				         skill->get_time2(skill_id, skill_lv), skill_id);
+			} else if (sd != NULL) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sd->skill_id_song = skill_id;
+				sd->skill_lv_song = skill_lv;
+				if (skill->check_pc_partner(sd, skill_id, &skill_lv, AREA_SIZE, 0) > 0)
+					flag |= 2;
+				map->foreachinrange(skill->area_sub, src, skill->get_splash(skill_id, skill_lv), BL_PC,
+				                     src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case TR_GEF_NOCTURN:
 			if ((flag & 1) != 0) {
 				sc_start4(src, bl, type, 100, skill_lv, 0, flag, 0, skill->get_time(skill_id, skill_lv), skill_id);
@@ -17545,6 +17571,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case TR_ROKI_CAPRICCIO:
+			if (map_flag_vs(sd->bl.m) == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case TR_NIPELHEIM_REQUIEM:
 			if (map_flag_vs(sd->bl.m) == 0) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
