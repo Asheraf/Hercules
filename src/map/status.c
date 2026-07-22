@@ -3239,8 +3239,11 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 	}
 	if (flag & SCB_SMATK)
 		st->smatk = bst->smatk;
-	if (flag & SCB_RES)
+	if ((flag & SCB_RES) != 0) {
 		st->res = bst->res;
+		if (sc != NULL && sc->data[SC_FIRM_FAITH] != NULL)
+			st->res = (int32)cap_value((int64)st->res + sc->data[SC_FIRM_FAITH]->val3, 0, SHRT_MAX);
+	}
 	if (flag & SCB_MRES)
 		st->mres = bst->mres;
 	if (flag & SCB_HPLUS)
@@ -6208,6 +6211,8 @@ static unsigned int status_calc_maxhp(struct block_list *bl, struct status_chang
 		maxhp -= maxhp * sc->data[SC_GM_BATTLE2]->val1 / 100;
 	if (sc->data[SC_LUNARSTANCE] != NULL)
 		maxhp += maxhp * sc->data[SC_LUNARSTANCE]->val2 / 100;
+	if (sc->data[SC_FIRM_FAITH] != NULL)
+		maxhp += maxhp * sc->data[SC_FIRM_FAITH]->val2 / 100;
 #ifdef RENEWAL
 	if (sc->data[SC_ANGELUS] != NULL)
 		maxhp += sc->data[SC_ANGELUS]->val3;
@@ -10184,6 +10189,15 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				status_change_end(bl, SC_SINCERE_FAITH, INVALID_TIMER);
 				val2 = 5 + 5 * val1;
 				val3 = 5 + 2 * val1;
+				break;
+			}
+			case SC_FIRM_FAITH:
+			{
+				status_change_end(bl, SC_POWERFUL_FAITH, INVALID_TIMER);
+				status_change_end(bl, SC_SINCERE_FAITH, INVALID_TIMER);
+				val1 = cap_value(val1, 1, 5);
+				val2 = 2 * val1;
+				val3 = 8 * val1;
 				break;
 			}
 
