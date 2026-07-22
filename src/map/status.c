@@ -5034,6 +5034,8 @@ static int status_calc_batk(struct block_list *bl, struct status_change *sc, int
 		batk += sc->data[SC_SKF_ATK]->val1;
 	if (sc->data[SC_ALMIGHTY] != NULL)
 		batk += sc->data[SC_ALMIGHTY]->val1;
+	if (sc->data[SC_INTENSIVE_AIM] != NULL)
+		batk += 150;
 
 	if (sc->data[SC_SHRIMP])
 		batk += batk * sc->data[SC_SHRIMP]->val2 / 100;
@@ -5340,6 +5342,8 @@ static int status_calc_critical(struct block_list *bl, struct status_change *sc,
 		critical += sc->data[SC_BUCHEDENOEL]->val4 * 10;
 	if (sc->data[SC_SOULSHADOW] != NULL)
 		critical += 10 * sc->data[SC_SOULSHADOW]->val3;
+	if (sc->data[SC_INTENSIVE_AIM] != NULL)
+		critical += 300;
 
 	return cap_value(critical, battle_config.critical_min, battle_config.critical_max);
 }
@@ -5401,6 +5405,8 @@ static int status_calc_hit(struct block_list *bl, struct status_change *sc, int 
 		hit += sc->data[SC_SOULFALCON]->val3;
 	if (sc->data[SC_ABYSS_SLAYER] != NULL)
 		hit += sc->data[SC_ABYSS_SLAYER]->val3;
+	if (sc->data[SC_INTENSIVE_AIM] != NULL)
+		hit += 250;
 #ifdef RENEWAL
 	if (sc->data[SC_BLESSING] != NULL)
 		hit += sc->data[SC_BLESSING]->val3;
@@ -10464,6 +10470,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 200 + 50 * val1;
 				val3 = 20 * val1;
 				break;
+			case SC_INTENSIVE_AIM:
+				tick_time = 500;
+				break;
 			case SC_MUSICAL_INTERLUDE:
 				val2 = 5 + 5 * val1;
 				if ((val3 & 2) != 0)
@@ -11180,6 +11189,7 @@ static void status_change_start_stop_action(struct block_list *bl, enum sc_type 
 		case SC_DEATHBOUND:
 		case SC_NETHERWORLD:
 		case SC_SV_ROOTTWIST:
+		case SC_INTENSIVE_AIM:
 			unit->stop_walking(bl, STOPWALKING_FLAG_FIXPOS);
 			break;
 		case SC_ANKLESNARE:
@@ -12592,6 +12602,9 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_CHARGINGPIERCE:
 			status_change_end(bl, SC_CHARGINGPIERCE_COUNT, INVALID_TIMER);
 			break;
+		case SC_INTENSIVE_AIM:
+			status_change_end(bl, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
+			break;
 		case SC_SOULUNITY:
 		{
 			struct map_session_data *tsd;
@@ -12942,6 +12955,16 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 			if(!status->charge(bl, 0, 1))
 				break; //Not enough SP to continue.
 			sc_timer_next(sce->val2+tick, status->change_timer, bl->id, data);
+			return 0;
+
+		case SC_INTENSIVE_AIM:
+			if (sc->data[SC_INTENSIVE_AIM_COUNT] == NULL)
+				sce->val4 = 0;
+			if (sce->val4 < 10) {
+				sce->val4++;
+				sc_start(bl, bl, SC_INTENSIVE_AIM_COUNT, 100, sce->val4, INT_MAX, NW_INTENSIVE_AIM);
+			}
+			sc_timer_next(500 + tick, status->change_timer, bl->id, data);
 			return 0;
 
 		case SC_CHASEWALK:

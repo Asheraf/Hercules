@@ -1151,8 +1151,11 @@ static int unit_push(struct block_list *bl, enum unit_dir dir, int count, bool u
 		if (update)
 			clif->blown(bl);
 
-		if (sd != NULL)
+		if (sd != NULL) {
+			if (sd->sc.data[SC_INTENSIVE_AIM_COUNT] != NULL)
+				status_change_end(bl, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			npc->handle_touch_events(sd, bl->x, bl->y, false);
+		}
 	}
 
 	return path->distance(delta_x, delta_y);
@@ -1362,17 +1365,8 @@ static int unit_can_move(struct block_list *bl)
 	if (sc) {
 		if( sc->count
 		 && (
-		        sc->data[SC_ANKLESNARE]
-		    ||  sc->data[SC_AUTOCOUNTER]
-		    ||  sc->data[SC_TRICKDEAD]
-		    ||  sc->data[SC_BLADESTOP]
-		    ||  sc->data[SC_BLADESTOP_WAIT]
-		    || (sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF) // cannot move while gospel is in effect
+		        (sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF) // cannot move while gospel is in effect
 		    || (sc->data[SC_BASILICA] && sc->data[SC_BASILICA]->val4 == bl->id) // Basilica caster cannot move
-		    ||  sc->data[SC_STOP]
-			|| sc->data[SC_FALLENEMPIRE]
-		    ||  sc->data[SC_RG_CCONFINE_M]
-		    ||  sc->data[SC_RG_CCONFINE_S]
 		    ||  sc->data[SC_GS_MADNESSCANCEL]
 		    || (sc->data[SC_GRAVITATION] && sc->data[SC_GRAVITATION]->val3 == BCT_SELF)
 		    ||  sc->data[SC_WHITEIMPRISON]
