@@ -44,7 +44,7 @@ struct status_change_entry;
 /**
  * Defines
  **/
-#define MAX_SKILL_PRODUCE_DB      270
+#define MAX_SKILL_PRODUCE_DB      284
 #define MAX_PRODUCE_RESOURCE      10
 #define MAX_SKILL_ARROW_DB        140
 #define MAX_ARROW_RESOURCE        5

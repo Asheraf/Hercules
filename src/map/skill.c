@@ -12209,6 +12209,15 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case BO_BIONIC_PHARMACY:
+			if (sd != NULL) {
+				int qty = 10 + skill_lv;
+				sd->skill_id_old = skill_id;
+				sd->skill_lv_old = skill_lv;
+				clif->cooking_list(sd, 32, skill_id, qty, 8);
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			}
+			break;
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
 		case MT_SUMMON_ABR_DUAL_CANNON:
 		case MT_SUMMON_ABR_MOTHER_NET:
@@ -16612,6 +16621,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case GN_S_PHARMACY:
 		case GN_CHANGEMATERIAL:
 		case MT_M_MACHINE:
+		case BO_BIONIC_PHARMACY:
 			if( sd->menuskill_id != skill_id )
 				return 0;
 			break;
@@ -17946,6 +17956,7 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 		case GN_S_PHARMACY:
 		case GN_CHANGEMATERIAL:
 		case MT_M_MACHINE:
+		case BO_BIONIC_PHARMACY:
 			if( sd->menuskill_id != skill_id )
 				return 0;
 			break;
@@ -21778,6 +21789,10 @@ static int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int n
 				qty = 7 + skill_lv;
 				make_per = 10000;
 				break;
+			case BO_BIONIC_PHARMACY:
+				qty = 10 + skill_lv;
+				make_per = 10000;
+				break;
 			default:
 				if (sd->menuskill_id == AM_PHARMACY && sd->menuskill_val > 10 && sd->menuskill_val <= 20) {
 					//Assume Cooking Dish
@@ -21886,7 +21901,8 @@ static int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int n
 
 			for (i=0; i< qty; i++) {
 				//Apply quantity modifiers.
-				if( (skill_id == GN_MIX_COOKING || skill_id == GN_MAKEBOMB || skill_id == GN_S_PHARMACY) && make_per > 1){
+				if ((skill_id == GN_MIX_COOKING || skill_id == GN_MAKEBOMB || skill_id == GN_S_PHARMACY
+					|| skill_id == MT_M_MACHINE || skill_id == BO_BIONIC_PHARMACY) && make_per > 1){
 					tmp_item.amount = qty;
 					break;
 				}
@@ -21947,6 +21963,10 @@ static int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int n
 					clif->produce_effect(sd, 0, nameid);
 					clif->misceffect(&sd->bl, 3);
 					break;
+				case BO_BIONIC_PHARMACY:
+					clif->produce_effect(sd, 2, nameid);
+					clif->misceffect(&sd->bl, 5);
+					break;
 				default: //Those that don't require a skill?
 					if( skill->dbs->produce_db[idx].itemlv > 10 && skill->dbs->produce_db[idx].itemlv <= 20)
 					{ //Cooking items.
@@ -21985,7 +22005,8 @@ static int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int n
 				map->addflooritem(&sd->bl, &tmp_item, tmp_item.amount, sd->bl.m, sd->bl.x, sd->bl.y, 0, 0, 0, 0, false);
 			}
 #if PACKETVER >= 20091013
-			if (skill_id == GN_MIX_COOKING || skill_id == GN_MAKEBOMB || skill_id ==  GN_S_PHARMACY)
+			if (skill_id == GN_MIX_COOKING || skill_id == GN_MAKEBOMB || skill_id == GN_S_PHARMACY
+				|| skill_id == MT_M_MACHINE || skill_id == BO_BIONIC_PHARMACY)
 				clif->msgtable_skill(sd, skill_id, MSG_SKILL_SUCCESS);
 #endif
 			return 1;
@@ -22061,6 +22082,13 @@ static int skill_produce_mix(struct map_session_data *sd, uint16 skill_id, int n
 			case MT_M_MACHINE:
 				clif->produce_effect(sd, 1, nameid);
 				clif->misceffect(&sd->bl, 2);
+#if PACKETVER >= 20091013
+				clif->msgtable_skill(sd, skill_id, MSG_SKILL_FAIL);
+#endif
+				break;
+			case BO_BIONIC_PHARMACY:
+				clif->produce_effect(sd, 3, nameid);
+				clif->misceffect(&sd->bl, 6);
 #if PACKETVER >= 20091013
 				clif->msgtable_skill(sd, skill_id, MSG_SKILL_FAIL);
 #endif
