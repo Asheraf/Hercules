@@ -2170,6 +2170,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 3 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case SOA_TALISMAN_OF_BLUE_DRAGON:
+					skillratio += -100 + 1250 + 2650 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, SOA_TALISMAN_MASTERY) * 15 * skill_lv;
+					skillratio += 5 * st->spl;
+					if (sc != NULL && sc->data[SC_T_FIFTH_GOD] != NULL)
+						skillratio += 850 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)

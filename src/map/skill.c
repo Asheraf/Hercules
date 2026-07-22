@@ -5224,6 +5224,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				clif->skill_nodamage(src, src, skill_id, sp, 1);
 			}
 			break;
+		case SOA_TALISMAN_OF_BLUE_DRAGON:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag);
+			sc_start(src, src, SC_T_FIRST_GOD, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
