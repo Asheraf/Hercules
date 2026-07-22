@@ -13962,6 +13962,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case LG_EARTHDRIVE:
 		case SC_ESCAPE:
 		case SU_CN_METEOR:
+		case SOA_TALISMAN_OF_BLACK_TORTOISE:
 			break; //Effect is displayed on respective switch case.
 		default:
 			skill->castend_pos2_effect_unknown(src, &x, &y, &skill_id, &skill_lv, &tick, &flag);
@@ -14339,6 +14340,14 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 
 				skill->addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skill_id,skill_lv,-1,0);
 			}
+			break;
+
+		case SOA_TALISMAN_OF_BLACK_TORTOISE:
+			if (sc != NULL && sc->data[SC_T_THIRD_GOD] != NULL) {
+				status_change_end(src, SC_T_THIRD_GOD, INVALID_TIMER);
+				sc_start(src, src, type, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			}
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
 
 		case AL_WARP:
@@ -16072,6 +16081,10 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 
 		case UNT_DUMMYSKILL:
 			switch (sg->skill_id) {
+				case SOA_TALISMAN_OF_BLACK_TORTOISE:
+					skill->attack(skill->get_type(sg->skill_id, sg->skill_lv), ss, ss, bl, sg->skill_id, sg->skill_lv,
+					              tick, 0);
+					break;
 				case SG_SUN_WARM: //SG skills [Komurka]
 				case SG_MOON_WARM:
 				case SG_STAR_WARM:
