@@ -2875,6 +2875,26 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case TR_ROSEBLOSSOM:
+					skillratio += -100 + 200 + 2000 * skill_lv;
+					if (sd != NULL && pc->checkskill(sd, TR_STAGE_MANNER) > 0)
+						skillratio += 3 * st->con;
+					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL)
+						skillratio += 200 * skill_lv;
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_MYSTIC_SYMPHONY] != NULL)
+						skillratio *= 2;
+					break;
+				case TR_ROSEBLOSSOM_ATK:
+					skillratio += -100 + 550 + 3850 * skill_lv;
+					if (sd != NULL && pc->checkskill(sd, TR_STAGE_MANNER) > 0)
+						skillratio += 3 * st->con;
+					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL)
+						skillratio += 200 * skill_lv;
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_MYSTIC_SYMPHONY] != NULL)
+						skillratio *= 2;
+					break;
 				case RA_CLUSTERBOMB:
 					skillratio += 100 + 100 * skill_lv;
 					break;

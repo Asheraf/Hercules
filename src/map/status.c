@@ -11937,6 +11937,7 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			}
 			break;
 		case SC_SPLASHER:
+		case SC_ROSEBLOSSOM:
 			{
 				struct block_list *src=map->id2bl(sce->val3);
 				if(src && tid != INVALID_TIMER)

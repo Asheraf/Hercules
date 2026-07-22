@@ -1659,6 +1659,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		return 0;
 
 	switch(skill_id) {
+		case TR_ROSEBLOSSOM:
+			sc_start4(src, bl, SC_ROSEBLOSSOM, 100, skill_lv, TR_ROSEBLOSSOM_ATK, src->id, 0,
+			          skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case 0: { // Normal attacks (no skill used)
 			if( attack_type&BF_SKILL )
 				break; // If a normal attack is a skill, it's splash damage. [Inkfish]
@@ -3818,6 +3822,10 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
 			                                 type);
 			break;
+		case TR_ROSEBLOSSOM_ATK:
+			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
+			                                 BDT_SPLASH);
+			break;
 		case AB_DUPLELIGHT_MELEE:
 		case AB_DUPLELIGHT_MAGIC:
 			dmg.amotion = 300;/* makes the damage value not overlap with previous damage (when displayed by the client) */
@@ -5145,6 +5153,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			sc_start(src, src, SC_CRESCIVEBOLT, 100, stack, skill->get_time(skill_id, skill_lv), skill_id);
 		}
 			break;
+		case TR_ROSEBLOSSOM:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 #ifdef RENEWAL
 		case BA_DISSONANCE:
@@ -5494,6 +5506,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case BO_ACIDIFIED_ZONE_FIRE:
 		case ABC_CHAIN_REACTION_SHOT:
 		case ABC_FROM_THE_ABYSS_ATK:
+		case TR_ROSEBLOSSOM_ATK:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -18584,6 +18597,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP || skill_id == WH_SWIFTTRAP
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
+	if (skill_id == TR_ROSEBLOSSOM)
+		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (add_ap <= 0)
 		return;
 	if (sd->skill_id_old == TR_RETROSPECTION && skill_id == sd->skill_id_song) {
