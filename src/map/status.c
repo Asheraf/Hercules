@@ -1937,6 +1937,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->bonus.long_attack_atk_rate += sc->data[SC_HIDDEN_CARD]->val3;
 	if (sc->data[SC_FLIP_FLAP] != NULL)
 		sd->bonus.long_attack_atk_rate += 6 * sc->data[SC_FLIP_FLAP]->val1;
+	if (sc->data[SC_FLIP_FLAP_TARGET] != NULL)
+		sd->bonus.long_attack_atk_rate += 6 * sc->data[SC_FLIP_FLAP_TARGET]->val1;
 	if (sc->data[SC_HEAVEN_AND_EARTH] != NULL) {
 		int bonus = sc->data[SC_HEAVEN_AND_EARTH]->val2;
 
@@ -2262,6 +2264,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->cri = (int32)cap_value((int64)bstatus->cri + skill_lv * 20, 0, SHRT_MAX);
 	if (sd->sc.data[SC_FLIP_FLAP] != NULL)
 		bstatus->cri = (int32)cap_value((int64)bstatus->cri + 30 * sd->sc.data[SC_FLIP_FLAP]->val1, 0, SHRT_MAX);
+	if (sd->sc.data[SC_FLIP_FLAP_TARGET] != NULL)
+		bstatus->cri = (int32)cap_value((int64)bstatus->cri + 30 * sd->sc.data[SC_FLIP_FLAP_TARGET]->val1, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, SHC_SHADOW_SENSE)) > 0) {
 		if (sd->weapontype == W_DAGGER || sd->weapontype == W_DOUBLE_DD || sd->weapontype == W_DOUBLE_DS
 			|| sd->weapontype == W_DOUBLE_DA)
@@ -11577,9 +11581,6 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 	case SC_OVERTHRUSTMAX:
 		// Cancels Normal Overthrust. [Skotlex]
 		status_change_end(bl, SC_OVERTHRUST, INVALID_TIMER);
-		break;
-	case SC_FERAL_CLAW:
-		status_change_end(bl, SC_PRIMAL_CLAW, INVALID_TIMER);
 		break;
 	case SC_MAGNIFICAT:
 		// Cancels Offertorium
