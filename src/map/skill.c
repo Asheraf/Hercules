@@ -7498,6 +7498,19 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 		}
+		case EM_INCREASING_ACTIVITY:
+			if (dstsd != NULL) {
+				uint32 old_ap = dstsd->battle_status.ap;
+
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				dstsd->battle_status.ap = (uint32)cap_value((int64)dstsd->battle_status.ap + 10 * skill_lv, 0,
+				                                    dstsd->battle_status.max_ap);
+				if (old_ap != dstsd->battle_status.ap)
+					clif->updatestatus(dstsd, SP_AP);
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+			}
+			break;
 		case WH_WIND_SIGN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
