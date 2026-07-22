@@ -5215,6 +5215,15 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case NW_WILD_FIRE:
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SOA_TALISMAN_OF_SOUL_STEALING:
+			skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag);
+			if (bl->type != BL_SKILL) {
+				int sp = (100 + status->get_lv(src) / 50) * skill_lv;
+
+				status->heal(src, 0, sp, STATUS_HEAL_DEFAULT);
+				clif->skill_nodamage(src, src, skill_id, sp, 1);
+			}
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
