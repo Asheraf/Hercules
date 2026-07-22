@@ -5173,6 +5173,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			}
 			break;
+		case NW_WILD_FIRE:
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -14677,6 +14680,15 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case ABC_ABYSS_SQUARE:
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
+		case NW_WILD_FIRE:
+			r = skill->get_splash(skill_id, skill_lv);
+			if (sd != NULL && sd->weapontype1 == W_GRENADE)
+				r += 2;
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:

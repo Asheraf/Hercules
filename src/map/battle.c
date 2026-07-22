@@ -3077,6 +3077,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 50 + 300 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case NW_WILD_FIRE:
+					skillratio += -100 + 1400 + 3550 * skill_lv + 5 * st->con;
+					if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+						skillratio += sc->data[SC_INTENSIVE_AIM_COUNT]->val1 * 500 * skill_lv;
+					if (sd != NULL && sd->weapontype1 == W_SHOTGUN)
+						skillratio += 100;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
