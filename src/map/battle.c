@@ -3196,6 +3196,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 350 + 1400 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_UNLUCKY_RUSH:
+					skillratio += -100 + 100 + 300 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_CHASING] != NULL)
+						skillratio += 2500 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_SECOND_FLAME:
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);
@@ -4364,7 +4370,8 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
-	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW)
+	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_RUSH_QUAKE
+		|| skill_id == ABC_UNLUCKY_RUSH)
 		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);

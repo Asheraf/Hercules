@@ -2088,6 +2088,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case ABC_UNLUCKY_RUSH:
+			sc_start(src, bl, SC_HANDICAPSTATE_MISFORTUNE, 30 + 10 * skill_lv, skill_lv,
+			         skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case MT_RUSH_QUAKE:
 			sc_start(src, bl, SC_RUSH_QUAKE1, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5420,6 +5424,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SHC_IMPACT_CRATER:
 		case SHC_FATAL_SHADOW_CROW:
 		case ABC_ABYSS_DAGGER:
+		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
@@ -5535,6 +5540,16 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 					}
+						break;
+					case ABC_UNLUCKY_RUSH:
+			if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0
+						 && (sc == NULL || sc->data[SC_SV_ROOTTWIST] == NULL)) {
+							enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+							if (unit->move_pos(src, bl->x, bl->y, 0, true) == 0)
+								skill->blown(src, src, 1, unit_get_opposite_dir(dir), 0);
+						}
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case MT_RUSH_QUAKE:
 						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0
