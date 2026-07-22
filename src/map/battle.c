@@ -4557,6 +4557,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_PINION_SHOT:
+					skillratio += -100 + 2600 * skill_lv;
+					skillratio += 5 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_FRENZY_FANG:
 					skillratio += -100 + 1000 + 250 * (skill_lv - 1);
 					if (sc != NULL && (sc->data[SC_ALPHA_PHASE] != NULL || sc->data[SC_INSANE] != NULL

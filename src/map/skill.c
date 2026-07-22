@@ -6094,6 +6094,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_PINION_SHOT:
 		case AT_SAVAGE_LUNGE:
 		case AT_ALPHA_CLAW:
 		case AT_FERAL_CLAW:
@@ -6260,6 +6261,32 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						} else if (sd != NULL) {
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+						}
+					}
+						break;
+					case AT_PINION_SHOT:
+					{
+						int charges = 1;
+
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						skill->area_temp[1] = 0;
+						if (sd != NULL) {
+							struct status_change *ssc = status->get_sc(src);
+
+							if (ssc != NULL && ssc->data[SC_ZEPHYR_CHARGE] != NULL)
+								charges += ssc->data[SC_ZEPHYR_CHARGE]->val3;
+							if (charges < 6) {
+								sc_start4(src, src, SC_ZEPHYR_CHARGE, 100, skill_lv, 0, charges, 0,
+								          skill->get_time(skill_id, skill_lv), skill_id);
+							} else {
+								status_change_end(src, SC_ZEPHYR_CHARGE, INVALID_TIMER);
+								if (sd->status.party_id == 0)
+									skill->castend_nodamage_id(src, src, AT_ZEPHYR_LINK, 1, tick, 0);
+								else
+									party->foreachsamemap(skill->area_sub, sd, skill->get_splash(AT_ZEPHYR_LINK, 1),
+									                      src,
+									                      AT_ZEPHYR_LINK, 1, tick, flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+							}
 						}
 					}
 						break;
@@ -19778,6 +19805,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case AT_PINION_SHOT:
 		case AT_FLIP_FLAP:
 		case AT_APEX_PHASE:
 			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL) {
