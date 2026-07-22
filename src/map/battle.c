@@ -2827,10 +2827,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case LG_CANNONSPEAR:
 					skillratio = (50 + st->str) * skill_lv;
+					if (sc != NULL && sc->data[SC_SPEAR_SCAR] != NULL)
+						skillratio += 400;
 					RE_LVL_DMOD(100);
 					break;
 				case LG_BANISHINGPOINT:
 					skillratio = 50 * skill_lv + 30 * (sd ? pc->checkskill(sd,SM_BASH) : 10);
+					if (sc != NULL && sc->data[SC_SPEAR_SCAR] != NULL)
+						skillratio += 800;
 					RE_LVL_DMOD(100);
 					break;
 				case LG_SHIELDPRESS:
@@ -3088,6 +3092,21 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case IQ_THIRD_CONSECRATION:
 					skillratio += -100 + 1250 * skill_lv + 10 * st->pow;
 					RE_LVL_DMOD(100);
+					break;
+				case IG_GRAND_JUDGEMENT:
+					skillratio += -100 + 250 + 1500 * skill_lv + 10 * st->pow;
+					if (tst->race == RC_PLANT || tst->race == RC_INSECT)
+						skillratio += 100 + 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					if (sd != NULL) {
+						i = 0;
+						if (sd->has_shield != 0)
+							i += pc->checkskill(sd, IG_SHIELD_MASTERY);
+						if (sd->weapontype == W_1HSWORD || sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR)
+							i += pc->checkskill(sd, IG_SPEAR_SWORD_M);
+						if (i > 0)
+							skillratio += skillratio * i / 100;
+					}
 					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:

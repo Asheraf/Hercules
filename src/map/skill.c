@@ -5362,6 +5362,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_SECOND_JUDGEMENT:
 		case IQ_THIRD_FLAME_BOMB:
 		case IQ_THIRD_CONSECRATION:
+		case IG_GRAND_JUDGEMENT:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5460,6 +5461,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_SECOND_JUDGEMENT:
 					case IQ_THIRD_FLAME_BOMB:
 					case IQ_THIRD_CONSECRATION:
+					case IG_GRAND_JUDGEMENT:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
@@ -5495,6 +5497,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if (skill_id == SU_LUNATICCARROTBEAT) {
 					skill->area_temp[3] = 0;
 				}
+				if (skill_id == IG_GRAND_JUDGEMENT)
+					sc_start(src, src, SC_SPEAR_SCAR, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 
 				if (skill_id == NC_VULCANARM) {
 					if (sd != NULL) {
@@ -16316,6 +16320,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 		}
+			break;
+		case IG_GRAND_JUDGEMENT:
+			if (sc == NULL || sc->data[SC_ATTACK_STANCE] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
 			break;
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
