@@ -3053,6 +3053,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case NW_ONLY_ONE_BULLET:
+					skillratio += -100 + 1200 + 3000 * skill_lv + 5 * st->con;
+					if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+						skillratio += sc->data[SC_INTENSIVE_AIM_COUNT]->val1 * 350 * skill_lv;
+					if (sd != NULL && sd->weapontype1 == W_REVOLVER)
+						skillratio += 400 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -5637,6 +5645,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 	sd = BL_CAST(BL_PC, src);
 	tsd = BL_CAST(BL_PC, target);
+	if (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_REVOLVER)
+		flag.idef = flag.idef2 = 1;
 
 	if(sd)
 		wd.blewcount += battle->blewcount_bonus(sd, skill_id);
@@ -5954,6 +5964,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
+		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -5970,6 +5981,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW
 			|| skill_id == WH_HAWKRUSH || skill_id == WH_HAWKBOOMERANG
 			|| skill_id == WH_CRESCIVE_BOLT
+			|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6030,6 +6042,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case SHC_ETERNAL_SLASH:
 			case WH_HAWKBOOMERANG:
 			case WH_CRESCIVE_BOLT:
+				cri /= 2;
+				break;
+			case NW_ONLY_ONE_BULLET:
 				cri /= 2;
 				break;
 			case SHC_IMPACT_CRATER:
@@ -6428,7 +6443,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE
 							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH
 							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG
-							|| skill_id == WH_CRESCIVE_BOLT)
+							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

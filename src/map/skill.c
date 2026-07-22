@@ -5149,6 +5149,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_CHAIN_REACTION_SHOT_ATK:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
+		case NW_ONLY_ONE_BULLET:
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
