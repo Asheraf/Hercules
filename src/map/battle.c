@@ -2877,6 +2877,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case ABR_BATTLE_BUSTER:
 					skillratio += -100 + 8000;
 					break;
+				case ABR_DUAL_CANNON_FIRE:
+					skillratio += -100 + 8000;
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)

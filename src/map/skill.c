@@ -3364,6 +3364,12 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			dmg.div_= pd->a_skill->div_;
 		}
 	}
+	if (skill_id == NC_ARMSCANNON || skill_id == NC_BOOSTKNUCKLE || skill_id == NC_VULCANARM) {
+		struct status_change *csc = status->get_sc(src);
+
+		if (csc != NULL && csc->data[SC_ABR_DUAL_CANNON] != NULL)
+			dmg.div_ = 2;
+	}
 
 	if( dmg.flag&BF_MAGIC
 		&& (skill_id != NPC_EARTHQUAKE || (battle_config.eq_single_target_reflectable && (flag & 0xFFF) == 1)) ) { /* Need more info cause NPC_EARTHQUAKE is ground type */
@@ -12070,11 +12076,14 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
+		case MT_SUMMON_ABR_DUAL_CANNON:
 			if (sd != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				int mob_id = (skill_id == MT_SUMMON_ABR_BATTLE_WARIOR)
+					? MOBID_ABR_BATTLE_WARIOR : MOBID_ABR_DUAL_CANNON;
 				struct mob_data *summon_md = mob->once_spawn_sub(src, src->m, src->x, src->y, DEFAULT_MOB_JNAME,
-				                                                MOBID_ABR_BATTLE_WARIOR, "", SZ_SMALL, AI_ABR, 0);
+				                                                mob_id, "", SZ_SMALL, AI_ABR, 0);
 				if (summon_md != NULL) {
 					summon_md->master_id = src->id;
 					summon_md->special_state.ai = AI_ABR;
@@ -16228,7 +16237,8 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 
 	if( md->master_id != src_id
 	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:
-	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
+	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR
+	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
 		return 0; //Non alchemist summoned mobs have nothing to do here.
 	if(md->class_==mob_class)
 		(*c)++;
@@ -16536,6 +16546,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_RUSH_QUAKE:
 				case MT_D_MACHINE:
 				case MT_SUMMON_ABR_BATTLE_WARIOR:
+				case MT_SUMMON_ABR_DUAL_CANNON:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 					break;
@@ -17922,6 +17933,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
 					                  MOBID_ABR_BATTLE_WARIOR, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
+				}
+			}
+			break;
+		case MT_SUMMON_ABR_DUAL_CANNON: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_ABR_DUAL_CANNON, skill_id, &c);
 					if (c >= maxcount) {
 						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
 						return 0;
