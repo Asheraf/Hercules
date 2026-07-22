@@ -14875,6 +14875,10 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case SS_KUNAIKUSSETSU:
+			map->foreachinrange(skill->detonator, src, skill->get_splash(skill_id, skill_lv), BL_SKILL, src, skill_lv);
+			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			break;
 		case SS_KUNAIKAITEN:
 			sc_start(src, src, SC_SHADOW_CLOCK, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			flag |= 1; // both units keep the ammo, it is spent on group delete
@@ -15385,7 +15389,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		 **/
 		case RA_DETONATOR:
 			r = skill->get_splash(skill_id, skill_lv);
-			map->foreachinarea(skill->detonator, src->m, x-r, y-r, x+r, y+r, BL_SKILL, src);
+			map->foreachinarea(skill->detonator, src->m, x-r, y-r, x+r, y+r, BL_SKILL, src, skill_lv);
 			clif->skill_damage(src, src, tick, status_get_amotion(src), 0, -30000, 1, skill_id, skill_lv, BDT_SKILL);
 			break;
 		/**
@@ -21812,6 +21816,7 @@ static int skill_detonator(struct block_list *bl, va_list ap)
 {
 	struct skill_unit *su = NULL;
 	struct block_list *src = va_arg(ap,struct block_list *);
+	int skill_lv = va_arg(ap, int);
 	int unit_id;
 
 	nullpo_ret(bl);
@@ -21851,6 +21856,10 @@ static int skill_detonator(struct block_list *bl, va_list ap)
 			su->group->limit = DIFF_TICK32(timer->gettick(),su->group->tick) +
 				(unit_id == UNT_TALKIEBOX ? 5000 : (unit_id == UNT_CLUSTERBOMB || unit_id == UNT_ICEBOUNDTRAP? 2500 : (unit_id == UNT_FIRINGTRAP ? 0 : 1500)) );
 			su->group->unit_id = UNT_USED_TRAPS;
+			break;
+		case UNT_KUNAIWAIKYOKU:
+			skill->delunit(su);
+			skill->unitsetting(src, SS_KUNAIKUSSETSU, skill_lv, bl->x, bl->y, 0);
 			break;
 	}
 	return 0;
