@@ -2087,6 +2087,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case SU_CN_METEOR:
 					skillratio += 100 + 100 * skill_lv;
+					FALLTHROUGH
+				case SU_CN_METEOR2:
+					if (sc != NULL && sc->data[SC_COLORS_OF_HYUN_ROK_BUFF] != NULL)
+						skillratio += skillratio * sc->data[SC_COLORS_OF_HYUN_ROK_BUFF]->val2 / 100;
 					break;
 				case SP_CURSEEXPLOSION:
 					if (tsc != NULL && tsc->data[SC_SOULCURSE] != NULL)
@@ -4906,6 +4910,17 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == TR_METALIC_FURY && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
+
+	if ((skill_id == SU_CN_METEOR || skill_id == SU_CN_METEOR2 || skill_id == SH_HYUN_ROKS_BREEZE
+		|| skill_id == SH_HYUN_ROK_CANNON || skill_id == SH_HYUN_ROK_SPIRIT_POWER)
+		&& sc != NULL && sc->count > 0) {
+		if (sc->data[SC_COLORS_OF_HYUN_ROK_1] != NULL) s_ele = ELE_WATER;
+		else if (sc->data[SC_COLORS_OF_HYUN_ROK_2] != NULL) s_ele = ELE_WIND;
+		else if (sc->data[SC_COLORS_OF_HYUN_ROK_3] != NULL) s_ele = ELE_EARTH;
+		else if (sc->data[SC_COLORS_OF_HYUN_ROK_4] != NULL) s_ele = ELE_FIRE;
+		else if (sc->data[SC_COLORS_OF_HYUN_ROK_5] != NULL) s_ele = ELE_DARK;
+		else if (sc->data[SC_COLORS_OF_HYUN_ROK_6] != NULL) s_ele = ELE_HOLY;
+	}
 
 	if( skill_id == SO_PSYCHIC_WAVE ) {
 		if( sc && sc->count ) {

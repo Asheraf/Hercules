@@ -9285,6 +9285,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case SH_COLORS_OF_HYUN_ROK:
+			if (skill_lv == 7) {
+				for (int i = SC_COLORS_OF_HYUN_ROK_1; i <= SC_COLORS_OF_HYUN_ROK_6; i++)
+					status_change_end(src, (sc_type)i, INVALID_TIMER);
+				status_change_end(src, SC_COLORS_OF_HYUN_ROK_BUFF, INVALID_TIMER);
+				clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			} else {
+				sc_type endow = (sc_type)(SC_COLORS_OF_HYUN_ROK_1 + skill_lv - 1);
+
+				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_HYUN_ROK) > 0)
+					sc_start(src, bl, SC_COLORS_OF_HYUN_ROK_BUFF, 100, 1, skill->get_time(skill_id, skill_lv),
+					         skill_id);
+				sc_start(src, bl, endow, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			}
+			break;
 		case SH_KI_SUL_RAMPAGE:
 			if ((flag & 2) != 0) {
 				struct map_session_data *tsd = BL_CAST(BL_PC, bl);

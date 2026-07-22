@@ -10498,6 +10498,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 10);
 				val2 = 5 + 2 * val1;
 				break;
+			case SC_COLORS_OF_HYUN_ROK_BUFF:
+				val2 = 50;
+				break;
 			case SC_HIDDEN_CARD:
 				val1 = cap_value(val1, 1, 10);
 				val2 = 3 * val1;
@@ -10511,6 +10514,17 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_KI_SUL_RAMPAGE:
 				val4 = tick / 1000;
 				tick_time = 100;
+				break;
+			case SC_COLORS_OF_HYUN_ROK_1:
+			case SC_COLORS_OF_HYUN_ROK_2:
+			case SC_COLORS_OF_HYUN_ROK_3:
+			case SC_COLORS_OF_HYUN_ROK_4:
+			case SC_COLORS_OF_HYUN_ROK_5:
+			case SC_COLORS_OF_HYUN_ROK_6:
+				for (int i = SC_COLORS_OF_HYUN_ROK_1; i <= SC_COLORS_OF_HYUN_ROK_6; i++) {
+					if (i != type)
+						status_change_end(bl, (sc_type)i, INVALID_TIMER);
+				}
 				break;
 			case SC_TALISMAN_OF_WARRIOR:
 			case SC_TALISMAN_OF_MAGICIAN:
