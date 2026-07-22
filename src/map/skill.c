@@ -12288,6 +12288,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				}
 			}
 			break;
+		case BO_WOODEN_FAIRY:
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
 		case MT_SUMMON_ABR_DUAL_CANNON:
 		case MT_SUMMON_ABR_MOTHER_NET:
@@ -18269,6 +18270,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
 					                  MOBID_BIONIC_WOODENWARRIOR, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
+				}
+			}
+			break;
+		case BO_WOODEN_FAIRY: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_BIONIC_WOODEN_FAIRY, skill_id, &c);
 					if (c >= maxcount) {
 						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
 						return 0;

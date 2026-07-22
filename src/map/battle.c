@@ -3204,6 +3204,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					/* Fall through */
 				case GN_CRAZYWEED_ATK:
 					skillratio += 400 + 100 * skill_lv;
+					if (skill_id == GN_SPORE_EXPLOSION && sc != NULL && sc->data[SC_BIONIC_WOODEN_FAIRY] != NULL)
+						skillratio *= 2;
 					break;
 				case GN_SLINGITEM_RANGEMELEEATK:
 					if( sd ) {
