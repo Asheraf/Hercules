@@ -2870,6 +2870,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 450 + 1150 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case MT_RUSH_QUAKE:
+					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
+					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
+						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case NC_POWERSWING:
 					skillratio = 300 + 100*skill_lv + ( status_get_str(src)+status_get_dex(src) ) * status->get_lv(src) / 100;
 					break;
@@ -3781,6 +3787,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 
 		if (sc->data[SC_HOLY_OIL] != NULL && (flag & (BF_LONG | BF_WEAPON)) == (BF_LONG | BF_WEAPON))
 			damage += damage * (3 * sc->data[SC_HOLY_OIL]->val1) / 100;
+		if (sc->data[SC_RUSH_QUAKE1] != NULL && (flag & BF_WEAPON) == BF_WEAPON)
+			damage += damage * 50 / 100;
 		if (sc->data[SC_SHADOW_SCAR] != NULL)
 			damage += damage * (3 * min(sc->data[SC_SHADOW_SCAR]->val1, 100)) / 100;
 
@@ -6466,6 +6474,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		if( sd ) {
 			if (skill_id != 0 && (i = pc->skillatk_bonus(sd, rskill)) != 0)
 				ATK_ADDRATE(i);
+			if (sc != NULL && sc->data[SC_RUSH_QUAKE2] != NULL && (wd.flag & (BF_SHORT | BF_LONG)) != 0)
+				ATK_ADDRATE(5 * sc->data[SC_RUSH_QUAKE2]->val1);
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
 				ATK_ADDRATE(sd->bonus.long_attack_atk_rate);

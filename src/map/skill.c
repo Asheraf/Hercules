@@ -2088,6 +2088,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case MT_RUSH_QUAKE:
+			sc_start(src, bl, SC_RUSH_QUAKE1, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case DK_SERVANT_W_DEMOL:
 			if (sd != NULL)
 				pc->addservantball(sd, 1);
@@ -5409,6 +5412,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SHC_SAVAGE_IMPACT:
 		case SHC_IMPACT_CRATER:
 		case SHC_FATAL_SHADOW_CROW:
+		case MT_RUSH_QUAKE:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5523,6 +5527,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 					}
+						break;
+					case MT_RUSH_QUAKE:
+						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0
+						 && (sc == NULL || sc->data[SC_SV_ROOTTWIST] == NULL)) {
+							enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+							if (unit->move_pos(src, bl->x, bl->y, 0, true) == 0)
+								skill->blown(src, src, 1, unit_get_opposite_dir(dir), 0);
+						}
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						clif->blown(src);
+						sc_start(src, src, SC_RUSH_QUAKE2, 100, skill_lv, skill->get_time2(skill_id, skill_lv),
+						         skill_id);
 						break;
 					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
@@ -16484,6 +16501,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case ALL_FULL_THROTTLE:
 				case NC_MAGMA_ERUPTION_DOTDAMAGE:
 				case MT_AXE_STOMP:
+				case MT_RUSH_QUAKE:
 					break;
 				default:
 				{
