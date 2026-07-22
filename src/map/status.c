@@ -10191,6 +10191,12 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 5);
 				val2 = 5 + 2 * val1;
 				break;
+			case SC_MEDIALE:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 2 * val1;
+				val4 = total_tick / 2000;
+				tick_time = 2000;
+				break;
 			case SC_NEWMOON:
 				val2 = 7;
 				tick_time = 1000;
@@ -13471,6 +13477,14 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 			status_heal(bl, 1000, 0, 2);
 			sc_timer_next(10000 + tick, status->change_timer, bl->id, data);
 			return 0;
+		case SC_MEDIALE:
+			if (--(sce->val4) >= 0) {
+				clif->specialeffect(bl, 1808, AREA);
+				skill->castend_nodamage_id(bl, bl, CD_MEDIALE_VOTUM, sce->val1, tick, 1);
+				sc_timer_next(2000 + tick, status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
 		case SC_CRIMSON_MARKER:
 			if (--(sce->val4) >= 0) {
 				struct map_session_data *caster = map->id2sd(sce->val2);
