@@ -3529,6 +3529,16 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case NW_WILD_SHOT:
+					skillratio += -100 + 850 + 230 * skill_lv + 5 * st->con;
+					if (sd != NULL && sc != NULL && sc->data[SC_HIDDEN_CARD] != NULL) {
+						if (sd->weapontype1 == W_REVOLVER)
+							skillratio += 100 * skill_lv;
+						else if (sd->weapontype1 == W_RIFLE)
+							skillratio += 150 * skill_lv;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case NW_HASTY_FIRE_IN_THE_HOLE:
 					skillratio += -100 + 1500 + 1500 * skill_lv + 5 * st->con;
 					if (sd != NULL)
@@ -6582,7 +6592,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 		&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-		|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN
+		|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6609,7 +6619,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 			&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-			|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN
+			|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6672,6 +6682,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case WH_CRESCIVE_BOLT:
 			case SKE_NOON_BLAST:
 			case SKE_SUNSET_BLAST:
+			case NW_WILD_SHOT:
 				cri /= 2;
 				break;
 			case NW_ONLY_ONE_BULLET:
@@ -7080,7 +7091,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == HN_MEGA_SONIC_BLOW
 							|| skill_id == SKE_NOON_BLAST
 							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
-							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN)
+							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
+							|| skill_id == NW_WILD_SHOT)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

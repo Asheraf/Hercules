@@ -5383,6 +5383,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			}
 			break;
+		case NW_WILD_SHOT:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				if (sd != NULL && sd->weapontype1 == W_RIFLE)
+					range++;
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			}
+			break;
 		case NW_WILD_FIRE:
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
