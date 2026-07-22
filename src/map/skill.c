@@ -1167,6 +1167,17 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 		case CD_MEDIALE_VOTUM:
 			hp = (status->get_lv(src) + status_get_int(src)) / 5 * 30;
 			break;
+		case SH_KI_SUL_WATER_SPRAYING:
+			hp = 500 * skill_lv + status_get_int(src) * 5;
+			if (sd != NULL) {
+				hp += pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY) * 100;
+				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0) {
+					hp += 250 * skill_lv;
+					hp += pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY) * 50;
+				}
+			}
+			hp = hp * (100 + status->get_status_data(src)->crt) * status->get_lv(src) / 10000;
+			break;
 		case CD_DILECTIO_HEAL:
 			hp = (status->get_lv(src) + status_get_int(src)) / 5 * 30;
 #ifdef RENEWAL
@@ -9257,6 +9268,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id,
 			                    skill_lv, tick,
 			                    flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			break;
+		case SH_KI_SUL_WATER_SPRAYING:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				int heal = skill->calc_heal(src, bl, skill_id, skill_lv, true);
+
+				clif->skill_nodamage(NULL, bl, AL_HEAL, heal, 1);
+				status->heal(bl, heal, 0, STATUS_HEAL_DEFAULT);
+			} else {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+					range += 2;
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				party->foreachsamemap(skill->area_sub, sd, range, src, skill_id, skill_lv, tick,
+				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
 			break;
 		case KN_BRANDISHSPEAR:
 		case ML_BRANDISH:
