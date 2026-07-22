@@ -7539,6 +7539,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				         skill->get_time(skill_id, skill_lv), skill_id);
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			break;
+		case NW_AUTO_FIRING_LAUNCHER:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case NW_INTENSIVE_AIM:
 			if (tsc != NULL && tsc->data[type] != NULL) {
 				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
@@ -19234,6 +19238,10 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 
 		for (int i = 0; i < MAX_SKILL_ITEM_REQUIRE && items_required; i++) {
 			if( !req.itemid[i] )
+				continue;
+			if (sd->auto_cast_current.type == AUTOCAST_TEMP && sc != NULL && sc->data[SC_AUTO_FIRING_LAUNCHER] != NULL
+				&& (skill_id == NW_BASIC_GRENADE || skill_id == NW_HASTY_FIRE_IN_THE_HOLE
+					|| skill_id == NW_GRENADES_DROPPING))
 				continue;
 
 			if (any_item_index != INDEX_NOT_FOUND && any_item_index != i)

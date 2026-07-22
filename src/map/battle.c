@@ -8161,6 +8161,47 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			sd->auto_cast_current.type = ac_type;
 		}
 
+		if (damage > 0 && (wd.flag & (BF_NORMAL | BF_WEAPON)) == (BF_NORMAL | BF_WEAPON)
+		 && sc != NULL && sc->data[SC_AUTO_FIRING_LAUNCHER] != NULL) {
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+			uint16 skill_id, skill_lv;
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			switch (sc->data[SC_AUTO_FIRING_LAUNCHER]->val1) {
+				case 5:
+					skill_id = NW_GRENADES_DROPPING;
+					skill_lv = pc->checkskill(sd, skill_id);
+					if (skill_lv > 0 && rnd() % 100 < 3)
+						skill->castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					FALLTHROUGH
+				case 4:
+					skill_id = NW_HASTY_FIRE_IN_THE_HOLE;
+					skill_lv = pc->checkskill(sd, skill_id);
+					if (skill_lv > 0 && rnd() % 100 < (sc->data[SC_AUTO_FIRING_LAUNCHER]->val1 == 4 ? 5 : 7))
+						skill->castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					FALLTHROUGH
+				case 3:
+					skill_id = NW_BASIC_GRENADE;
+					skill_lv = pc->checkskill(sd, skill_id);
+					if (skill_lv > 0 && rnd() % 100 < (5 + sc->data[SC_AUTO_FIRING_LAUNCHER]->val1))
+						skill->castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					break;
+				case 2:
+					skill_id = NW_BASIC_GRENADE;
+					skill_lv = pc->checkskill(sd, skill_id);
+					if (skill_lv > 0 && rnd() % 100 < 7)
+						skill->castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					break;
+				case 1:
+					skill_id = NW_BASIC_GRENADE;
+					skill_lv = pc->checkskill(sd, skill_id);
+					if (skill_lv > 0 && rnd() % 100 < 6)
+						skill->castend_pos2(src, target->x, target->y, skill_id, skill_lv, tick, flag);
+					break;
+			}
+			sd->auto_cast_current.type = ac_type;
+		}
+
 		if (sc != NULL && sc->data[SC_DUPLELIGHT] != NULL && pc->checkskill(sd, CD_PETITIO) > 0 && rnd() % 100 < 20) {
 			enum autocast_type ac_type = sd->auto_cast_current.type;
 			int delay = skill->delay_fix(src, CD_PETITIO, pc->checkskill(sd, CD_PETITIO));
