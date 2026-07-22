@@ -5271,6 +5271,22 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
 			break;
+		case SOA_CIRCLE_OF_DIRECTIONS_AND_ELEMENTALS:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				if (sc != NULL && sc->data[SC_T_FOURTH_GOD] != NULL)
+					status_change_end(src, SC_T_FOURTH_GOD, INVALID_TIMER);
+				sc_start(src, src, SC_T_FIFTH_GOD, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				skill->area_temp[0] = 0;
+				skill->area_temp[1] = bl->id;
+				skill->area_temp[2] = 0;
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL, src,
+				                    skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			}
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18366,6 +18382,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case SOA_SOUL_GATHERING:
 			if (sc == NULL || sc->data[SC_SOULCOLLECT] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SOA_CIRCLE_OF_DIRECTIONS_AND_ELEMENTALS:
+			if (sc == NULL || (sc->data[SC_T_FOURTH_GOD] == NULL && sc->data[SC_T_FIFTH_GOD] == NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}

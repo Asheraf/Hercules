@@ -58,7 +58,7 @@ struct status_change_entry;
 #define MAX_SKILLUNITGROUP        64
 #define MAX_SKILL_ITEM_REQUIRE    10
 #define MAX_SKILLUNITGROUPTICKSET 25
-#define MAX_SKILL_NAME_LENGTH     32
+#define MAX_SKILL_NAME_LENGTH     40
 #define SKILL_ALTDMG_FLAG         0x10
 
 #ifndef MAX_SKILL_DESC_LENGTH

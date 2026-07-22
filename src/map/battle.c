@@ -2213,6 +2213,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case SOA_CIRCLE_OF_DIRECTIONS_AND_ELEMENTALS:
+					skillratio += -100 + 500 + 2000 * skill_lv;
+					if (sd != NULL) {
+						skillratio += pc->checkskill(sd, SOA_TALISMAN_MASTERY) * 15 * skill_lv;
+						skillratio += pc->checkskill(sd, SOA_SOUL_MASTERY) * 15 * skill_lv;
+					}
+					skillratio += 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)
