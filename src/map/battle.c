@@ -4060,6 +4060,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 200 + 50 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_CHASING_SHOT:
+					skillratio += -100 + 1750 + 850 * skill_lv + 5 * st->con;
+					if (sc != NULL && sc->data[SC_CHASING] != NULL)
+						skillratio += 250;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_DEFT_STAB:
 					skillratio += -100 + 700 + 550 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
@@ -6419,6 +6425,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sc != NULL && sc->data[SC_CHASING] != NULL)
 					wd.div_ = 7;
 				break;
+			case ABC_CHASING_SHOT:
+				if (sc != NULL && sc->data[SC_CHASING] != NULL)
+					wd.div_ = 3;
+				break;
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)
 					wd.div_ = cap_value(sd->spiritball / 5, 1, 3);
@@ -6759,7 +6769,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 		|| skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER || skill_id == BO_MAYHEMIC_THORNS
-		|| skill_id == ABC_FRENZY_SHOT || skill_id == IG_RADIANT_SPEAR || skill_id == SHC_CROSS_SLASH
+		|| skill_id == ABC_FRENZY_SHOT || skill_id == ABC_CHASING_SHOT
+		|| skill_id == IG_RADIANT_SPEAR || skill_id == SHC_CROSS_SLASH
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
@@ -6777,7 +6788,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
 		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER
-			|| skill_id == BO_MAYHEMIC_THORNS || skill_id == ABC_FRENZY_SHOT ||
+			|| skill_id == BO_MAYHEMIC_THORNS || skill_id == ABC_FRENZY_SHOT
+			|| skill_id == ABC_CHASING_SHOT ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
@@ -7276,6 +7288,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
 							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
 							|| skill_id == SH_CHUL_HO_BATTERING || skill_id == HN_MEGA_SONIC_BLOW
+							|| skill_id == ABC_CHASING_SHOT
 							|| skill_id == SKE_NOON_BLAST
 							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
 							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
