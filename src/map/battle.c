@@ -456,6 +456,7 @@ static int64 battle_attr_fix(struct block_list *src, struct block_list *target, 
 			break;
 		case ELE_WATER:
 			if( tsc->data[SC_FIRE_INSIGNIA]) damage += damage/2;
+			if (tsc->data[SC_MISTYFROST] != NULL) damage += damage * 15 / 100;
 			break;
 		case ELE_EARTH:
 			if( tsc->data[SC_WIND_INSIGNIA]) damage += damage/2;
@@ -2386,6 +2387,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sd != NULL)
 						skillratio += 50 * skill_lv * pc->checkskill(sd, ABC_MAGIC_SWORD_M);
 					RE_LVL_DMOD(100);
+					break;
+				case HN_JACK_FROST_NOVA:
+					if ((flag & SKILL_ALTDMG_FLAG) != 0) {
+						skillratio += -100 + 200 * skill_lv + 2 * st->spl;
+					} else {
+						skillratio += -100 + 400 + 500 * skill_lv + 4 * st->spl;
+					}
+					if (sd != NULL)
+						skillratio += 3 * skill_lv * pc->checkskill(sd, HN_SELFSTUDY_SOCERY);
+					RE_LVL_DMOD(100);
+					if ((flag & SKILL_ALTDMG_FLAG) == 0 && sd != NULL)
+						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
 					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;

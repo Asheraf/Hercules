@@ -1678,6 +1678,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start4(src, bl, SC_ROSEBLOSSOM, 100, skill_lv, TR_ROSEBLOSSOM_ATK, src->id, 0,
 			          skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case HN_JACK_FROST_NOVA:
+			sc_start(src, bl, SC_MISTYFROST, 100, 0, skill->get_time2(skill_id, skill_lv), skill_id);
+			break;
 		case 0: { // Normal attacks (no skill used)
 			if( attack_type&BF_SKILL )
 				break; // If a normal attack is a skill, it's splash damage. [Inkfish]
@@ -14313,6 +14316,19 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case HN_JACK_FROST_NOVA:
+			if (map->getcell(src->m, src, x, y, CELL_CHKLANDPROTECTOR) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				break;
+			}
+			if ((sg = skill->unitsetting(src, skill_id, skill_lv, x, y, 0)) != NULL) {
+				r = skill->get_splash(skill_id, skill_lv);
+				map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+				                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | SKILL_ALTDMG_FLAG | 1,
+				                   skill->castend_damage_id);
+			}
+			break;
 		case PR_BENEDICTIO:
 			r = skill->get_splash(skill_id, skill_lv);
 			skill->area_temp[1] = src->id;
@@ -17058,6 +17074,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_LIGHTNING_LAND:
 		case UNT_VENOM_SWAMP:
 		case UNT_CONFLAGRATION:
+		case UNT_JACK_FROST_NOVA:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_TOTEM_OF_TUTELARY:
