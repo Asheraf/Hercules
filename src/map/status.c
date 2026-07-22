@@ -3261,9 +3261,14 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->patk = bst->patk;
 		if (sc != NULL && sc->data[SC_POWERFUL_FAITH] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_POWERFUL_FAITH]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
-	if (flag & SCB_SMATK)
+	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
+		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
+	}
 	if ((flag & SCB_RES) != 0) {
 		st->res = bst->res;
 		if (sc != NULL && sc->data[SC_FIRM_FAITH] != NULL)
@@ -5440,6 +5445,8 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 		def += sc->data[SC_SOULGOLEM]->val2;
 	if (sc->data[SC_GUARD_STANCE] != NULL)
 		def += sc->data[SC_GUARD_STANCE]->val2;
+	if (sc->data[SC_ATTACK_STANCE] != NULL)
+		def -= sc->data[SC_ATTACK_STANCE]->val2;
 	if (sc->data[SC_CLIMAX_CRYIMP] != NULL)
 		def += 300;
 
@@ -10156,6 +10163,13 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_REBOUND_S:
 				val1 = cap_value(val1, 1, 5);
 				val2 = min(10 * val1, 99);
+				break;
+			case SC_ATTACK_STANCE:
+				status_change_end(bl, SC_GUARD_STANCE, INVALID_TIMER);
+				val1 = cap_value(val1, 1, 5);
+				val2 = 40 * val1;
+				val3 = 3 * val1;
+				total_tick = INFINITE_DURATION;
 				break;
 			case SC_NEWMOON:
 				val2 = 7;
