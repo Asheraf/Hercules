@@ -2128,6 +2128,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
 		case SS_KAGEAKUMU:
+		case SS_HITOUAKUMU:
 			status_change_end(bl, SC_NIGHTMARE, INVALID_TIMER);
 			break;
 		case SS_ANTENPOU:
@@ -6770,6 +6771,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SS_KAGENOMAI:
 		case SS_KAGEGARI:
 		case SS_KAGEAKUMU:
+		case SS_HITOUAKUMU:
 			if ((flag & 1) != 0)
 				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
@@ -9668,6 +9670,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case SS_KAGEAKUMU:
+		case SS_HITOUAKUMU:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,

@@ -3085,7 +3085,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					break;
 				case SS_HITOUAKUMU:
-					skillratio += -100 + 18000;
+					skillratio += -100 + 22500;
 					skillratio += 5 * st->pow;
 					if (tsc != NULL && tsc->data[SC_NIGHTMARE] != NULL)
 						skillratio += skillratio / 2;
