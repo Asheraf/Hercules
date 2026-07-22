@@ -3261,6 +3261,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						else if (sd->weapontype1 == W_SHOTGUN)
 							skillratio += 400 * skill_lv;
 					}
+				case HN_DOUBLEBOWLINGBASH:
+					skillratio += -100 + 250 + 400 * skill_lv + 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 3 * skill_lv * pc->checkskill(sd, HN_SELFSTUDY_TATICS);
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -5977,6 +5983,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				break;
 
 #ifdef RENEWAL
+			case HN_DOUBLEBOWLINGBASH:
+				wd.div_ += min(4, wflag);
+				break;
+
 			case RG_BACKSTAP:
 				if (sd != NULL && sd->weapontype == W_DAGGER)
 					wd.div_ = 2;
