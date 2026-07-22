@@ -7627,6 +7627,21 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		}
+		case SOA_TALISMAN_OF_FIVE_ELEMENTS:
+			if (dstsd != NULL) {
+				int index = dstsd->equip_index[EQI_HAND_R];
+
+				if (index >= 0 && dstsd->inventory_data[index] != NULL
+					&& dstsd->inventory_data[index]->type == IT_WEAPON) {
+					clif->skill_nodamage(src, bl, skill_id, skill_lv,
+					                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+					                              skill_id));
+					break;
+				}
+			}
+			if (sd != NULL)
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_THIS_WEAPON, 0, 0);
+			break;
 		case SOA_SOUL_GATHERING:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			if (sd != NULL) {

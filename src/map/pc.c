@@ -6467,6 +6467,7 @@ static int pc_checkallowskill(struct map_session_data *sd)
 	const enum sc_type sca_list[] = {
 		SC_TALISMAN_OF_WARRIOR,
 		SC_TALISMAN_OF_MAGICIAN,
+		SC_TALISMAN_OF_FIVE_ELEMENTS,
 	};
 	const enum sc_type scs_list[] = {
 		SC_AUTOGUARD,

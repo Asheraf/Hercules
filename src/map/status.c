@@ -1934,6 +1934,16 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	}
 	if (sc->data[SC_HIDDEN_CARD] != NULL)
 		sd->bonus.long_attack_atk_rate += sc->data[SC_HIDDEN_CARD]->val3;
+	if (sc->data[SC_TALISMAN_OF_FIVE_ELEMENTS] != NULL) {
+		int bonus = sc->data[SC_TALISMAN_OF_FIVE_ELEMENTS]->val2;
+
+		for (int element = ELE_NEUTRAL; element <= ELE_WIND; element++) {
+			sd->magic_atk_ele[element] += bonus;
+			sd->right_weapon.addele[element] += bonus;
+			if (battle_config.left_cardfix_to_right == 0)
+				sd->left_weapon.addele[element] += bonus;
+		}
+	}
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -10472,6 +10482,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_TALISMAN_OF_WARRIOR:
 			case SC_TALISMAN_OF_MAGICIAN:
 				val2 = 2 * val1;
+				break;
+			case SC_TALISMAN_OF_FIVE_ELEMENTS:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 4 * val1;
 				break;
 			case SC_SPELL_ENCHANTING:
 				val1 = cap_value(val1, 1, 5);
