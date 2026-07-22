@@ -4813,6 +4813,18 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 						skill->unitsetting(src, skl->skill_id, skl->skill_lv, tmpx, tmpy, skl->flag);
 					}
 					break;
+				case NW_MISSION_BOMBARD: {
+					int area = skill->get_unit_range(skl->skill_id, skl->skill_lv);
+					int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+					int tmpx = skl->x - splash + rnd() % (splash * 2 + 1);
+					int tmpy = skl->y - splash + rnd() % (splash * 2 + 1);
+
+					map->foreachinarea(skill->area_sub, src->m, tmpx - area, tmpy - area, tmpx + area, tmpy + area,
+					                   BL_CHAR,
+					                   src, skl->skill_id, skl->skill_lv, tick, skl->flag | BCT_ENEMY | SD_SPLASH | 1,
+					                   skill->castend_damage_id);
+					break;
+				}
 				case WZ_METEOR:
 				case SU_CN_METEOR:
 					if (skl->type >= 0) {
@@ -14745,6 +14757,19 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				                     skill_lv, 0, flag);
 			break;
 		}
+		case NW_MISSION_BOMBARD: {
+			int i;
+
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR | BL_SKILL,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SKILL_ALTDMG_FLAG | 1,
+			                   skill->castend_damage_id);
+			skill->unitsetting(src, skill_id, skill_lv, x, y, flag);
+			for (i = 1; i <= skill->get_time(skill_id, skill_lv) / skill->get_unit_interval(skill_id, skill_lv); i++)
+				skill->addtimerskill(src, tick + i * skill->get_unit_interval(skill_id, skill_lv), 0, x, y, skill_id,
+				                     skill_lv, 0, flag);
+			break;
+		}
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
@@ -16637,6 +16662,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_SWIFTTRAP:
 		case UNT_FLAMETRAP:
 		case UNT_GRENADES_DROPPING:
+		case UNT_MISSION_BOMBARD:
 			skill->attack(BF_WEAPON, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_ASTRAL_STRIKE:

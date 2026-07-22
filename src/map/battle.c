@@ -3097,6 +3097,19 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 30 * pc->checkskill(sd, NW_GRENADE_MASTERY);
 					RE_LVL_DMOD(100);
 					break;
+				case NW_MISSION_BOMBARD:
+					if ((flag & SKILL_ALTDMG_FLAG) != 0) {
+						skillratio += -100 + 5000 + 1800 * skill_lv;
+						if (sd != NULL)
+							skillratio += 100 * pc->checkskill(sd, NW_GRENADE_MASTERY);
+					} else {
+						skillratio += -100 + 800 + 200 * skill_lv;
+						if (sd != NULL)
+							skillratio += 30 * pc->checkskill(sd, NW_GRENADE_MASTERY);
+					}
+					skillratio += 5 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case NW_HASTY_FIRE_IN_THE_HOLE:
 					skillratio += -100 + 1500 + 1500 * skill_lv + 5 * st->con;
 					if (sd != NULL)
@@ -5921,6 +5934,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		case NW_BASIC_GRENADE:
 		case NW_HASTY_FIRE_IN_THE_HOLE:
 		case NW_GRENADES_DROPPING:
+		case NW_MISSION_BOMBARD:
 			if (sc != NULL) {
 				if (sc->data[SC_GRENADE_FRAGMENT_1] != NULL)
 					s_ele = s_ele_ = ELE_WATER;
