@@ -5150,6 +5150,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
 		case NW_ONLY_ONE_BULLET:
+		case NW_MAGAZINE_FOR_ONE:
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
+			break;
 		case NW_SPIRAL_SHOOTING:
 			if ((flag & 1) != 0) {
 				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -19330,6 +19335,8 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 	req.weapon = skill->dbs->db[idx].weapon;
 
 	req.ammo_qty = skill->dbs->db[idx].ammo_qty[skill_lv-1];
+	if (skill_id == NW_MAGAZINE_FOR_ONE && sd->weapontype1 == W_GATLING)
+		req.ammo_qty += 4;
 	if (req.ammo_qty)
 		req.ammo = skill->dbs->db[idx].ammo;
 

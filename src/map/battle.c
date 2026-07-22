@@ -3069,6 +3069,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 200 + 1100 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case NW_MAGAZINE_FOR_ONE:
+					skillratio += -100 + 250 + 500 * skill_lv + 5 * st->con;
+					if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+						skillratio += sc->data[SC_INTENSIVE_AIM_COUNT]->val1 * 100 * skill_lv;
+					if (sd != NULL && sd->weapontype1 == W_REVOLVER)
+						skillratio += 50 + 300 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -4571,6 +4579,8 @@ static void battle_consume_ammo(struct map_session_data *sd, int skill_id, int l
 
 	if (skill_id && lv) {
 		qty = skill->get_ammo_qty(skill_id, lv);
+		if (skill_id == NW_MAGAZINE_FOR_ONE && sd->weapontype1 == W_GATLING)
+			qty += 4;
 		if (!qty) qty = 1;
 	}
 
@@ -5689,6 +5699,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sd != NULL && sd->weapontype1 == W_GATLING)
 					wd.div_ += 3;
 				break;
+			case NW_MAGAZINE_FOR_ONE:
+				if (sd != NULL && sd->weapontype1 == W_GATLING)
+					wd.div_ += 4;
+				break;
 			case NW_SPIRAL_SHOOTING:
 				if (sd != NULL && sd->weapontype1 == W_GRENADE)
 					wd.div_ += 1;
@@ -5977,6 +5991,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
+		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -5995,6 +6010,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == WH_CRESCIVE_BOLT
 			|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 			|| (skill_id == NW_SPIRAL_SHOOTING && sd != NULL && sd->weapontype1 == W_RIFLE)
+			|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6457,7 +6473,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH
 							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
-							|| skill_id == NW_SPIRAL_SHOOTING)
+							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
