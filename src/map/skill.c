@@ -5396,6 +5396,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_CONSECRATION:
 		case IG_GRAND_JUDGEMENT:
 		case CD_ARBITRIUM:
+		case CD_PETITIO:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5425,6 +5426,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if ((skill_id == SP_SHA || skill_id == SP_SWHOO) && bl->type != BL_MOB)
 					break;
 
+				if (skill_id == CD_PETITIO)
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 #ifndef RENEWAL
 				switch (skill_id) {
 				case AS_SPLASHER:

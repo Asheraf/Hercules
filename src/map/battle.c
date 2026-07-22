@@ -3369,6 +3369,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case CD_PETITIO:
+					skillratio += -100 + 1375 * skill_lv + 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 50 * skill_lv * pc->checkskill(sd, CD_MACE_BOOK_M);
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -4288,7 +4294,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 
 		return sd != NULL && (sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR) ? BF_LONG : BF_SHORT;
 	}
-	if (skill_id == CD_EFFLIGO) {
+	if (skill_id == CD_EFFLIGO || skill_id == CD_PETITIO) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
 		return sd != NULL && (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE) ? BF_LONG : BF_SHORT;
@@ -5598,7 +5604,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
-		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO) && sstatus->cri &&
+		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
+		|| skill_id == CD_PETITIO) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5608,7 +5615,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
-			|| skill_id == CD_EFFLIGO))
+			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -6048,7 +6055,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
-							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO)
+							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
+							|| skill_id == CD_PETITIO)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
@@ -7646,6 +7654,21 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			pc->delservantball(sd, 1);
 			skill->castend_damage_id(src, target, DK_SERVANTWEAPON_ATK, sc->data[SC_SERVANTWEAPON]->val1, tick, flag);
 			sd->auto_cast_current.type = ac_type;
+		}
+
+		if (sc != NULL && sc->data[SC_DUPLELIGHT] != NULL && pc->checkskill(sd, CD_PETITIO) > 0 && rnd() % 100 < 20) {
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+			int delay = skill->delay_fix(src, CD_PETITIO, pc->checkskill(sd, CD_PETITIO));
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			skill->castend_damage_id(src, target, CD_PETITIO, pc->checkskill(sd, CD_PETITIO), tick, flag);
+			sd->auto_cast_current.type = ac_type;
+			if (DIFF_TICK(sd->ud.canact_tick, tick + delay) < 0) {
+				sd->ud.canact_tick = max(tick + delay, sd->ud.canact_tick);
+				if (battle_config.display_status_timers != 0)
+					clif->status_change(src, status->get_sc_icon(SC_POSTDELAY),
+					                    status->get_sc_relevant_bl_types(SC_POSTDELAY), 1, delay, 0, 0, 0);
+			}
 		}
 
 		if (wd.flag & BF_WEAPON && src != target && damage > 0) {
