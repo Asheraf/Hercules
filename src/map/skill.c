@@ -13087,6 +13087,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case AG_STRANTUM_TREMOR:
 		case AG_TORNADO_STORM:
 		case AG_FLORAL_FLARE_ROAD:
+		case IG_CROSS_RAIN:
 		case SJ_BOOKOFCREATINGSTAR:
 			flag |= 1; // Set flag to 1 to prevent deleting ammo (it will be deleted on group-delete).
 			FALLTHROUGH
@@ -15521,6 +15522,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_STRANTUM_TREMOR:
 		case UNT_TORNADO_STORM:
 		case UNT_FLORAL_FLARE_ROAD:
+		case UNT_CROSS_RAIN:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_ASTRAL_STRIKE:

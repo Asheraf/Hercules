@@ -2153,6 +2153,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 650 * skill_lv + 10 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case IG_CROSS_RAIN:
+					if (sc != NULL && sc->data[SC_HOLY_S] != NULL)
+						skillratio += -100 + (650 + 15 * pc->checkskill(sd, IG_SPEAR_SWORD_M)) * skill_lv;
+					else
+						skillratio += -100 + (450 + 10 * pc->checkskill(sd, IG_SPEAR_SWORD_M)) * skill_lv;
+					skillratio += 7 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_ROCK_DOWN:
 					skillratio += -100 + 1550 * skill_lv + 5 * st->spl;
 					if (sc != NULL && sc->data[SC_CLIMAX] != NULL)
