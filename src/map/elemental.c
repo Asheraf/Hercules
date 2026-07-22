@@ -145,6 +145,7 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 	case ELEID_EL_VENTUS_S:
 	case ELEID_EL_VENTUS_M:
 	case ELEID_EL_VENTUS_L:
+	case ELEID_EM_PROCELLA:
 		//FLEE + (Summon Ventus Skill Level x 20) / MATK + (Summon Ventus Skill Level x 10)
 		ele.flee += summon_level * 20;
 		ele.matk += summon_level * 10;
@@ -265,6 +266,9 @@ static int elemental_delete(struct elemental_data *ed, int reply)
 			break;
 		case ELEID_EM_DILUVIO:
 			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_DILUVIO, INVALID_TIMER);
+			break;
+		case ELEID_EM_PROCELLA:
+			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_PROCELLA, INVALID_TIMER);
 			break;
 	}
 

@@ -47,6 +47,7 @@ enum elemental_id {
 	ELEID_EL_TERA_L   = 2125, ///<   EL_TERA_L / Tera
 	ELEID_EM_DILUVIO  = 20816, ///< EM_DILUVIO / Diluvio
 	ELEID_EM_ARDOR    = 20817, ///< EM_ARDOR / Ardor
+	ELEID_EM_PROCELLA = 20818, ///< EM_PROCELLA / Procella
 };
 
 /**
