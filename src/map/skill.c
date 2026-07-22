@@ -6500,6 +6500,23 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SKE_RISING_SUN:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			if (sc == NULL || (sc->data[SC_RISING_SUN] == NULL && sc->data[SC_NOON_SUN] == NULL
+				&& sc->data[SC_SUNSET_SUN] == NULL)) {
+				status_change_end(src, SC_RISING_MOON, INVALID_TIMER);
+				status_change_end(src, SC_MIDNIGHT_MOON, INVALID_TIMER);
+				status_change_end(src, SC_DAWN_MOON, INVALID_TIMER);
+				sc_start(src, src, SC_RISING_SUN, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			} else if (sc->data[SC_NOON_SUN] == NULL && sc->data[SC_SUNSET_SUN] == NULL) {
+				status_change_end(src, SC_RISING_SUN, INVALID_TIMER);
+				sc_start(src, src, SC_NOON_SUN, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			} else if (sc->data[SC_SUNSET_SUN] == NULL) {
+				status_change_end(src, SC_NOON_SUN, INVALID_TIMER);
+				sc_start(src, src, SC_SUNSET_SUN, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			}
+			break;
 		case SH_HYUN_ROK_CANNON:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18460,6 +18477,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case TR_NIPELHEIM_REQUIEM:
 			if (map_flag_vs(sd->bl.m) == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SKE_RISING_SUN:
+			if (sc != NULL && sc->data[SC_SUNSET_SUN] != NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
