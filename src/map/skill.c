@@ -7916,6 +7916,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IQ_FIRM_FAITH:
 		case IQ_SINCERE_FAITH:
 		case SHC_SHADOW_EXCEED:
+		case SHC_POTENT_VENOM:
 #ifdef RENEWAL
 		case BD_ADAPTATION:
 		case HP_BASILICA: // 2018.11 rebalance - Basilica changed to a self buff
@@ -16927,6 +16928,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			if (sc == NULL || ((sc->data[SC_COMBOATTACK] == NULL
 			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) && sc->data[SC_WEAPONBLOCK_ON] == NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
+				return 0;
+			}
+			break;
+		case SHC_POTENT_VENOM:
+			if (sc == NULL || sc->data[SC_EDP] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
 			break;

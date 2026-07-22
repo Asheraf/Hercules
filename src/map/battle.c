@@ -6505,9 +6505,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 		if ((wd.damage != 0 || wd.damage2 != 0) && tstatus->res > 0) {
 			int res = tstatus->res;
+			int ignore_res = 0;
 
 			if (sc != NULL && sc->data[SC_ARGUTUS_TELUM] != NULL)
-				res -= res * sc->data[SC_ARGUTUS_TELUM]->val2 / 100;
+				ignore_res += sc->data[SC_ARGUTUS_TELUM]->val2;
+			if (sc != NULL && sc->data[SC_POTENT_VENOM] != NULL)
+				ignore_res += sc->data[SC_POTENT_VENOM]->val2;
+
+			res -= res * min(ignore_res, 50) / 100;
 
 			double reduction = (double)res / (res + 400.0) * 0.8;
 			wd.damage -= (int64)(wd.damage * reduction);

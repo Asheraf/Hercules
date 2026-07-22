@@ -10340,6 +10340,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				tick_time = 300;
 				val4 = total_tick / tick_time;
 				break;
+			case SC_POTENT_VENOM:
+				val2 = 2 * val1;
+				break;
 			case SC_SOULGOLEM:
 				val2 = 60 * val1; // DEF Increase
 				val3 = 15 + 5 * val1; // MDEF Increase
@@ -11653,6 +11656,9 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(type) {
+		case SC_EDP:
+			status_change_end(bl, SC_POTENT_VENOM, INVALID_TIMER);
+			break;
 		case SC_GRANITIC_ARMOR:
 		{
 			unsigned int damage = st->max_hp*sce->val3/100;
