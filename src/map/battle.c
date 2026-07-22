@@ -3077,6 +3077,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SKE_SUNSET_BLAST:
+					skillratio += -100 + 1200 + 500 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_NOON_BLAST:
 					skillratio += -100 + 1750 + 1550 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -6381,6 +6388,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
 		|| (skill_id == SKE_NOON_BLAST && sc != NULL
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
+		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
+		&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6405,6 +6414,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
 			|| (skill_id == SKE_NOON_BLAST && sc != NULL
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
+			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
+			&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6466,6 +6477,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case WH_HAWKBOOMERANG:
 			case WH_CRESCIVE_BOLT:
 			case SKE_NOON_BLAST:
+			case SKE_SUNSET_BLAST:
 				cri /= 2;
 				break;
 			case NW_ONLY_ONE_BULLET:
@@ -6870,7 +6882,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
 							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
-							|| skill_id == HN_MEGA_SONIC_BLOW || skill_id == SKE_NOON_BLAST)
+							|| skill_id == HN_MEGA_SONIC_BLOW || skill_id == SKE_NOON_BLAST
+							|| skill_id == SKE_SUNSET_BLAST)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
