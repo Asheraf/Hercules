@@ -2141,6 +2141,13 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->cri = bstatus->cri * sd->critical_rate/100;
 	if (pc->checkskill(sd, SU_POWEROFLIFE) > 0)
 		bstatus->cri += 20;
+	if ((skill_lv = pc->checkskill(sd, SHC_SHADOW_SENSE)) > 0) {
+		if (sd->weapontype == W_DAGGER || sd->weapontype == W_DOUBLE_DD || sd->weapontype == W_DOUBLE_DS
+			|| sd->weapontype == W_DOUBLE_DA)
+			bstatus->cri += 100 + skill_lv * 40;
+		else if (sd->weapontype == W_KATAR)
+			bstatus->cri += 50 + skill_lv * 20;
+	}
 
 #ifdef RENEWAL
 	if ((skill_lv = pc->checkskill(sd, PR_MACEMASTERY)) > 0 && (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE))
@@ -2195,6 +2202,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->flee += (skill_lv*3)>>1;
 	if (pc->checkskill(sd, SU_POWEROFLIFE) > 0)
 		bstatus->flee += 20;
+	if ((skill_lv = pc->checkskill(sd, SHC_SHADOW_SENSE)) > 0)
+		bstatus->flee += skill_lv * 10;
 	// ----- EQUIPMENT-DEF CALCULATION -----
 
 	// Apply relative modifiers from equipment
