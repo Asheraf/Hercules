@@ -101,3 +101,4 @@
 // EM_DILUVIO
 //================
 20816,8446,1,1	//EM_EL_COLD_FORCE,Cold Force
+20816,8447,1,2	//EM_EL_CRYSTAL_ARMOR,Crystal Armor
