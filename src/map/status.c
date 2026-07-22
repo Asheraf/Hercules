@@ -2712,6 +2712,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 			sd->subele[ELE_WATER] += 100;
 			sd->subele[ELE_WIND] -= 30;
 		}
+		if (sc->data[SC_EYES_OF_STORM_OPTION] != NULL) {
+			sd->subele[ELE_WIND] += 100;
+			sd->subele[ELE_EARTH] -= 30;
+		}
 		if (sc->data[SC_WATER_DROP_OPTION]) {
 			i = sc->data[SC_WATER_DROP_OPTION]->val2;
 			sd->subele[ELE_WATER] += i;
@@ -6750,6 +6754,8 @@ static unsigned char status_calc_element(struct block_list *bl, struct status_ch
 		return ELE_EARTH;
 	if (sc->data[SC_FLAMEARMOR_OPTION] != NULL)
 		return ELE_FIRE;
+	if (sc->data[SC_EYES_OF_STORM_OPTION] != NULL)
+		return ELE_WIND;
 	if(sc->data[SC_BENEDICTIO])
 		return ELE_HOLY;
 	if(sc->data[SC_PROPERTYUNDEAD])
@@ -6781,7 +6787,7 @@ static unsigned char status_calc_element_lv(struct block_list *bl, struct status
 		return 1;
 	if(sc->data[SC__INVISIBILITY])
 		return 1;
-	if (sc->data[SC_FLAMEARMOR_OPTION] != NULL || sc->data[SC_CRYSTAL_ARMOR_OPTION] != NULL)
+	if (sc->data[SC_FLAMEARMOR_OPTION] != NULL || sc->data[SC_CRYSTAL_ARMOR_OPTION] != NULL || sc->data[SC_EYES_OF_STORM_OPTION] != NULL)
 		return 1;
 
 	return (unsigned char)cap_value(lv,1,4);
@@ -10770,6 +10776,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val3 += 10000;
 				tick_time = val3;
 				break;
+			case SC_EYES_OF_STORM:
+				val2 += 10;
+				val3 += 10000;
+				tick_time = val3;
+				break;
 			case SC_JAWAII_SERENADE:
 				val2 = 3 * val1;
 				if ((val3 & 2) != 0)
@@ -14176,6 +14187,19 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 					elemental->change_mode(BL_CAST(BL_ELEM, bl), EL_MODE_PASSIVE);
 				if (s_bl != NULL)
 					status_change_end(s_bl, SC_GRACE_BREEZE_OPTION, INVALID_TIMER);
+				break;
+			}
+			sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);
+			return 0;
+
+		case SC_EYES_OF_STORM:
+			if (status->charge(bl, 0, sce->val2) == 0) {
+				struct block_list *s_bl = battle->get_master(bl);
+
+				if (bl->type == BL_ELEM)
+					elemental->change_mode(BL_CAST(BL_ELEM, bl), EL_MODE_PASSIVE);
+				if (s_bl != NULL)
+					status_change_end(s_bl, SC_EYES_OF_STORM_OPTION, INVALID_TIMER);
 				break;
 			}
 			sc_timer_next(sce->val3 + tick, status->change_timer, bl->id, data);

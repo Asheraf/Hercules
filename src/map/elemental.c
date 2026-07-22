@@ -403,6 +403,7 @@ static int elemental_clean_single_effect(struct elemental_data *ed, uint16 skill
 			case SC_COLD_FORCE_OPTION:
 			case SC_CRYSTAL_ARMOR_OPTION:
 			case SC_GRACE_BREEZE_OPTION:
+			case SC_EYES_OF_STORM_OPTION:
 				if( bl ) status_change_end(bl,type,INVALID_TIMER); // Master
 				status_change_end(&ed->bl,type-1,INVALID_TIMER); // Elemental Spirit
 				break;
@@ -452,6 +453,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&ed->bl, SC_COLD_FORCE, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_CRYSTAL_ARMOR, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_GRACE_BREEZE, INVALID_TIMER);
+	status_change_end(&ed->bl, SC_EYES_OF_STORM, INVALID_TIMER);
 
 	if( (sd = ed->master) == NULL )
 		return 0;
@@ -486,6 +488,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&sd->bl, SC_COLD_FORCE_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_CRYSTAL_ARMOR_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_GRACE_BREEZE_OPTION, INVALID_TIMER);
+	status_change_end(&sd->bl, SC_EYES_OF_STORM_OPTION, INVALID_TIMER);
 
 	return 1;
 }

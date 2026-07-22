@@ -14647,6 +14647,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case EM_EL_COLD_FORCE:
 		case EM_EL_CRYSTAL_ARMOR:
 		case EM_EL_GRACE_BREEZE:
+		case EM_EL_EYES_OF_STORM:
 		{
 			struct elemental_data *ele = BL_CAST(BL_ELEM, src);
 			if( ele ) {

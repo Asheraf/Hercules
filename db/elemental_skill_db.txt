@@ -108,3 +108,4 @@
 // EM_PROCELLA
 //================
 20818,8449,1,1	//EM_EL_GRACE_BREEZE,Grace Breeze
+20818,8450,1,2	//EM_EL_EYES_OF_STORM,Eyes Of Storm
