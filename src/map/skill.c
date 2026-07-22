@@ -7484,6 +7484,20 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case EM_ACTIVITY_BURN:
+		{
+			static const uint8 ap_burn[] = { 20, 30, 50, 60, 70 };
+
+			if (dstsd != NULL && map_flag_vs(src->m) != 0 && skill_lv > 0 && skill_lv <= ARRAYLENGTH(ap_burn)
+				&& rnd() % 100 < 20 + 10 * skill_lv) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				dstsd->battle_status.ap = dstsd->battle_status.ap >= ap_burn[skill_lv - 1] ? dstsd->battle_status.ap - ap_burn[skill_lv - 1] : 0;
+				clif->updatestatus(dstsd, SP_AP);
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+			}
+			break;
+		}
 		case WH_WIND_SIGN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
