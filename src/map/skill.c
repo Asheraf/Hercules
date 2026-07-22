@@ -9285,6 +9285,23 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case SH_MARINE_FESTIVAL_OF_KI_SUL:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				int duration = skill->get_time(skill_id, skill_lv);
+
+				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+					duration *= 2;
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, duration, skill_id));
+			} else {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+					range += 2;
+				party->foreachsamemap(skill->area_sub, sd, range, src, skill_id, skill_lv, tick,
+				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case KN_BRANDISHSPEAR:
 		case ML_BRANDISH:
 			skill->brandishspear(src, bl, skill_id, skill_lv, tick, flag);
