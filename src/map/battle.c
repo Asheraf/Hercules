@@ -5748,7 +5748,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT
-		|| skill_id == WH_HAWKRUSH)
+		|| skill_id == WH_HAWKRUSH
+		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
 		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT ||
@@ -5762,7 +5763,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
 			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW
-			|| skill_id == WH_HAWKRUSH))
+			|| skill_id == WH_HAWKRUSH
+			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -6216,7 +6218,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE
-							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH)
+							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH
+							|| skill_id == WH_GALESTORM)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
