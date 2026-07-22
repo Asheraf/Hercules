@@ -2382,6 +2382,21 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->subrace[RC_DEMON] += skill_index + 1;
 #endif
 	}
+	if ((skill_lv = pc->checkskill(sd, CD_MACE_BOOK_M)) > 0
+		&& (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE || sd->weapontype == W_BOOK)) {
+		static const int attack_bonus[3][10] = {
+			{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+			{ 2, 3, 5, 6, 8, 9, 11, 12, 14, 15 },
+			{ 3, 5, 7, 9, 10, 12, 13, 15, 16, 18 },
+		};
+		int skill_index = cap_value(skill_lv, 1, 10) - 1;
+
+		for (int size = SZ_SMALL; size <= SZ_BIG; size++) {
+			sd->right_weapon.addsize[size] += attack_bonus[size][skill_index];
+			if (battle_config.left_cardfix_to_right == 0)
+				sd->left_weapon.addsize[size] += attack_bonus[size][skill_index];
+		}
+	}
 
 	if (sc->count) {
 		if (sc->data[SC_CONCENTRATION]) { // Update the card-bonus data
