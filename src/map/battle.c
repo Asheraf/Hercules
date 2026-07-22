@@ -3997,6 +3997,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 950 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_BLAZING_FLAME_BLAST:
+					skillratio += -100 + 2000 + 3800 * skill_lv + 10 * st->pow;
+					if (sc != NULL && sc->data[SC_MASSIVE_F_BLASTER] != NULL)
+						skillratio += 1500 + 400 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case SHC_ETERNAL_SLASH:
 					skillratio += -100 + 300 * skill_lv + 2 * st->pow;
 					if (sc != NULL && sc->data[SC_SHADOW_EXCEED] != NULL)
@@ -6793,7 +6799,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 		|| skill_id == DK_STORMSLASH || skill_id == DK_DRAGONIC_PIERCE || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
+		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_BLAZING_FLAME_BLAST || skill_id == IQ_SECOND_FAITH
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
@@ -6826,7 +6832,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == DK_DRAGONIC_PIERCE
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
-			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
+			|| skill_id == IQ_BLAZING_FLAME_BLAST || skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
 			|| skill_id == IG_RADIANT_SPEAR || skill_id == SHC_CROSS_SLASH
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
@@ -7306,7 +7312,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_STORMSLASH || skill_id == DK_DRAGONIC_PIERCE
 							|| skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
-							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
+							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_BLAZING_FLAME_BLAST
+							|| skill_id == IQ_SECOND_FAITH
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
