@@ -7861,6 +7861,12 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			else
 				battle->drain(sd, target, wd.damage, wd.damage2, tstatus->race, is_boss(target));
 		}
+		if ((wd.flag & (BF_NORMAL | BF_LONG)) == (BF_NORMAL | BF_LONG) && tsc != NULL
+		 && tsc->data[SC_WINDSIGN] != NULL && rnd() % 100 < tsc->data[SC_WINDSIGN]->val2
+		 && sd->battle_status.ap < sd->battle_status.max_ap) {
+			sd->battle_status.ap++;
+			clif->updatestatus(sd, SP_AP);
+		}
 	}
 
 	if (tsc) {

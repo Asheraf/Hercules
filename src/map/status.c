@@ -8399,6 +8399,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				if (sd == NULL)
 					val2 = 25;
 				break;
+			case SC_WINDSIGN:
+				val2 = 8 + 6 * val1;
+				if (val1 == 5)
+					val2 += 2;
+				break;
 			case SC_AUTOSPELL:
 				//Val1 Skill LV of Autospell
 				//Val2 Skill ID to cast

@@ -7326,6 +7326,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case WH_WIND_SIGN:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case CD_BENEDICTUM:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
