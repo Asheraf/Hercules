@@ -9289,6 +9289,21 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case SH_BLESSING_OF_MYSTICAL_CREATURES:
+			if (src == bl || battle->check_target(src, bl, BCT_PARTY) <= 0
+			 || (dstsd != NULL && (dstsd->job & MAPID_BASEMASK) == MAPID_SUMMONER)
+			 || (tsc != NULL && tsc->data[SC_BLESSING_OF_M_C_DEBUFF] != NULL)) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_TOTARGET, 0, 0);
+				break;
+			}
+			if (dstsd != NULL && dstsd->battle_status.ap < 200) {
+				dstsd->battle_status.ap = min(200, dstsd->battle_status.max_ap);
+				clif->updatestatus(dstsd, SP_AP);
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case SH_TEMPORARY_COMMUNION:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
@@ -19059,6 +19074,19 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 	// perform skill-specific checks (and actions)
 	switch( skill_id ) {
+		case SH_BLESSING_OF_MYSTICAL_CREATURES:
+		{
+			struct map_session_data *tsd = BL_CAST(BL_PC, target);
+			struct status_change *tsc = (target != NULL) ? status->get_sc(target) : NULL;
+
+			if (target == NULL || target == &sd->bl || battle->check_target(&sd->bl, target, BCT_PARTY) <= 0
+			 || (tsd != NULL && (tsd->job & MAPID_BASEMASK) == MAPID_SUMMONER)
+			 || (tsc != NULL && tsc->data[SC_BLESSING_OF_M_C_DEBUFF] != NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_TOTARGET, 0, 0);
+				return 0;
+			}
+		}
+			break;
 		case ABC_CHAIN_REACTION_SHOT:
 		{
 			int ammo_index = sd->equip_index[EQI_AMMO];

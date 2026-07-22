@@ -3476,11 +3476,15 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TALISMAN_OF_WARRIOR]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_BLESSING_OF_M_CREATURES] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_BLESSING_OF_M_CREATURES]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
 		if (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_BLESSING_OF_M_CREATURES] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_BLESSING_OF_M_CREATURES]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
@@ -10512,6 +10516,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 5);
 				val2 = 3 * val1;
 				break;
+			case SC_BLESSING_OF_M_CREATURES:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 10 * val1;
+				break;
 			case SC_HIDDEN_CARD:
 				val1 = cap_value(val1, 1, 10);
 				val2 = 3 * val1;
@@ -12410,6 +12418,18 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 					status_zap(bl, 0, status_get_max_sp(bl) / 2);
 					break;
 			}
+			break;
+		case SC_BLESSING_OF_M_CREATURES:
+		{
+			struct map_session_data *tsd = BL_CAST(BL_PC, bl);
+
+			sc_start(bl, bl, SC_BLESSING_OF_M_C_DEBUFF, 100, 1,
+			         skill->get_time2(SH_BLESSING_OF_MYSTICAL_CREATURES, 1), SH_BLESSING_OF_MYSTICAL_CREATURES);
+			if (tsd != NULL && tsd->battle_status.ap > 0) {
+				tsd->battle_status.ap = 0;
+				clif->updatestatus(tsd, SP_AP);
+			}
+		}
 			break;
 		case SC_ARMOR_RESIST: {
 			struct status_change_entry *sce_water = sc->data[SC_RESIST_PROPERTY_WATER];
