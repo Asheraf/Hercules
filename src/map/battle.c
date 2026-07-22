@@ -3614,6 +3614,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 600 + 1400 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case BO_EXPLOSIVE_POWDER:
+					skillratio += -100 + 500 + 650 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL)
+						skillratio += 100 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_TRIPLE_LASER:
 					skillratio += -100 + 650 + 1150 * skill_lv + 12 * st->pow;
 					RE_LVL_DMOD(100);
@@ -6350,6 +6356,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case NW_SPIRAL_SHOOTING:
 				if (sd != NULL && sd->weapontype1 == W_GRENADE)
 					wd.div_ += 1;
+				break;
+			case BO_EXPLOSIVE_POWDER:
+				if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL)
+					wd.div_ = 5;
 				break;
 #ifndef RENEWAL
 			case MO_FINGEROFFENSIVE:

@@ -5879,6 +5879,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
 		case MT_SPARK_BLASTER:
+		case BO_EXPLOSIVE_POWDER:
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
@@ -9005,6 +9006,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case IQ_OLEUM_SANCTUM:
 		case IQ_EXPOSION_BLASTER:
+		case BO_EXPLOSIVE_POWDER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
