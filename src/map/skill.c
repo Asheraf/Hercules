@@ -3235,6 +3235,8 @@ static int skill_blown(struct block_list *src, struct block_list *target, int co
 
 	if (tsc != NULL && tsc->data[SC_SU_STOOP]) // Any knockback will cancel it.
 		status_change_end(target, SC_SU_STOOP, INVALID_TIMER);
+	if (tsc != NULL && tsc->data[SC_CRESCIVEBOLT] != NULL)
+		status_change_end(target, SC_CRESCIVEBOLT, INVALID_TIMER);
 
 	return unit->push(target, dir, count, (flag & 0x1) == 0x0); // send over the proper flag
 }
@@ -5106,6 +5108,24 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case WH_HAWKBOOMERANG:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case WH_CRESCIVE_BOLT: {
+			int stack = 1;
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			if (sc != NULL && sc->data[SC_CRESCIVEBOLT] != NULL) {
+				stack = min(3, sc->data[SC_CRESCIVEBOLT]->val1 + 1);
+				if (sd != NULL && sc->data[SC_CRESCIVEBOLT]->val1 >= 3) {
+					uint32 old_ap = sd->battle_status.ap;
+
+					sd->battle_status.ap = (uint32)cap_value((int64)sd->battle_status.ap + 2, 0, sd->battle_status.max_ap);
+					if (old_ap != sd->battle_status.ap)
+						clif->updatestatus(sd, SP_AP);
+				}
+			}
+			sc_start(src, src, SC_CRESCIVEBOLT, 100, stack, skill->get_time(skill_id, skill_lv), skill_id);
+		}
 			break;
 
 #ifdef RENEWAL
@@ -18565,6 +18585,8 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 		if (sc->data[SC_ADAPTATION] && (skill->get_inf2(skill_id) & (INF2_SONG_DANCE | INF2_ENSEMBLE_SKILL)) != 0)
 			req.sp -= req.sp * sc->data[SC_ADAPTATION]->val2 / 100;
 #endif
+		if (sc->data[SC_CRESCIVEBOLT] != NULL)
+			req.sp += req.sp * 20 * sc->data[SC_CRESCIVEBOLT]->val1 / 100;
 	}
 
 	req.zeny = skill->dbs->db[idx].zeny[skill_lv-1];
