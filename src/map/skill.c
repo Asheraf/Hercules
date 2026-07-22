@@ -5884,6 +5884,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_DEFT_STAB:
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
+		case MT_RUSH_STRIKE:
 		case MT_SPARK_BLASTER:
 		case BO_EXPLOSIVE_POWDER:
 		case BO_MAYHEMIC_THORNS:
@@ -6092,6 +6093,17 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->blown(src);
 						sc_start(src, src, SC_RUSH_QUAKE2, 100, skill_lv, skill->get_time2(skill_id, skill_lv),
 						         skill_id);
+						break;
+					case MT_RUSH_STRIKE:
+						if (map_flag_gvg2(src->m) == 0 && map->list[src->m].flag.battleground == 0
+						 && (sc == NULL || sc->data[SC_SV_ROOTTWIST] == NULL)) {
+							enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+							if (unit->move_pos(src, bl->x, bl->y, 0, true) == 0)
+								skill->blown(src, src, 1, unit_get_opposite_dir(dir), 0);
+						}
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						clif->blown(src);
 						break;
 					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
