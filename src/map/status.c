@@ -3474,9 +3474,13 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_HIDDEN_CARD]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_TALISMAN_OF_WARRIOR] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TALISMAN_OF_WARRIOR]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
+		if (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
@@ -3512,8 +3516,11 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		if (sc != NULL && sc->data[SC_GEF_NOCTURN] != NULL)
 			st->mres = max(st->mres - sc->data[SC_GEF_NOCTURN]->val2, 0);
 	}
-	if (flag & SCB_HPLUS)
+	if ((flag & SCB_HPLUS) != 0) {
 		st->hplus = bst->hplus;
+		if (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL)
+			st->hplus = (int32)cap_value((int64)st->hplus + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
+	}
 	if ((flag & SCB_CRATE) != 0) {
 		st->crate = bst->crate;
 		if (sc != NULL && sc->data[SC_PRESENS_ACIES] != NULL)
@@ -10500,6 +10507,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				break;
 			case SC_COLORS_OF_HYUN_ROK_BUFF:
 				val2 = 50;
+				break;
+			case SC_TEMPORARY_COMMUNION:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 3 * val1;
 				break;
 			case SC_HIDDEN_CARD:
 				val1 = cap_value(val1, 1, 10);

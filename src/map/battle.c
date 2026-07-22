@@ -3013,7 +3013,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					if (sd != NULL) {
 						skillratio += 20 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
-						if (pc->checkskill(sd, SH_COMMUNE_WITH_HYUN_ROK) > 0) {
+						if (skill->sh_communed(src, SH_COMMUNE_WITH_HYUN_ROK) == true) {
 							skillratio += 100 + 200 * skill_lv;
 							skillratio += 20 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
 						}
@@ -3025,7 +3025,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->pow;
 					if (sd != NULL) {
 						skillratio += 10 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
-						if (pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0) {
+						if (skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO) == true) {
 							skillratio += 70 + 150 * skill_lv;
 							skillratio += 10 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
 						}
@@ -3037,7 +3037,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->pow;
 					if (sd != NULL) {
 						skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
-						if (pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0) {
+						if (skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO) == true) {
 							skillratio += 100 + 100 * skill_lv;
 							skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
 						}

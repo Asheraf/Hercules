@@ -1171,7 +1171,7 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 			hp = 500 * skill_lv + status_get_int(src) * 5;
 			if (sd != NULL) {
 				hp += pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY) * 100;
-				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0) {
+				if (skill->sh_communed(src, SH_COMMUNE_WITH_KI_SUL) == true) {
 					hp += 250 * skill_lv;
 					hp += pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY) * 50;
 				}
@@ -9254,7 +9254,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
 
-			if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0)
+			if (sd != NULL && skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO) == true)
 				range += 1;
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->area_temp[0] = 0;
@@ -9282,12 +9282,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			} else {
 				int range = skill->get_splash(skill_id, skill_lv);
 
-				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+				if (skill->sh_communed(src, SH_COMMUNE_WITH_KI_SUL) == true)
 					range += 2;
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				party->foreachsamemap(skill->area_sub, sd, range, src, skill_id, skill_lv, tick,
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
+			break;
+		case SH_TEMPORARY_COMMUNION:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case SH_COLORS_OF_HYUN_ROK:
 			if (skill_lv == 7) {
@@ -9298,7 +9302,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			} else {
 				sc_type endow = (sc_type)(SC_COLORS_OF_HYUN_ROK_1 + skill_lv - 1);
 
-				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_HYUN_ROK) > 0)
+				if (sd != NULL && skill->sh_communed(src, SH_COMMUNE_WITH_HYUN_ROK) == true)
 					sc_start(src, bl, SC_COLORS_OF_HYUN_ROK_BUFF, 100, 1, skill->get_time(skill_id, skill_lv),
 					         skill_id);
 				sc_start(src, bl, endow, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
@@ -9321,7 +9325,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			} else if ((flag & 1) != 0) {
 				int range = skill->get_splash(skill_id, skill_lv);
 
-				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0) {
+				if (sd != NULL && skill->sh_communed(src, SH_COMMUNE_WITH_KI_SUL) == true) {
 					range += 2;
 					flag |= 4; // the wider pulse also restores more AP
 				}
@@ -9339,14 +9343,14 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				int duration = skill->get_time(skill_id, skill_lv);
 
-				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+				if (sd != NULL && skill->sh_communed(src, SH_COMMUNE_WITH_KI_SUL) == true)
 					duration *= 2;
 				clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				                     sc_start(src, bl, type, 100, skill_lv, duration, skill_id));
 			} else {
 				int range = skill->get_splash(skill_id, skill_lv);
 
-				if (pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0)
+				if (skill->sh_communed(src, SH_COMMUNE_WITH_KI_SUL) == true)
 					range += 2;
 				party->foreachsamemap(skill->area_sub, sd, range, src, skill_id, skill_lv, tick,
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
@@ -18298,6 +18302,13 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case SH_TEMPORARY_COMMUNION:
+			if (pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) == 0 && pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) == 0
+			 && pc->checkskill(sd, SH_COMMUNE_WITH_HYUN_ROK) == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
 		case SHC_ETERNAL_SLASH:
 			if (sc == NULL || ((sc->data[SC_COMBOATTACK] == NULL
 			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) && sc->data[SC_WEAPONBLOCK_ON] == NULL)) {
@@ -19477,6 +19488,29 @@ static int skill_get_any_item_index(struct map_session_data *sd, int skill_id, i
  * @param skill_id The skill ID.
  * @param skill_lv The skill level.
  **/
+/**
+ * Whether a Spirit Handler counts as communed with one of the mystical
+ * creatures, either by having learned that communion or by running
+ * Temporary Communion, which stands in for all three.
+ *
+ * @param src          the caster.
+ * @param communion_id the communion skill to look for.
+ * @retval true if the caster is communed.
+ */
+static bool skill_sh_communed(struct block_list *src, uint16 communion_id)
+{
+	nullpo_retr(false, src);
+
+	struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+	if (sd != NULL && pc->checkskill(sd, communion_id) > 0)
+		return true;
+
+	struct status_change *sc = status->get_sc(src);
+
+	return (sc != NULL && sc->data[SC_TEMPORARY_COMMUNION] != NULL);
+}
+
 static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 skill_lv)
 {
 	nullpo_retv(sd);
@@ -19489,9 +19523,9 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP || skill_id == WH_SWIFTTRAP
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
-	if (skill_id == SH_HOGOGONG_STRIKE && pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0)
+	if (skill_id == SH_HOGOGONG_STRIKE && skill->sh_communed(&sd->bl, SH_COMMUNE_WITH_CHUL_HO) == true)
 		add_ap++;
-	if (skill_id == SH_HYUN_ROK_CANNON && pc->checkskill(sd, SH_COMMUNE_WITH_HYUN_ROK) > 0)
+	if (skill_id == SH_HYUN_ROK_CANNON && skill->sh_communed(&sd->bl, SH_COMMUNE_WITH_HYUN_ROK) == true)
 		add_ap++;
 	if (skill_id == TR_RHYTHMSHOOTING)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
@@ -28359,6 +28393,7 @@ void skill_defaults(void)
 	skill->check_condition_castend = skill_check_condition_castend;
 	skill->get_any_item_index = skill_get_any_item_index;
 	skill->give_ap = skill_give_ap;
+	skill->sh_communed = skill_sh_communed;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;
