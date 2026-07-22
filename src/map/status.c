@@ -3378,6 +3378,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_POWERFUL_FAITH]->val3, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ABYSS_SLAYER]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
@@ -3385,6 +3387,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->smatk = bst->smatk;
 		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ABYSS_SLAYER]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
@@ -5333,6 +5337,8 @@ static int status_calc_hit(struct block_list *bl, struct status_change *sc, int 
 		hit -= sc->data[SC_HEAT_BARREL]->val4;
 	if (sc->data[SC_SOULFALCON] != NULL)
 		hit += sc->data[SC_SOULFALCON]->val3;
+	if (sc->data[SC_ABYSS_SLAYER] != NULL)
+		hit += sc->data[SC_ABYSS_SLAYER]->val3;
 #ifdef RENEWAL
 	if (sc->data[SC_BLESSING] != NULL)
 		hit += sc->data[SC_BLESSING]->val3;
@@ -10354,6 +10360,12 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_COMPETENTIA:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 10 * val1;
+				break;
+			case SC_ABYSS_SLAYER:
+				val1 = cap_value(val1, 1, 10);
+				status_percent_heal(bl, 100, 100);
+				val2 = 10 + 2 * val1;
+				val3 = 100 + 20 * val1;
 				break;
 			case SC_D_MACHINE:
 				val2 = 200 + 50 * val1;
