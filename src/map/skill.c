@@ -2119,6 +2119,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEADLYPOISON, 3, skill_lv, skill->get_time2(skill_id, skill_lv),
 			         skill_id);
 			break;
+		case EM_CONFLAGRATION:
+			sc_start(src, bl, SC_HANDICAPSTATE_CONFLAGRATION, 3, skill_lv, skill->get_time2(skill_id, skill_lv),
+			         skill_id);
+			break;
 		case MT_RUSH_QUAKE:
 			sc_start(src, bl, SC_RUSH_QUAKE1, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -13855,6 +13859,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case EM_DIAMOND_STORM:
 		case EM_LIGHTNING_LAND:
 		case EM_VENOM_SWAMP:
+		case EM_CONFLAGRATION:
 		case IG_CROSS_RAIN:
 		case CD_PNEUMATICUS_PROCELLA:
 		case SJ_BOOKOFCREATINGSTAR:
@@ -16317,6 +16322,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_PNEUMATICUS_PROCELLA:
 		case UNT_LIGHTNING_LAND:
 		case UNT_VENOM_SWAMP:
+		case UNT_CONFLAGRATION:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_ABYSS_SQUARE:
