@@ -3637,6 +3637,24 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio *= 2;
 					RE_LVL_DMOD(100);
 					break;
+				case HN_SPIRAL_PIERCE_MAX:
+					skillratio += -100 + 1000 + 1500 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, HN_SELFSTUDY_TATICS) * 3 * skill_lv;
+					skillratio += 5 * st->pow;
+					switch (tst->size) {
+						case SZ_SMALL:
+							skillratio = skillratio * 150 / 100;
+							break;
+						case SZ_MEDIUM:
+							skillratio = skillratio * 130 / 100;
+							break;
+						case SZ_BIG:
+							skillratio = skillratio * 120 / 100;
+							break;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_DEFT_STAB:
 					skillratio += -100 + 700 + 550 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
