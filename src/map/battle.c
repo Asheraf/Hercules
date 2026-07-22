@@ -2227,6 +2227,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 750 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_FROM_THE_ABYSS_ATK:
+					skillratio += -100 + 150 + 650 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
 					break;
@@ -7782,6 +7786,18 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			sd->auto_cast_current.type = AUTOCAST_TEMP;
 			pc->delservantball(sd, 1);
 			skill->castend_damage_id(src, target, DK_SERVANTWEAPON_ATK, sc->data[SC_SERVANTWEAPON]->val1, tick, flag);
+			sd->auto_cast_current.type = ac_type;
+		}
+
+		if (damage > 0 && (wd.flag & (BF_NORMAL | BF_WEAPON)) == (BF_NORMAL | BF_WEAPON)
+		 && sc != NULL && sc->data[SC_ABYSSFORCEWEAPON] != NULL
+		 && sd->abyssball > 0 && rnd() % 100 < 25) {
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			pc->delabyssball(sd, 1);
+			skill->castend_damage_id(src, target, ABC_FROM_THE_ABYSS_ATK, sc->data[SC_ABYSSFORCEWEAPON]->val1, tick,
+			                         flag);
 			sd->auto_cast_current.type = ac_type;
 		}
 

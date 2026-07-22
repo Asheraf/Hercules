@@ -1223,6 +1223,8 @@ struct clif_interface {
 	void (*enchanting_shadow_spirit) (struct block_list *bl, uint16 amount);
 	void (*servantballs) (struct block_list *bl, int servantballs, enum send_target target);
 	void (*servantball_single) (int fd, struct map_session_data *sd);
+	void (*abyssballs) (struct block_list *bl, int abyssballs, enum send_target target);
+	void (*abyssball_single) (int fd, struct map_session_data *sd);
 	void (*bladestop) (struct block_list *src, int dst_id, int active);
 	void (*mvp_effect) (struct map_session_data *sd);
 	void (*heal) (int fd,int type,int val);

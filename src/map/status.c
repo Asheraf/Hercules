@@ -8162,6 +8162,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_ENSEMBLEFATIGUE:
 				break;
 			case SC_SERVANTWEAPON:
+			case SC_ABYSSFORCEWEAPON:
 				val4 = sce->val4;
 				break;
 			case SC_GOSPEL:
@@ -10420,6 +10421,14 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				if (sd != NULL)
 					pc->addservantball(sd, MAX_SERVANTBALL);
 				break;
+			case SC_ABYSSFORCEWEAPON:
+				if (val4 <= 0)
+					val4 = total_tick;
+				total_tick = val4;
+				tick_time = min(max(500, skill->get_time2(ABC_FROM_THE_ABYSS, val1)), val4);
+				if (sd != NULL)
+					pc->addabyssball(sd, MAX_ABYSSBALL);
+				break;
 			case SC_VIGOR:
 				val2 = max(0, 100 - 10 * (val1 - 1));
 				break;
@@ -12457,6 +12466,10 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			if (sd != NULL)
 				pc->delservantball(sd, sd->servantball);
 			break;
+		case SC_ABYSSFORCEWEAPON:
+			if (sd != NULL)
+				pc->delabyssball(sd, sd->abyssball);
+			break;
 		case SC_CHARGINGPIERCE:
 			status_change_end(bl, SC_CHARGINGPIERCE_COUNT, INVALID_TIMER);
 			break;
@@ -13734,6 +13747,17 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 			sce->val4 -= min(max(500, skill->get_time2(DK_SERVANTWEAPON, sce->val1)), sce->val4);
 			if (sce->val4 > 0) {
 				sc_timer_next(min(max(500, skill->get_time2(DK_SERVANTWEAPON, sce->val1)), sce->val4) + tick,
+				              status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
+		case SC_ABYSSFORCEWEAPON:
+			if (sd != NULL && sd->abyssball < MAX_ABYSSBALL)
+				pc->addabyssball(sd, 1);
+
+			sce->val4 -= min(max(500, skill->get_time2(ABC_FROM_THE_ABYSS, sce->val1)), sce->val4);
+			if (sce->val4 > 0) {
+				sc_timer_next(min(max(500, skill->get_time2(ABC_FROM_THE_ABYSS, sce->val1)), sce->val4) + tick,
 				              status->change_timer, bl->id, data);
 				return 0;
 			}

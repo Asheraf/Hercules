@@ -5428,6 +5428,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
 		case ABC_CHAIN_REACTION_SHOT:
+		case ABC_FROM_THE_ABYSS_ATK:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -8040,6 +8041,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case ABC_FROM_THE_ABYSS:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start2(src, bl, type, 100, skill_lv, src->id, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case SHC_IMPACT_CRATER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,

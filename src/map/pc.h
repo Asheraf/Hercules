@@ -489,6 +489,7 @@ END_ZEROED_BLOCK;
 	int soulball;
 	int servantball;
 	int servantball_old;
+	int abyssball;
 	int servant_sign[MAX_SERVANT_SIGN];
 	unsigned char potion_success_counter; //Potion successes in row counter
 	unsigned char mission_count; //Stores the bounty kill count for TK_MISSION
@@ -1204,6 +1205,8 @@ END_ZEROED_BLOCK; /* End */
 	void (*delsoulball) (struct map_session_data *sd, int count, bool type);
 	void (*addservantball) (struct map_session_data *sd, int count);
 	void (*delservantball) (struct map_session_data *sd, int count);
+	void (*addabyssball) (struct map_session_data *sd, int count);
+	void (*delabyssball) (struct map_session_data *sd, int count);
 	void (*addfame) (struct map_session_data *sd, int ranktype, int count);
 	int (*fame_rank) (int char_id, int ranktype);
 	int (*famelist_type) (uint16 job_mapid);
