@@ -2959,6 +2959,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case BO_ACIDIFIED_ZONE_WATER_ATK:
 				case BO_ACIDIFIED_ZONE_GROUND:
 				case BO_ACIDIFIED_ZONE_GROUND_ATK:
+				case BO_ACIDIFIED_ZONE_WIND:
+				case BO_ACIDIFIED_ZONE_WIND_ATK:
 					skillratio += -100 + 400 * skill_lv + 5 * st->pow;
 					if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL) {
 						skillratio += skillratio * 50 / 100;
@@ -6582,6 +6584,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					break;
 				case BO_ACIDIFIED_ZONE_GROUND_ATK:
 					rskill = BO_ACIDIFIED_ZONE_GROUND;
+					break;
+				case BO_ACIDIFIED_ZONE_WIND_ATK:
+					rskill = BO_ACIDIFIED_ZONE_WIND;
 					break;
 				case DK_HACKANDSLASHER_ATK:
 					rskill = DK_HACKANDSLASHER;

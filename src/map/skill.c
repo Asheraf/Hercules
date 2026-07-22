@@ -5490,6 +5490,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case MT_RUSH_QUAKE:
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
+		case BO_ACIDIFIED_ZONE_WIND:
 		case ABC_CHAIN_REACTION_SHOT:
 		case ABC_FROM_THE_ABYSS_ATK:
 		case IQ_OLEUM_SANCTUM:
@@ -5523,10 +5524,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 				if (skill_id == CD_PETITIO)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
-				if (skill_id == BO_ACIDIFIED_ZONE_WATER) {
+				if (skill_id == BO_ACIDIFIED_ZONE_WATER || skill_id == BO_ACIDIFIED_ZONE_WIND) {
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 					if (bl->type == BL_PC && ((skill_id != BO_ACIDIFIED_ZONE_WATER
-						&& skill_id != BO_ACIDIFIED_ZONE_GROUND) || rnd() % 100 < 1))
+						&& skill_id != BO_ACIDIFIED_ZONE_GROUND && skill_id != BO_ACIDIFIED_ZONE_WIND)
+						|| rnd() % 100 < 1))
 						skill->castend_pos2(src, bl->x, bl->y, skill_id, skill_lv, tick, 0);
 				}
 #ifndef RENEWAL
@@ -14163,6 +14165,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
+		case BO_ACIDIFIED_ZONE_WIND:
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
@@ -16031,6 +16034,10 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_ACIDIFIED_ZONE_GROUND:
 			skill->attack(skill->get_type(BO_ACIDIFIED_ZONE_GROUND_ATK, sg->skill_lv), ss, &src->bl, bl,
 			              BO_ACIDIFIED_ZONE_GROUND_ATK, sg->skill_lv, tick, 0);
+			break;
+		case UNT_ACIDIFIED_ZONE_WIND:
+			skill->attack(skill->get_type(BO_ACIDIFIED_ZONE_WIND_ATK, sg->skill_lv), ss, &src->bl, bl,
+			              BO_ACIDIFIED_ZONE_WIND_ATK, sg->skill_lv, tick, 0);
 			break;
 		case UNT_DEEPBLINDTRAP:
 		case UNT_SOLIDTRAP:
@@ -18873,6 +18880,7 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
+		case BO_ACIDIFIED_ZONE_WIND:
 			if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL && req.amount[0] > 0)
 				req.amount[0]--;
 			break;
