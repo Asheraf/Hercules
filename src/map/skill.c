@@ -9570,6 +9570,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case SS_AKUMUKESU:
+			if ((flag & 1) != 0) {
+				status_change_end(bl, SC_NIGHTMARE, INVALID_TIMER);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+				                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+				                    skill->castend_nodamage_id);
+			}
+			break;
 		case SKE_ENCHANTING_SKY:
 			status_change_end(bl, SC_RISING_SUN, INVALID_TIMER);
 			status_change_end(bl, SC_NOON_SUN, INVALID_TIMER);
