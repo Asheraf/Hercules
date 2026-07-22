@@ -1935,6 +1935,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	}
 	if (sc->data[SC_HIDDEN_CARD] != NULL)
 		sd->bonus.long_attack_atk_rate += sc->data[SC_HIDDEN_CARD]->val3;
+	if (sc->data[SC_FLIP_FLAP] != NULL)
+		sd->bonus.long_attack_atk_rate += 6 * sc->data[SC_FLIP_FLAP]->val1;
 	if (sc->data[SC_HEAVEN_AND_EARTH] != NULL) {
 		int bonus = sc->data[SC_HEAVEN_AND_EARTH]->val2;
 
@@ -2258,6 +2260,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->cri += 20;
 	if ((skill_lv = pc->checkskill(sd, AT_SIXTH_SENSE)) > 0)
 		bstatus->cri = (int32)cap_value((int64)bstatus->cri + skill_lv * 20, 0, SHRT_MAX);
+	if (sd->sc.data[SC_FLIP_FLAP] != NULL)
+		bstatus->cri = (int32)cap_value((int64)bstatus->cri + 30 * sd->sc.data[SC_FLIP_FLAP]->val1, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, SHC_SHADOW_SENSE)) > 0) {
 		if (sd->weapontype == W_DAGGER || sd->weapontype == W_DOUBLE_DD || sd->weapontype == W_DOUBLE_DS
 			|| sd->weapontype == W_DOUBLE_DA)
