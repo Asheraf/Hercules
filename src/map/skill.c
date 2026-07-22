@@ -4893,6 +4893,19 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 					}
 					FALLTHROUGH
 				// fall through ...
+				case SKE_TWINKLING_GALAXY:
+				{
+					int area = skill->get_unit_range(skl->skill_id, skl->skill_lv);
+					int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+					int tmpx = skl->x - area + rnd() % (area * 2 + 1);
+					int tmpy = skl->y - area + rnd() % (area * 2 + 1);
+
+					map->foreachinarea(skill->area_sub, src->m, tmpx - splash, tmpy - splash, tmpx + splash,
+					                   tmpy + splash,
+					                   BL_CHAR, src, skl->skill_id, skl->skill_lv, tick,
+					                   skl->flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				}
+					break;
 				case WL_EARTHSTRAIN:
 					skill->unitsetting(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,(skl->type<<16)|skl->flag);
 					break;
@@ -6531,6 +6544,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SKE_TWINKLING_GALAXY:
 		case SH_HOWLING_OF_CHUL_HO:
 			if ((flag & 1) != 0)
 				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -14618,6 +14632,18 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			if ( skill_id == WM_SEVERE_RAINSTORM )
 				sc_start(src, src, type, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src,skill_id,skill_lv,x,y,0);
+			break;
+		case SKE_TWINKLING_GALAXY:
+		{
+			int interval = skill->get_unit_interval(skill_id, skill_lv);
+
+			if (interval > 0) {
+				for (int i = 0; i < skill->get_time(skill_id, skill_lv) / interval; i++)
+					skill->addtimerskill(src, tick + (int64)i * interval, 0, x, y, skill_id, skill_lv, 0, flag);
+			}
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+		}
 			break;
 		case WZ_ICEWALL:
 			flag |= 1;
