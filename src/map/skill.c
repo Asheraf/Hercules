@@ -5398,6 +5398,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_GRAND_JUDGEMENT:
 		case CD_ARBITRIUM:
 		case CD_PETITIO:
+		case SHC_SAVAGE_IMPACT:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5497,6 +5498,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						clif->blown(src);
 						break;
+					case SHC_SAVAGE_IMPACT:
+					{
+						enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+						if (Assert_chk(dir >= UNIT_DIR_FIRST && dir < UNIT_DIR_MAX)) {
+							map->freeblock_unlock();
+							return 0;
+						}
+
+						if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 0, true) == 0)
+							clif->blown(src);
+
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					}
+						break;
 					case AG_ROCK_DOWN:
 					case NJ_BAKUENRYU:
 					case LG_EARTHDRIVE:
@@ -5584,6 +5600,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 				if (skill_id == DK_DRAGONIC_AURA)
 					sc_start(src, src, SC_DRAGONIC_AURA, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				if (skill_id == SHC_SAVAGE_IMPACT)
+					status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
 
 				if (skill_id == AS_SPLASHER) {
 					// Prevent double item consumption when the target explodes (item requirements have already been processed in skill_castend_nodamage_id)

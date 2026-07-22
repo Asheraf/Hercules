@@ -2765,6 +2765,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 900 + 100 * skill_lv;
 					RE_LVL_DMOD(120);
 					break;
+				case SHC_SAVAGE_IMPACT:
+					skillratio += -100 + 130 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_SHADOW_EXCEED] != NULL)
+						skillratio += 30 * skill_lv + 2 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case GC_PHANTOMMENACE:
 					skillratio += 200;
 					break;
@@ -4301,6 +4307,8 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
+	if (skill_id == SHC_SAVAGE_IMPACT)
+		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
@@ -5360,6 +5368,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sd != NULL)
 					wd.div_ = sd->servantball_old;
 				break;
+			case SHC_SAVAGE_IMPACT:
+				if (sc != NULL && sc->data[SC_CLOAKINGEXCEED] != NULL)
+					wd.div_ = 5;
+				break;
 			case IG_OVERSLASH:
 				if ((wflag & 0xFFF) >= 4)
 					wd.div_ = 7;
@@ -5617,7 +5629,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
-		|| skill_id == CD_PETITIO) && sstatus->cri &&
+		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5627,7 +5639,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
-			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO))
+			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
+			|| skill_id == SHC_SAVAGE_IMPACT))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5682,6 +5695,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				break;
 			case NJ_KIRIKAGE:
 				cri += 250 + 50*skill_lv;
+				break;
+			case SHC_SAVAGE_IMPACT:
+				cri /= 2;
 				break;
 		}
 		if(tsd && tsd->bonus.critical_def)
@@ -6068,7 +6084,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
-							|| skill_id == CD_PETITIO)
+							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
