@@ -2171,6 +2171,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv + 2, 0, SHRT_MAX);
 	if (sd->weapontype == W_2HSTAFF && (skill_lv = pc->checkskill(sd, AG_TWOHANDSTAFF)) > 0)
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 2, 0, SHRT_MAX);
+	if ((skill_lv = pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY)) > 0) {
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 15 / 10, 0, SHRT_MAX);
+		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 15 / 10, 0, SHRT_MAX);
+	}
 	if (sd->patk_rate != 100)
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk * sd->patk_rate / 100, 0, SHRT_MAX);
 	if (sd->smatk_rate < 0)
