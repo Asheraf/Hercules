@@ -1670,8 +1670,13 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 					skill->castend_damage_id(src,bl,HT_BLITZBEAT,(temp<rate)?temp:rate,tick,SD_LEVEL);
 				}
 				// Automatic trigger of Warg Strike [Jobbie]
-				if( pc_iswug(sd) && (temp=pc->checkskill(sd,RA_WUGSTRIKE)) > 0 && rnd()%1000 <= sstatus->luk*3 )
-					skill->castend_damage_id(src,bl,RA_WUGSTRIKE,temp,tick,0);
+				if (pc_iswug(sd) == true && (temp = pc->checkskill(sd, RA_WUGSTRIKE)) > 0) {
+					rate = sstatus->luk * 3;
+					if (pc_isfalcon(sd) == true && pc->checkskill(sd, WH_HAWK_M) > 0)
+						rate /= 3;
+					if (rnd() % 1000 <= rate)
+						skill->castend_damage_id(src, bl, RA_WUGSTRIKE, temp, tick, 0);
+				}
 				if (pc_isfalcon(sd) == true && sd->weapontype == W_BOW && (attack_type & BF_LONG) != 0
 					&& (temp = pc->checkskill(sd, WH_HAWKRUSH)) > 0) {
 					rate = sstatus->con * 10 / 3 + 1;
@@ -11203,6 +11208,15 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 			}
 			break;
+		case WH_HAWK_M:
+			if (sd != NULL) {
+				if (pc_isfalcon(sd) == false)
+					pc->setoption(sd, sd->sc.option | OPTION_FALCON);
+				else
+					pc->setoption(sd, sd->sc.option & ~OPTION_FALCON);
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			}
+			break;
 
 		case RA_WUGDASH:
 			if( tsce ) {
@@ -17177,8 +17191,9 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		 * Ranger
 		 **/
 		case RA_WUGMASTERY:
-			if( pc_isfalcon(sd) || pc_isridingwug(sd) || sd->sc.data[SC__GROOMY] ) {
-				clif->skill_fail(sd, skill_id, sd->sc.data[SC__GROOMY] ? USESKILL_FAIL_MANUAL_NOTIFY : USESKILL_FAIL_CONDITION, 0, 0);
+			if ((pc_isfalcon(sd) == true && pc->checkskill(sd, WH_HAWK_M) == 0) || pc_isridingwug(sd) == true
+			 || sd->sc.data[SC__GROOMY] != NULL) {
+				clif->skill_fail(sd, skill_id, sd->sc.data[SC__GROOMY] != NULL ? USESKILL_FAIL_MANUAL_NOTIFY : USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
 			break;
@@ -17189,7 +17204,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case RA_WUGRIDER:
-			if( pc_isfalcon(sd) || ( !pc_isridingwug(sd) && !pc_iswug(sd) ) ) {
+			if ((pc_isfalcon(sd) == true && pc->checkskill(sd, WH_HAWK_M) == 0)
+			 || (pc_isridingwug(sd) == false && pc_iswug(sd) == false)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}

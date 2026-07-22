@@ -4451,8 +4451,9 @@ ACMD(mount_peco)
 		}
 		return true;
 	}
-	if ((sd->job & MAPID_THIRDMASK) == MAPID_RANGER) {
-		if (!pc->checkskill(sd,RA_WUGRIDER)) {
+	if ((sd->job & MAPID_THIRDMASK) == MAPID_RANGER
+	 && (pc_isfalcon(sd) == false || pc->checkskill(sd, WH_HAWK_M) > 0)) {
+		if (pc->checkskill(sd,RA_WUGRIDER) == 0) {
 			snprintf(atcmd_output, sizeof(atcmd_output), msg_fd(fd, MSGTBL_REQUIREMENT_FOR_MOUNT), skill->get_desc(RA_WUGRIDER)); // You need %s to mount!
 			clif->message(fd, atcmd_output);
 			return false;
