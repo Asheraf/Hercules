@@ -4266,6 +4266,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 50 * skill_lv * pc->checkskill(sd, CD_MACE_BOOK_M);
 					RE_LVL_DMOD(100);
 					break;
+				case DK_DRAGONIC_PIERCE:
+					skillratio += -100 + 900 + 730 * skill_lv + 7 * st->pow;
+					if (sc != NULL && sc->data[SC_DRAGONIC_AURA] != NULL)
+						skillratio += 200 + 50 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -6669,7 +6675,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 		|| skill_id == DK_SERVANT_W_DEMOL
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
-		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
+		|| skill_id == DK_STORMSLASH || skill_id == DK_DRAGONIC_PIERCE || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
@@ -6699,6 +6705,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
+			|| skill_id == DK_DRAGONIC_PIERCE
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
@@ -7176,7 +7183,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 							|| skill_id == DK_SERVANT_W_DEMOL
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
-							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
+							|| skill_id == DK_STORMSLASH || skill_id == DK_DRAGONIC_PIERCE
+							|| skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
