@@ -1161,16 +1161,22 @@ static int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt)
 	}
 
 	if ((flag & 16) != 0 && mbl != NULL) {
-		if (md->special_state.ai == AI_ABR) {
+		if (md->special_state.ai == AI_BIONIC || md->special_state.ai == AI_ABR) {
 			struct map_session_data *msd = BL_CAST(BL_PC, mbl);
 			struct status_data *masterstatus = status->get_status_data(mbl);
 
 			if (msd != NULL && masterstatus != &status->dummy) {
-				int mastery = pc->checkskill(msd, MT_ABR_M);
-				int64 atk = 2 * (int64)masterstatus->batk + 600 * mastery + 200;
+				int mastery = md->special_state.ai == AI_BIONIC ? pc->checkskill(msd,
+					BO_BIONICS_M) : pc->checkskill(msd, MT_ABR_M);
+				int64 atk = 2 * (int64)masterstatus->batk + 600 * mastery;
+
+				if (md->special_state.ai == AI_ABR)
+					atk += 200;
 
 				mstatus->max_hp = (uint32)cap_value(((int64)5000 + 40000 * mastery) * masterstatus->vit / 100, 1,
 				                                    INT_MAX);
+				if (md->special_state.ai == AI_BIONIC)
+					mstatus->max_sp = (uint32)cap_value((int64)mstatus->max_sp + 20 * mastery, 1, UINT_MAX);
 				mstatus->rhw.atk = (unsigned int)cap_value(atk * 70 / 100, 0, UINT_MAX);
 				mstatus->rhw.atk2 = (unsigned int)cap_value(atk, 0, UINT_MAX);
 				mstatus->def = (defType)cap_value((int64)masterstatus->def + 20 * mastery, DEFTYPE_MIN, DEFTYPE_MAX);
