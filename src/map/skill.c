@@ -5741,6 +5741,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
+		case SKE_RISING_MOON:
 		case SKE_NOON_BLAST:
 		case SKE_SUNSET_BLAST:
 			if (flag&1) { //Recursive invocation
@@ -5926,6 +5927,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_THIRD_FLAME_BOMB:
 					case IQ_THIRD_CONSECRATION:
 					case IG_GRAND_JUDGEMENT:
+					case SKE_RISING_MOON:
 					case SKE_NOON_BLAST:
 					case SKE_SUNSET_BLAST:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
@@ -9418,6 +9420,27 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SH_TEMPORARY_COMMUNION:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case SKE_RISING_MOON:
+		{
+			struct status_change *ssc = status->get_sc(src);
+
+			if (ssc == NULL || (ssc->data[SC_RISING_MOON] == NULL && ssc->data[SC_MIDNIGHT_MOON] == NULL
+				&& ssc->data[SC_DAWN_MOON] == NULL)) {
+				status_change_end(src, SC_RISING_SUN, INVALID_TIMER);
+				status_change_end(src, SC_NOON_SUN, INVALID_TIMER);
+				status_change_end(src, SC_SUNSET_SUN, INVALID_TIMER);
+				sc_start(src, src, SC_RISING_MOON, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			} else if (ssc->data[SC_MIDNIGHT_MOON] == NULL && ssc->data[SC_DAWN_MOON] == NULL) {
+				status_change_end(src, SC_RISING_MOON, INVALID_TIMER);
+				sc_start(src, src, SC_MIDNIGHT_MOON, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			} else if (ssc->data[SC_DAWN_MOON] == NULL) {
+				status_change_end(src, SC_MIDNIGHT_MOON, INVALID_TIMER);
+				sc_start(src, src, SC_DAWN_MOON, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+		}
 			break;
 		case SH_COLORS_OF_HYUN_ROK:
 			if (skill_lv == 7) {
@@ -18494,6 +18517,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SKE_SUNSET_BLAST:
 			if (sc == NULL || (sc->data[SC_NOON_SUN] == NULL && sc->data[SC_SUNSET_SUN] == NULL
 			 && sc->data[SC_SKY_ENCHANT] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SKE_RISING_MOON:
+			if (sc != NULL && sc->data[SC_DAWN_MOON] != NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
