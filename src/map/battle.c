@@ -3207,6 +3207,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case SKE_SKY_SUN:
+					skillratio += -100 + 250 + 1650 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 7 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_ALL_IN_THE_SKY:
 					skillratio += -100 + 250 + 1200 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -6596,7 +6603,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 		&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-		|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
+		|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SKE_SKY_SUN
+		|| skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6623,7 +6631,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 			&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-			|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
+			|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SKE_SKY_SUN
+			|| skill_id == SS_KAGEGISSEN || skill_id == NW_WILD_SHOT
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;

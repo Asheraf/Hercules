@@ -5877,6 +5877,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SS_RAIDENPOU:
 		case SS_SEKIENHOU:
 		case SS_KAGEGISSEN:
+		case SKE_SKY_SUN:
 		case SKE_DAWN_BREAK:
 		case SKE_MIDNIGHT_KICK:
 		case SKE_RISING_MOON:
@@ -6071,6 +6072,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						skill->mirage_cast(src, NULL, SS_ANTENPOU, skill_lv, 0, 0, tick, flag);
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
+					case SKE_SKY_SUN:
 					case SKE_DAWN_BREAK:
 					case SKE_MIDNIGHT_KICK:
 					case SKE_RISING_MOON:
@@ -9636,6 +9638,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 
+		case SKE_SKY_SUN:
 		case SKE_DAWN_BREAK:
 		case SKE_MIDNIGHT_KICK:
 		case SH_HOWLING_OF_CHUL_HO:
@@ -18990,6 +18993,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case SKE_RISING_MOON:
 			if (sc != NULL && sc->data[SC_DAWN_MOON] != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SKE_SKY_SUN:
+			if (sc == NULL || sc->data[SC_SKY_ENCHANT] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
