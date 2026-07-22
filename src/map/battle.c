@@ -3077,6 +3077,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_KAGENOMAI:
+					skillratio += -100 + 750 + 900 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 70 * skill_lv * pc->checkskill(sd, SS_KAGEGARI);
+					RE_LVL_DMOD(100);
+					if ((flag & SKILL_ALTDMG_FLAG) != 0)
+						skillratio = skillratio * 3 / 10;
+					break;
 				case SS_KAGEGARI:
 					skillratio += -100 + 600 + 900 * skill_lv;
 					skillratio += 5 * st->pow;

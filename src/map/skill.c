@@ -5112,6 +5112,46 @@ static int skill_shimiru_check_cell(struct block_list *target, va_list ap)
 	return 1;
 }
 
+/**
+ * Repeats a Shinkiro skill from every Mirage the caster has placed.
+ *
+ * The copies deal reduced damage, which the damage formulas key off
+ * SKILL_ALTDMG_FLAG to apply.
+ *
+ * @retval false if the caster is not a player, or this is already a copy.
+ */
+static bool skill_mirage_cast(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int16 x,
+	int16 y, int64 tick, int flag)
+{
+	nullpo_retr(false, src);
+
+	struct unit_data *ud = unit->bl2ud(src);
+
+	if (ud == NULL || src->type != BL_PC || (flag & 1) != 0)
+		return false;
+
+	for (int i = 0; i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+		struct skill_unit_group *sg = ud->skillunit[i];
+
+		if (sg->skill_id != SS_SHINKIROU || sg->unit.count < 1 || sg->unit.data == NULL)
+			continue;
+
+		struct skill_unit *su = sg->unit.data;
+
+		switch (skill_id) {
+			case SS_KAGENOMAI:
+				clif->skill_nodamage(&su->bl, &su->bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, &su->bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+				                    src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | SD_ANIMATION | SKILL_ALTDMG_FLAG | 1,
+				                    skill->castend_damage_id);
+				break;
+		}
+	}
+
+	return true;
+}
+
 static int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag)
 {
 	GUARD_MAP_LOCK
@@ -6679,6 +6719,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SS_KAGENOMAI:
 		case SS_KAGEGARI:
 			if ((flag & 1) != 0)
 				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -9576,6 +9617,13 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case SS_KAGENOMAI:
+			skill->mirage_cast(src, NULL, skill_id, skill_lv, 0, 0, tick, flag);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+			                    skill->castend_damage_id);
 			break;
 		case SS_AKUMUKESU:
 			if ((flag & 1) != 0) {
@@ -28940,6 +28988,7 @@ void skill_defaults(void)
 	skill->give_ap = skill_give_ap;
 	skill->sh_communed = skill_sh_communed;
 	skill->shimiru_check_cell = skill_shimiru_check_cell;
+	skill->mirage_cast = skill_mirage_cast;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;
