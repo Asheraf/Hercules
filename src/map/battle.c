@@ -3299,6 +3299,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 5 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
 					RE_LVL_DMOD(100);
 					break;
+				case SH_CHUL_HO_BATTERING:
+					skillratio += -100 + 550 + 250 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 70 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case SH_HYUN_ROK_CANNON:
 					skillratio += -100 + 1450 + 2250 * skill_lv;
 					skillratio += 5 * st->spl;
@@ -6612,7 +6619,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 		|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 		&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
-		|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
+		|| skill_id == SH_HOGOGONG_STRIKE || skill_id == SH_CHUL_HO_BATTERING
+		|| skill_id == HN_MEGA_SONIC_BLOW
 		|| (skill_id == SKE_NOON_BLAST && sc != NULL
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
@@ -6640,7 +6648,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 			|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 			&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
-			|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
+			|| skill_id == SH_HOGOGONG_STRIKE || skill_id == SH_CHUL_HO_BATTERING
+			|| skill_id == HN_MEGA_SONIC_BLOW
 			|| (skill_id == SKE_NOON_BLAST && sc != NULL
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
@@ -7115,7 +7124,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
 							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
-							|| skill_id == HN_MEGA_SONIC_BLOW
+							|| skill_id == SH_CHUL_HO_BATTERING || skill_id == HN_MEGA_SONIC_BLOW
 							|| skill_id == SKE_NOON_BLAST
 							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
 							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
