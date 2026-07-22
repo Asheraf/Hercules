@@ -2145,6 +2145,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_MISFORTUNE, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case ABC_HIT_AND_SLIDING:
+			sc_start(src, src, SC_CHASING, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case EM_DIAMOND_STORM:
 			sc_start(src, bl, SC_HANDICAPSTATE_FROSTBITE, 5, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
@@ -5492,6 +5495,25 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			} else if (sd != NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 			}
+		}
+			break;
+		case ABC_HIT_AND_SLIDING:
+		{
+			enum unit_dir dir = UNIT_DIR_NORTHEAST;
+			int total_backslide = skill_lv + distance_bl(src, bl);
+
+			if (bl->x != src->x || bl->y != src->y)
+				dir = map->calc_dir(bl, src->x, src->y);
+
+			if (unit->move_pos(src, bl->x + dirx[dir] * total_backslide, bl->y + diry[dir] * total_backslide, 1, true) == 0) {
+				clif->blown(src);
+				unit->set_dir(src, map->calc_dir(src, bl->x, bl->y));
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+			}
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 		}
 			break;
 		case IG_IMPERIAL_CROSS:

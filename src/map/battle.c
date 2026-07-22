@@ -4023,6 +4023,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 350 + 825 * skill_lv + 15 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_HIT_AND_SLIDING:
+					skillratio += -100 + 3500 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case HN_MEGA_SONIC_BLOW:
 					skillratio += -100 + 900 + 750 * skill_lv;
 					if (sd != NULL)
@@ -6400,6 +6404,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case ABC_FRENZY_SHOT:
 				if (rnd() % 100 < 5 * skill_lv)
 					wd.div_ = 3;
+				break;
+			case ABC_HIT_AND_SLIDING:
+				if (sd != NULL && sd->weapontype == W_BOW)
+					wd.flag |= BF_LONG;
 				break;
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)
