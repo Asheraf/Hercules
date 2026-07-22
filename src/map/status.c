@@ -3411,6 +3411,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->res = (int32)cap_value((int64)st->res + sc->data[SC_D_MACHINE]->val3, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_SHADOW_STRIP] != NULL && bl->type != BL_PC)
 			st->res -= st->res * sc->data[SC_SHADOW_STRIP]->val2 / 100;
+		if (sc != NULL && sc->data[SC_AIN_RHAPSODY] != NULL)
+			st->res = max(st->res - sc->data[SC_AIN_RHAPSODY]->val2, 0);
 	}
 	if ((flag & SCB_MRES) != 0) {
 		st->mres = bst->mres;
@@ -10389,6 +10391,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val3 = 100 + 20 * val1;
 				break;
 			case SC_GEF_NOCTURN:
+			case SC_AIN_RHAPSODY:
 				val2 = 10 * val1;
 				if ((val3 & 2) != 0)
 					val2 *= 2;
