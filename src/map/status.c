@@ -3270,6 +3270,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 
 	if ((flag & SCB_POW) != 0) {
 		st->pow = bst->pow;
+		if (sc != NULL && sc->data[SC_BENEDICTUM] != NULL)
+			st->pow = (uint16)cap_value((int64)st->pow + sc->data[SC_BENEDICTUM]->val2, 0, USHRT_MAX);
 		flag |= SCB_PATK;
 	}
 	if ((flag & SCB_STA) != 0) {
@@ -3292,10 +3294,14 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 	}
 	if ((flag & SCB_CON) != 0) {
 		st->con = bst->con;
+		if (sc != NULL && sc->data[SC_BENEDICTUM] != NULL)
+			st->con = (uint16)cap_value((int64)st->con + sc->data[SC_BENEDICTUM]->val2, 0, USHRT_MAX);
 		flag |= SCB_HIT | SCB_FLEE | SCB_PATK | SCB_SMATK;
 	}
 	if ((flag & SCB_CRT) != 0) {
 		st->crt = bst->crt;
+		if (sc != NULL && sc->data[SC_BENEDICTUM] != NULL)
+			st->crt = (uint16)cap_value((int64)st->crt + sc->data[SC_BENEDICTUM]->val2, 0, USHRT_MAX);
 		flag |= SCB_HPLUS | SCB_CRATE;
 	}
 
@@ -10250,6 +10256,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 5);
 				val2 = 2 * val1;
 				status_change_end(bl, SC_SANDY_FESTIVAL, INVALID_TIMER);
+				break;
+			case SC_BENEDICTUM:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 2 * val1;
+				status_change_end(bl, SC_MARINE_FESTIVAL, INVALID_TIMER);
 				break;
 			case SC_MARINE_FESTIVAL:
 				val1 = cap_value(val1, 1, 5);

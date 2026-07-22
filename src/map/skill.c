@@ -7215,6 +7215,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case CD_BENEDICTUM:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case CD_COMPETENTIA:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				int hp = (int)cap_value((int64)tstatus->max_hp * 20 * skill_lv / 100, 0, INT_MAX);
