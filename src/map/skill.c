@@ -3052,11 +3052,11 @@ static void skill_counter_additional_effect_unknown(struct block_list *src, stru
  * - flag is a BCT_ flag to indicate which type of adjustment should be used
  *   (BCT_ENEMY/BCT_PARTY/BCT_SELF) are the valid values.
  *------------------------------------------------------------------------*/
-static int skill_break_equip(struct block_list *bl, unsigned short where, int rate, int flag)
+static int skill_break_equip(struct block_list *bl, uint32 where, int rate, int flag)
 {
-	const int where_list[4]     = {EQP_WEAPON, EQP_ARMOR, EQP_SHIELD, EQP_HELM};
-	const enum sc_type scatk[4] = {SC_NOEQUIPWEAPON, SC_NOEQUIPARMOR, SC_NOEQUIPSHIELD, SC_NOEQUIPHELM};
-	const enum sc_type scdef[4] = {SC_PROTECTWEAPON, SC_PROTECTARMOR, SC_PROTECTSHIELD, SC_PROTECTHELM};
+	const int where_list[]      = {EQP_WEAPON, EQP_ARMOR, EQP_SHIELD, EQP_HELM, EQP_SHADOW_GEAR};
+	const enum sc_type scatk[] = {SC_NOEQUIPWEAPON, SC_NOEQUIPARMOR, SC_NOEQUIPSHIELD, SC_NOEQUIPHELM, SC_SHADOW_STRIP};
+	const enum sc_type scdef[] = {SC_PROTECTWEAPON, SC_PROTECTARMOR, SC_PROTECTSHIELD, SC_PROTECTHELM, SC_PROTECTSHADOWEQUIP};
 	struct status_change *sc = status->get_sc(bl);
 	int i;
 	struct map_session_data *sd = BL_CAST(BL_PC, bl);
@@ -3091,7 +3091,7 @@ static int skill_break_equip(struct block_list *bl, unsigned short where, int ra
 			rate = rate*battle_config.equip_self_break_rate/100;
 	}
 
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < ARRAYLENGTH(where_list); i++) {
 		if (where&where_list[i]) {
 			if (sc && sc->count && sc->data[scdef[i]])
 				where&=~where_list[i];
@@ -3128,6 +3128,24 @@ static int skill_break_equip(struct block_list *bl, unsigned short where, int ra
 				case EQI_GARMENT:
 					flag = (where&EQP_GARMENT);
 					break;
+				case EQI_SHADOW_ARMOR:
+					flag = (where&EQP_SHADOW_ARMOR);
+					break;
+				case EQI_SHADOW_WEAPON:
+					flag = (where&EQP_SHADOW_WEAPON);
+					break;
+				case EQI_SHADOW_SHIELD:
+					flag = (where&EQP_SHADOW_SHIELD);
+					break;
+				case EQI_SHADOW_SHOES:
+					flag = (where&EQP_SHADOW_SHOES);
+					break;
+				case EQI_SHADOW_ACC_R:
+					flag = (where&EQP_SHADOW_ACC_R);
+					break;
+				case EQI_SHADOW_ACC_L:
+					flag = (where&EQP_SHADOW_ACC_L);
+					break;
 				default:
 					continue;
 			}
@@ -3142,12 +3160,12 @@ static int skill_break_equip(struct block_list *bl, unsigned short where, int ra
 	return where; //Return list of pieces broken.
 }
 
-static int skill_strip_equip(struct block_list *bl, unsigned short where, int rate, int lv, int time)
+static int skill_strip_equip(struct block_list *bl, uint32 where, int rate, int lv, int time)
 {
 	struct status_change *sc;
-	const int pos[5]             = {EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HELM, EQP_ACC};
-	const enum sc_type sc_atk[5] = {SC_NOEQUIPWEAPON, SC_NOEQUIPSHIELD, SC_NOEQUIPARMOR, SC_NOEQUIPHELM, SC__STRIPACCESSARY};
-	const enum sc_type sc_def[5] = {SC_PROTECTWEAPON, SC_PROTECTSHIELD, SC_PROTECTARMOR, SC_PROTECTHELM, 0};
+	const int pos[]               = {EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HELM, EQP_ACC, EQP_SHADOW_GEAR};
+	const enum sc_type sc_atk[] = {SC_NOEQUIPWEAPON, SC_NOEQUIPSHIELD, SC_NOEQUIPARMOR, SC_NOEQUIPHELM, SC__STRIPACCESSARY, SC_SHADOW_STRIP};
+	const enum sc_type sc_def[] = {SC_PROTECTWEAPON, SC_PROTECTSHIELD, SC_PROTECTARMOR, SC_PROTECTHELM, SC_NONE, SC_PROTECTSHADOWEQUIP};
 	int i;
 
 	if (rnd()%100 >= rate)
@@ -7393,6 +7411,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      skill_lv, tick,
 				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
+			break;
+		case BO_ADVANCE_PROTECTION:
+			if (dstsd != NULL && pc->checkequip(dstsd, EQP_SHADOW_GEAR) >= 0)
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, SC_PROTECTSHADOWEQUIP, 100, skill_lv,
+				                              skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		case WH_WIND_SIGN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
@@ -17996,6 +18020,13 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 				return 0;
 			}
 		}
+			break;
+		case BO_ADVANCE_PROTECTION:
+			if (target == NULL || target->type != BL_PC
+				|| pc->checkequip(BL_UCAST(BL_PC, target), EQP_SHADOW_GEAR) < 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
 			break;
 		case PR_BENEDICTIO:
 			skill->check_pc_partner(sd, skill_id, &skill_lv, 1, 1);
