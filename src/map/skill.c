@@ -14815,6 +14815,10 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				                     skill_lv, 0, flag);
 			break;
 		}
+		case SOA_TOTEM_OF_TUTELARY:
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
@@ -15133,6 +15137,7 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 		case SA_VOLCANO:
 		case SA_DELUGE:
 		case SA_VIOLENTGALE:
+		case SOA_TOTEM_OF_TUTELARY:
 		{
 			struct skill_unit_group *old_sg;
 			if ((old_sg = skill->locate_element_field(src)) != NULL) {
@@ -16677,6 +16682,18 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_CONFLAGRATION:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
+		case UNT_TOTEM_OF_TUTELARY:
+			if (bl->type == BL_PC && (tsc == NULL || (tsc->option & OPTION_MADOGEAR) == 0)) {
+				struct map_session_data *ssd = BL_CAST(BL_PC, ss);
+				int mastery_lv = ssd != NULL ? pc->checkskill(ssd, SOA_TALISMAN_MASTERY) : 0;
+				int64 hp = ((int64)500 + 500 * sg->skill_lv + 50 * mastery_lv * sg->skill_lv) * status->get_lv(ss) / 100;
+				int64 sp = (int64)50 * sg->skill_lv + 5 * mastery_lv * sg->skill_lv;
+
+				hp += (int64)5 * status->get_status_data(ss)->crt * sg->skill_lv * status->get_lv(ss) / 100;
+				status->heal(bl, hp, sp, STATUS_HEAL_SHOWEFFECT);
+				sc_start(ss, bl, type, 100, sg->skill_lv, sg->interval + 100, skill_id);
+			}
+			break;
 		case UNT_ABYSS_SQUARE:
 		{
 			int flag = 0;
@@ -16761,6 +16778,7 @@ static int skill_unit_onout(struct skill_unit *src, struct block_list *bl, int64
 		case UNT_PNEUMA:
 		case UNT_NEUTRALBARRIER:
 		case UNT_STEALTHFIELD:
+		case UNT_TOTEM_OF_TUTELARY:
 			if (sce)
 				status_change_end(bl, type, INVALID_TIMER);
 			break;
@@ -20730,6 +20748,7 @@ static int skill_clear_group(struct block_list *bl, int flag)
 			case SA_LANDPROTECTOR:
 			case NJ_SUITON:
 			case NJ_KAENSIN:
+			case SOA_TOTEM_OF_TUTELARY:
 				if (flag&1)
 					group[count++]= ud->skillunit[i];
 				break;
@@ -20770,6 +20789,7 @@ static struct skill_unit_group *skill_locate_element_field(struct block_list *bl
 			case SA_VIOLENTGALE:
 			case SA_LANDPROTECTOR:
 			case NJ_SUITON:
+			case SOA_TOTEM_OF_TUTELARY:
 			case SO_CLOUD_KILL:
 			case SO_WARMER:
 				return ud->skillunit[i];
