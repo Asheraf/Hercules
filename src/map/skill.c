@@ -8212,6 +8212,30 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case TR_ROKI_CAPRICCIO:
+			if ((flag & 1) != 0) {
+				int confusion_chance = 4 * skill_lv;
+				int misfortune_chance = 5 * skill_lv;
+
+				if ((flag & 2) != 0) {
+					confusion_chance *= 2;
+					misfortune_chance *= 2;
+				}
+
+				sc_start(src, bl, SC_CONFUSION, confusion_chance, skill_lv, skill->get_time(skill_id, skill_lv),
+				         skill_id);
+				sc_start(src, bl, SC_HANDICAPSTATE_MISFORTUNE, misfortune_chance, skill_lv,
+				         skill->get_time2(skill_id, skill_lv), skill_id);
+			} else if (sd != NULL) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sd->skill_id_song = skill_id;
+				sd->skill_lv_song = skill_lv;
+				if (skill->check_pc_partner(sd, skill_id, &skill_lv, AREA_SIZE, 0) > 0)
+					flag |= 2;
+				map->foreachinrange(skill->area_sub, src, skill->get_splash(skill_id, skill_lv), BL_PC,
+				                     src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case TR_GEF_NOCTURN:
 			if ((flag & 1) != 0) {
 				sc_start4(src, bl, type, 100, skill_lv, 0, flag, 0, skill->get_time(skill_id, skill_lv), skill_id);
@@ -17471,6 +17495,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case SHC_POTENT_VENOM:
 			if (sc == NULL || sc->data[SC_EDP] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case TR_ROKI_CAPRICCIO:
+			if (map_flag_vs(sd->bl.m) == 0) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
