@@ -30,6 +30,13 @@
 struct map_session_data;
 struct block_list;
 
+#define MAX_SHADOW_SCAR 100
+
+struct shadow_scar_data {
+	int timer[MAX_SHADOW_SCAR];
+	uint16 count;
+};
+
 /**
  * Bitmask values usable as a flag in unit_stopwalking
  */
@@ -71,6 +78,7 @@ struct unit_data {
 	enum unit_dir dir;
 	unsigned char walk_count;
 	unsigned char target_count;
+	struct shadow_scar_data *shadow_scar;
 	struct {
 		unsigned change_walk_target : 1 ;
 		unsigned skillcastcancel : 1 ;
@@ -107,6 +115,7 @@ struct unit_interface {
 	struct unit_data* (*bl2ud2) (struct block_list *bl);
 	void (*init_ud) (struct unit_data *ud);
 	int (*attack_timer) (int tid, int64 tick, int id, intptr_t data);
+	int (*shadow_scar_timer) (int tid, int64 tick, int id, intptr_t data);
 	int (*walk_toxy_timer) (int tid, int64 tick, int id, intptr_t data);
 	int (*walk_toxy_sub) (struct block_list *bl);
 	int (*delay_walk_toxy_timer) (int tid, int64 tick, int id, intptr_t data);
@@ -135,6 +144,8 @@ struct unit_interface {
 	int (*skilluse_pos) (struct block_list *src, short skill_x, short skill_y, uint16 skill_id, uint16 skill_lv);
 	int (*skilluse_pos2) (struct block_list *src, short skill_x, short skill_y, uint16 skill_id, uint16 skill_lv, int casttime, int castcancel);
 	int (*set_target) (struct unit_data *ud, int target_id);
+	void (*add_shadow_scar) (struct block_list *bl, int duration);
+	void (*clear_shadow_scar) (struct block_list *bl);
 	void (*stop_attack) (struct block_list *bl);
 	int (*unattackable) (struct block_list *bl);
 	int (*attack) (struct block_list *src, int target_id, int continuous);

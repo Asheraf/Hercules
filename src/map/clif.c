@@ -1541,6 +1541,22 @@ static void clif_charm_single(int fd, struct map_session_data *sd)
 #endif
 }
 
+static void clif_enchanting_shadow_spirit(struct block_list *bl, uint16 amount)
+{
+#if PACKETVER_MAIN_NUM >= 20191120 || PACKETVER_RE_NUM >= 20191120 || PACKETVER_ZERO_NUM >= 20191127
+	struct PACKET_ZC_TARGET_SPIRITS p = { 0 };
+
+	nullpo_retv(bl);
+	p.PacketType = HEADER_ZC_TARGET_SPIRITS;
+	p.GID = bl->id;
+	p.amount = amount;
+	clif->send(&p, sizeof(p), bl, AREA);
+#else
+	(void)bl;
+	(void)amount;
+#endif
+}
+
 /*==========================================
  * Run when player changes map / refreshes
  * Tells its client to display all weather settings being used by this map
@@ -27008,6 +27024,7 @@ void clif_defaults(void)
 	clif->soulballs = clif_soulball;
 	clif->spiritballs = clif_spiritballs;
 	clif->spiritball_single = clif_spiritball_single;
+	clif->enchanting_shadow_spirit = clif_enchanting_shadow_spirit;
 	clif->servantballs = clif_servantballs;
 	clif->servantball_single = clif_servantball_single;
 	clif->bladestop = clif_bladestop;

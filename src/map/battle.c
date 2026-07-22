@@ -3769,6 +3769,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 
 		if (sc->data[SC_HOLY_OIL] != NULL && (flag & (BF_LONG | BF_WEAPON)) == (BF_LONG | BF_WEAPON))
 			damage += damage * (3 * sc->data[SC_HOLY_OIL]->val1) / 100;
+		if (sc->data[SC_SHADOW_SCAR] != NULL)
+			damage += damage * (3 * min(sc->data[SC_SHADOW_SCAR]->val1, 100)) / 100;
 
 		if( damage ) {
 			if( sc->data[SC_DEEP_SLEEP] ) {

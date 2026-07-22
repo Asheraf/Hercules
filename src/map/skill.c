@@ -1586,6 +1586,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		//So if the target can't be inflicted with statuses, this is pointless.
 		return 0;
 
+	if (sc != NULL && sc->data[SC_SHADOW_WEAPON] != NULL
+		&& rnd() % 100 < sc->data[SC_SHADOW_WEAPON]->val1)
+		unit->add_shadow_scar(bl, skill->get_time2(SHC_ENCHANTING_SHADOW, sc->data[SC_SHADOW_WEAPON]->val1));
+
 	if( sd ) { // These statuses would be applied anyway even if the damage was blocked by some skills. [Inkfish]
 		if( skill_id != WS_CARTTERMINATION && skill_id != AM_DEMONSTRATION && skill_id != CR_REFLECTSHIELD && skill_id != MS_REFLECTSHIELD && skill_id != ASC_BREAKER ) {
 			// Trigger status effects
@@ -7924,6 +7928,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IQ_SINCERE_FAITH:
 		case SHC_SHADOW_EXCEED:
 		case SHC_POTENT_VENOM:
+		case SHC_ENCHANTING_SHADOW:
 #ifdef RENEWAL
 		case BD_ADAPTATION:
 		case HP_BASILICA: // 2018.11 rebalance - Basilica changed to a self buff

@@ -395,6 +395,16 @@ struct PACKET_ZC_STATUS_CHANGE {
 } __attribute__((packed));
 DEFINE_PACKET_HEADER(ZC_STATUS_CHANGE, 0x00be);
 
+#if PACKETVER_MAIN_NUM >= 20191120 || PACKETVER_RE_NUM >= 20191120 || PACKETVER_ZERO_NUM >= 20191127
+struct PACKET_ZC_TARGET_SPIRITS {
+	int16 PacketType;
+	uint32 GID;
+	uint32 unknown_val;
+	uint16 amount;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_TARGET_SPIRITS, 0x0b68);
+#endif
+
 struct PACKET_ZC_NOTIFY_CARTITEM_COUNTINFO {
 	int16 PacketType;
 	int16 curCount;

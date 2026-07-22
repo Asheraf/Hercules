@@ -163,6 +163,106 @@ static struct unit_data *unit_bl2ud2(struct block_list *bl)
 	return unit->bl2ud(bl);
 }
 
+static int unit_shadow_scar_timer(int tid, int64 tick, int id, intptr_t data)
+{
+	struct block_list *bl = map->id2bl(id);
+	struct unit_data *ud;
+	struct shadow_scar_data *scar;
+	int i;
+
+	if (bl == NULL || (ud = unit->bl2ud(bl)) == NULL || (scar = ud->shadow_scar) == NULL)
+		return 0;
+
+	for (i = 0; i < MAX_SHADOW_SCAR; i++) {
+		if (scar->timer[i] == tid) {
+			scar->timer[i] = INVALID_TIMER;
+			scar->count--;
+			break;
+		}
+	}
+
+	if (i == MAX_SHADOW_SCAR)
+		return 0;
+
+	if (scar->count == 0) {
+		aFree(scar);
+		ud->shadow_scar = NULL;
+		clif->enchanting_shadow_spirit(bl, 0);
+		status_change_end(bl, SC_SHADOW_SCAR, INVALID_TIMER);
+		return 0;
+	}
+
+	struct status_change *sc = status->get_sc(bl);
+	if (sc != NULL && sc->data[SC_SHADOW_SCAR] != NULL)
+		sc->data[SC_SHADOW_SCAR]->val1 = scar->count;
+	clif->enchanting_shadow_spirit(bl, scar->count);
+	return 0;
+}
+
+static void unit_clear_shadow_scar(struct block_list *bl)
+{
+	struct unit_data *ud;
+	struct shadow_scar_data *scar;
+	int i;
+
+	nullpo_retv(bl);
+	if ((ud = unit->bl2ud(bl)) == NULL || (scar = ud->shadow_scar) == NULL)
+		return;
+
+	for (i = 0; i < MAX_SHADOW_SCAR; i++) {
+		if (scar->timer[i] != INVALID_TIMER)
+			timer->delete_(scar->timer[i], unit->shadow_scar_timer);
+	}
+	aFree(scar);
+	ud->shadow_scar = NULL;
+	clif->enchanting_shadow_spirit(bl, 0);
+}
+
+static void unit_add_shadow_scar(struct block_list *bl, int duration)
+{
+	struct unit_data *ud;
+	struct shadow_scar_data *scar;
+	int i;
+
+	nullpo_retv(bl);
+	if (duration <= 0 || (ud = unit->bl2ud(bl)) == NULL)
+		return;
+
+	if ((scar = ud->shadow_scar) == NULL) {
+		CREATE(scar, struct shadow_scar_data, 1);
+		for (i = 0; i < MAX_SHADOW_SCAR; i++)
+			scar->timer[i] = INVALID_TIMER;
+		ud->shadow_scar = scar;
+	}
+
+	if (scar->count >= MAX_SHADOW_SCAR)
+		return;
+
+	for (i = 0; i < MAX_SHADOW_SCAR; i++) {
+		if (scar->timer[i] == INVALID_TIMER)
+			break;
+	}
+	if (i == MAX_SHADOW_SCAR)
+		return;
+
+	scar->timer[i] = timer->add(timer->gettick() + duration, unit->shadow_scar_timer, bl->id, 0);
+	if (scar->timer[i] == INVALID_TIMER) {
+		if (scar->count == 0) {
+			aFree(scar);
+			ud->shadow_scar = NULL;
+		}
+		return;
+	}
+
+	scar->count++;
+	struct status_change *sc = status->get_sc(bl);
+	if (sc != NULL && sc->data[SC_SHADOW_SCAR] != NULL)
+		sc->data[SC_SHADOW_SCAR]->val1 = scar->count;
+	else
+		sc_start(bl, bl, SC_SHADOW_SCAR, 100, scar->count, INFINITE_DURATION, SHC_ENCHANTING_SHADOW);
+	clif->enchanting_shadow_spirit(bl, scar->count);
+}
+
 /**
  * TODO: understand purpose of this function
  * @param bl block_list to process
@@ -2976,6 +3076,7 @@ static int unit_free(struct block_list *bl, enum clr_type clrtype)
 	map->freeblock_lock();
 	if( bl->prev ) //Players are supposed to logout with a "warp" effect.
 		unit->remove_map(bl, clrtype, ALC_MARK);
+	unit->clear_shadow_scar(bl);
 
 	switch( bl->type ) {
 		case BL_PC:
@@ -3247,6 +3348,7 @@ static int do_init_unit(bool minimal)
 	timer->add_func_list(unit->walktobl_timer, "unit_walktobl_timer");
 	timer->add_func_list(unit->delay_walk_toxy_timer, "unit_delay_walk_toxy_timer");
 	timer->add_func_list(unit->steptimer, "unit_steptimer");
+	timer->add_func_list(unit->shadow_scar_timer, "unit_shadow_scar_timer");
 	return 0;
 }
 
@@ -3268,6 +3370,7 @@ void unit_defaults(void)
 	unit->bl2ud2 = unit_bl2ud2;
 	unit->init_ud = unit_init_ud;
 	unit->attack_timer = unit_attack_timer;
+	unit->shadow_scar_timer = unit_shadow_scar_timer;
 	unit->walk_toxy_timer = unit_walk_toxy_timer;
 	unit->walk_toxy_sub = unit_walk_toxy_sub;
 	unit->delay_walk_toxy_timer = unit_delay_walk_toxy_timer;
@@ -3296,6 +3399,8 @@ void unit_defaults(void)
 	unit->skilluse_pos = unit_skilluse_pos;
 	unit->skilluse_pos2 = unit_skilluse_pos2;
 	unit->set_target = unit_set_target;
+	unit->add_shadow_scar = unit_add_shadow_scar;
+	unit->clear_shadow_scar = unit_clear_shadow_scar;
 	unit->stop_attack = unit_stop_attack;
 	unit->unattackable = unit_unattackable;
 	unit->attack = unit_attack;

@@ -11659,6 +11659,9 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		case SC_EDP:
 			status_change_end(bl, SC_POTENT_VENOM, INVALID_TIMER);
 			break;
+		case SC_SHADOW_SCAR:
+			unit->clear_shadow_scar(bl);
+			break;
 		case SC_GRANITIC_ARMOR:
 		{
 			unsigned int damage = st->max_hp*sce->val3/100;
