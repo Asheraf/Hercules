@@ -89,3 +89,8 @@
 2125,8424,1,1	//EL_UPHEAVAL,Upheaval
 2125,8412,1,2	//EL_POWER_OF_GAIA,Power of Gaia
 2125,8442,1,4	//EL_STONE_RAIN,Stone Rain
+
+//================
+// EM_ARDOR
+//================
+20817,8443,1,1	//EM_EL_FLAMETECHNIC,Flame Technic

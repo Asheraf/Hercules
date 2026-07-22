@@ -5883,6 +5883,7 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			else if( sc->data[SC_COOLER_OPTION] ) s_ele = sc->data[SC_COOLER_OPTION]->val4;
 			else if( sc->data[SC_BLAST_OPTION] ) s_ele = sc->data[SC_BLAST_OPTION]->val3;
 			else if( sc->data[SC_CURSED_SOIL_OPTION] ) s_ele = sc->data[SC_CURSED_SOIL_OPTION]->val4;
+			else if (sc->data[SC_FLAMETECHNIC_OPTION] != NULL) s_ele = sc->data[SC_FLAMETECHNIC_OPTION]->val3;
 		}
 	}
 
@@ -6031,6 +6032,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 							ad.flag = BF_WEAPON|BF_SHORT;
 							ad.type = BDT_NORMAL;
 						}
+						if (skill_id == MG_FIREBOLT && sc != NULL && sc->data[SC_FLAMETECHNIC_OPTION] != NULL)
+							skillratio *= 5;
 					/* Fall through */
 					default:
 						MATK_RATE(battle->calc_skillratio(BF_MAGIC, src, target, skill_id, skill_lv, skillratio, mflag));
@@ -9459,6 +9462,24 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 					clif->status_change(src, status->get_sc_icon(SC_POSTDELAY),
 					                    status->get_sc_relevant_bl_types(SC_POSTDELAY), 1, delay, 0, 0, 0);
 			}
+		}
+
+		if (sc != NULL && sc->data[SC_FLAMETECHNIC_OPTION] != NULL && rnd()%100 < 7) {
+			uint16 skill_lv = max(1, pc->checkskill(sd, MG_FIREBOLT));
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+			int delay = skill->delay_fix(src, MG_FIREBOLT, skill_lv);
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			if (status->charge(src, 0, skill->get_sp(MG_FIREBOLT, skill_lv)) != 0) {
+				skill->castend_damage_id(src, target, MG_FIREBOLT, skill_lv, tick, flag);
+				if (DIFF_TICK(sd->ud.canact_tick, tick + delay) < 0) {
+					sd->ud.canact_tick = max(tick + delay, sd->ud.canact_tick);
+					if (battle_config.display_status_timers != 0)
+						clif->status_change(src, status->get_sc_icon(SC_POSTDELAY),
+						                    status->get_sc_relevant_bl_types(SC_POSTDELAY), 1, delay, 0, 0, 0);
+				}
+			}
+			sd->auto_cast_current.type = ac_type;
 		}
 
 		if (wd.flag & BF_WEAPON && src != target && damage > 0) {
