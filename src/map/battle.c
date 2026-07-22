@@ -4634,6 +4634,20 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 
 	//SC effects from caster side.
 	if (s_sc && s_sc->count) {
+		if (s_sc->data[SC_BREAKINGLIMIT] != NULL) {
+			switch (skill_id) {
+				case HN_DOUBLEBOWLINGBASH:
+				case HN_SHIELD_CHAIN_RUSH:
+					damage += damage * 120 / 100;
+					break;
+				case HN_MEGA_SONIC_BLOW:
+					damage *= 2;
+					break;
+				case HN_SPIRAL_PIERCE_MAX:
+					damage += damage * 130 / 100;
+					break;
+			}
+		}
 		if( s_sc->data[SC_INVINCIBLE] && !s_sc->data[SC_INVINCIBLEOFF] )
 			damage += damage * 75 / 100;
 		// [Epoque]

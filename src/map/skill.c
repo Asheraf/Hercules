@@ -7783,6 +7783,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			}
 			break;
+		case HN_BREAKINGLIMIT:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case SOA_TALISMAN_OF_PROTECTION:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start2(src, bl, type, 100, skill_lv, src->id, skill->get_time(skill_id, skill_lv),
