@@ -5880,6 +5880,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case MT_RUSH_QUAKE:
 		case MT_SPARK_BLASTER:
 		case BO_EXPLOSIVE_POWDER:
+		case BO_MAYHEMIC_THORNS:
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
@@ -5939,6 +5940,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				if (skill_id == CD_PETITIO)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == MT_SPARK_BLASTER)
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				if (skill_id == BO_MAYHEMIC_THORNS)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == BO_ACIDIFIED_ZONE_WATER || skill_id == BO_ACIDIFIED_ZONE_GROUND
 					|| skill_id == BO_ACIDIFIED_ZONE_WIND || skill_id == BO_ACIDIFIED_ZONE_FIRE) {

@@ -3620,6 +3620,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 100 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case BO_MAYHEMIC_THORNS:
+					skillratio += -100 + 200 + 340 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL)
+						skillratio += 200;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_TRIPLE_LASER:
 					skillratio += -100 + 650 + 1150 * skill_lv + 12 * st->pow;
 					RE_LVL_DMOD(100);
@@ -6361,6 +6367,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL)
 					wd.div_ = 5;
 				break;
+			case BO_MAYHEMIC_THORNS:
+				if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL)
+					wd.div_ = 4;
+				break;
 #ifndef RENEWAL
 			case MO_FINGEROFFENSIVE:
 				if(sd) {
@@ -6665,7 +6675,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
-		|| skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER || skill_id == ABC_FRENZY_SHOT
+		|| skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER || skill_id == BO_MAYHEMIC_THORNS
+		|| skill_id == ABC_FRENZY_SHOT
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
@@ -6683,7 +6694,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
 		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER
-			|| skill_id == ABC_FRENZY_SHOT ||
+			|| skill_id == BO_MAYHEMIC_THORNS || skill_id == ABC_FRENZY_SHOT ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
@@ -7181,7 +7192,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SKE_NOON_BLAST
 							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
 							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
-							|| skill_id == NW_WILD_SHOT || skill_id == MT_TRIPLE_LASER)
+							|| skill_id == NW_WILD_SHOT || skill_id == MT_TRIPLE_LASER
+							|| skill_id == BO_MAYHEMIC_THORNS)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
