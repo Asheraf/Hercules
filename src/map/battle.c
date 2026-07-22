@@ -3347,6 +3347,17 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 60 * skill_lv * pc->checkskill(sd, IG_SPEAR_SWORD_M);
 					RE_LVL_DMOD(100);
 					break;
+				case CD_EFFLIGO:
+					skillratio += -100 + 1800 * skill_lv + 7 * st->pow;
+					if (sd != NULL)
+						skillratio += 8 * pc->checkskill(sd, CD_MACE_BOOK_M);
+					if (tst->race == RC_UNDEAD || tst->race == RC_DEMON) {
+						skillratio += 200 * skill_lv;
+						if (sd != NULL)
+							skillratio += 7 * pc->checkskill(sd, CD_MACE_BOOK_M);
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -4265,6 +4276,11 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
 		return sd != NULL && (sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR) ? BF_LONG : BF_SHORT;
+	}
+	if (skill_id == CD_EFFLIGO) {
+		struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+		return sd != NULL && (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE) ? BF_LONG : BF_SHORT;
 	}
 
 #ifdef RENEWAL
@@ -5571,7 +5587,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
-		|| skill_id == IQ_THIRD_PUNISH) && sstatus->cri &&
+		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5580,7 +5596,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
-			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH))
+			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
+			|| skill_id == CD_EFFLIGO))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -6020,7 +6037,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
 							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
-							|| skill_id == IQ_THIRD_PUNISH)
+							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
