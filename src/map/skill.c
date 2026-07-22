@@ -5996,6 +5996,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 		case AG_ASTRAL_STRIKE:
 		case AG_ASTRAL_STRIKE_ATK:
+		case EM_ELEMENTAL_BUSTER_FIRE:
+		case EM_ELEMENTAL_BUSTER_WATER:
+		case EM_ELEMENTAL_BUSTER_WIND:
+		case EM_ELEMENTAL_BUSTER_GROUND:
+		case EM_ELEMENTAL_BUSTER_POISON:
 		case AG_ROCK_DOWN:
 		case MG_SOULSTRIKE:
 		case NPC_DARKSTRIKE:
@@ -7472,6 +7477,43 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case EM_ELEMENTAL_BUSTER:
+			if (sd != NULL && sd->ed != NULL) {
+				uint16 buster_element = 0;
+
+				switch (sd->ed->elemental.class_) {
+					case ELEID_EM_ARDOR:
+						buster_element = EM_ELEMENTAL_BUSTER_FIRE;
+						break;
+					case ELEID_EM_DILUVIO:
+						buster_element = EM_ELEMENTAL_BUSTER_WATER;
+						break;
+					case ELEID_EM_PROCELLA:
+						buster_element = EM_ELEMENTAL_BUSTER_WIND;
+						break;
+					case ELEID_EM_TERREMOTUS:
+						buster_element = EM_ELEMENTAL_BUSTER_GROUND;
+						break;
+					case ELEID_EM_SERPENS:
+						buster_element = EM_ELEMENTAL_BUSTER_POISON;
+						break;
+				}
+
+				if (buster_element != 0) {
+					skill->area_temp[1] = 0;
+					clif->skill_nodamage(src, bl, buster_element, skill_lv, 1);
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					map->foreachinrange(skill->area_sub, bl, 6, BL_CHAR | BL_SKILL, src, buster_element, skill_lv, tick,
+					                    flag | BCT_ENEMY | SD_LEVEL | SD_SPLASH | 1, skill->castend_damage_id);
+				} else {
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					flag |= 1;
+				}
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				flag |= 1;
+			}
+			break;
 		case BO_THE_WHOLE_PROTECTION:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				static const unsigned int equip[] = { EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HEAD_TOP };
@@ -17972,6 +18014,24 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			if (st->hp < 30 * st->max_hp / 100) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 				return 0;
+			}
+			break;
+		case EM_ELEMENTAL_BUSTER:
+			if (sd == NULL || sd->ed == NULL) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			switch (sd->ed->elemental.class_) {
+				case ELEID_EM_ARDOR:
+				case ELEID_EM_DILUVIO:
+				case ELEID_EM_PROCELLA:
+				case ELEID_EM_TERREMOTUS:
+				case ELEID_EM_SERPENS:
+					break;
+				default:
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					return 0;
 			}
 			break;
 		default:

@@ -2139,6 +2139,16 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 7500 - 300 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case EM_ELEMENTAL_BUSTER_FIRE:
+				case EM_ELEMENTAL_BUSTER_WATER:
+				case EM_ELEMENTAL_BUSTER_WIND:
+				case EM_ELEMENTAL_BUSTER_GROUND:
+				case EM_ELEMENTAL_BUSTER_POISON:
+					skillratio += -100 + 550 + 2650 * skill_lv + 10 * st->spl;
+					if (tst->race == RC_FORMLESS || tst->race == RC_DRAGON)
+						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)
@@ -4588,6 +4598,16 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 
 static int battle_adjust_skill_damage(int m, unsigned short skill_id)
 {
+	switch (skill_id) {
+		case EM_ELEMENTAL_BUSTER_FIRE:
+		case EM_ELEMENTAL_BUSTER_WATER:
+		case EM_ELEMENTAL_BUSTER_WIND:
+		case EM_ELEMENTAL_BUSTER_GROUND:
+		case EM_ELEMENTAL_BUSTER_POISON:
+			skill_id = EM_ELEMENTAL_BUSTER;
+			break;
+	}
+
 	if( map->list[m].skill_count ) {
 		int i;
 		ARR_FIND(0, map->list[m].skill_count, i, map->list[m].skills[i]->skill_id == skill_id );
@@ -4877,6 +4897,10 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			bonus_skill_id = AG_CRYSTAL_IMPACT;
 		else if (skill_id == AG_CRIMSON_ARROW_ATK)
 			bonus_skill_id = AG_CRIMSON_ARROW;
+		else if (skill_id == EM_ELEMENTAL_BUSTER_FIRE || skill_id == EM_ELEMENTAL_BUSTER_WATER
+			|| skill_id == EM_ELEMENTAL_BUSTER_WIND
+			|| skill_id == EM_ELEMENTAL_BUSTER_GROUND || skill_id == EM_ELEMENTAL_BUSTER_POISON)
+			bonus_skill_id = EM_ELEMENTAL_BUSTER;
 		int64 skill_damage_bonus = 0;
 		if (sd != NULL)
 			skill_damage_bonus = pc->skillatk_bonus(sd, bonus_skill_id);
@@ -4944,6 +4968,13 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 					break;
 				case WM_REVERBERATION_MAGIC:
 					rskill = WM_REVERBERATION;
+					break;
+				case EM_ELEMENTAL_BUSTER_FIRE:
+				case EM_ELEMENTAL_BUSTER_WATER:
+				case EM_ELEMENTAL_BUSTER_WIND:
+				case EM_ELEMENTAL_BUSTER_GROUND:
+				case EM_ELEMENTAL_BUSTER_POISON:
+					rskill = EM_ELEMENTAL_BUSTER;
 					break;
 				default:
 					rskill = skill_id;
