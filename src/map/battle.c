@@ -3321,6 +3321,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case IG_OVERSLASH:
+					skillratio += -100 + 260 * skill_lv + 7 * st->pow;
+					if (sd != NULL)
+						skillratio += 60 * skill_lv * pc->checkskill(sd, IG_SPEAR_SWORD_M);
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -5283,6 +5289,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case DK_SERVANT_W_DEMOL:
 				if (sd != NULL)
 					wd.div_ = sd->servantball_old;
+				break;
+			case IG_OVERSLASH:
+				if ((wflag & 0xFFF) >= 4)
+					wd.div_ = 7;
+				else if ((wflag & 0xFFF) >= 2)
+					wd.div_ = 5;
 				break;
 			case HT_PHANTASMIC:
 				//Since these do not consume ammo, they need to be explicitly set as arrow attacks.

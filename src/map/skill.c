@@ -5359,6 +5359,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
 		case IG_SHIELD_SHOOTING:
+		case IG_OVERSLASH:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -5424,6 +5425,12 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case IG_OVERSLASH:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						skill->area_temp[0] = map->foreachinrange(skill->area_sub, bl,
+							skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id, skill_lv, tick, BCT_ENEMY,
+							skill->area_sub_count);
+						break;
 					case IG_SHIELD_SHOOTING:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						sc_start(src, src, SC_SHIELD_POWER, 100, skill_lv, skill->get_time(skill_id, skill_lv),
@@ -16332,6 +16339,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		}
 			break;
 		case IG_GRAND_JUDGEMENT:
+		case IG_OVERSLASH:
 			if (sc == NULL || sc->data[SC_ATTACK_STANCE] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
