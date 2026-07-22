@@ -5879,6 +5879,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case CD_PETITIO:
 		case SHC_SAVAGE_IMPACT:
 		case SHC_IMPACT_CRATER:
+		case SHC_CROSS_SLASH:
 		case SHC_FATAL_SHADOW_CROW:
 		case ABC_ABYSS_DAGGER:
 		case ABC_DEFT_STAB:
@@ -6011,6 +6012,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 								clif->updatestatus(sd, SP_AP);
 						}
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
+					case SHC_CROSS_SLASH:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						sc_start(src, src, SC_WEAPONBLOCK_ON, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+						         skill_id);
 						break;
 					case ABC_DEFT_STAB:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
