@@ -7117,6 +7117,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IG_RADIANT_SPEAR || skill_id == SHC_CROSS_SLASH || skill_id == WH_WILD_WALK
 		|| skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW || skill_id == AT_ALPHA_CLAW
 		|| skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG
+		|| skill_id == AT_PINION_SHOT || skill_id == AT_QUILL_SPEAR || skill_id == AT_QUILL_SPEAR_S
+		|| skill_id == AT_TEMPEST_FLAP
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
@@ -7160,6 +7162,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| ((skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW || skill_id == AT_ALPHA_CLAW
 				|| skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG) && sc != NULL
 				&& (sc->data[SC_ALPHA_PHASE] != NULL || sc->data[SC_INSANE3] != NULL))
+			|| ((skill_id == AT_PINION_SHOT || skill_id == AT_QUILL_SPEAR || skill_id == AT_QUILL_SPEAR_S
+				|| skill_id == AT_TEMPEST_FLAP) && sc != NULL && sc->data[SC_APEX_PHASE] != NULL)
 			|| (skill_id == SKE_NOON_BLAST && sc != NULL
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
@@ -7648,7 +7652,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SHC_CROSS_SLASH || skill_id == WH_WILD_WALK
 							|| skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW
 							|| skill_id == AT_ALPHA_CLAW || skill_id == AT_SAVAGE_LUNGE
-							|| skill_id == AT_FRENZY_FANG)
+							|| skill_id == AT_FRENZY_FANG || skill_id == AT_PINION_SHOT || skill_id == AT_QUILL_SPEAR
+							|| skill_id == AT_QUILL_SPEAR_S || skill_id == AT_TEMPEST_FLAP)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
@@ -8008,6 +8013,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				ATK_ADDRATE(sc->data[SC_HEAVEN_AND_EARTH]->val2);
 			if (sc != NULL && sc->data[SC_ENRAGE_WOLF] != NULL && (wd.flag & BF_SHORT) != 0)
 				ATK_ADDRATE((int64)sc->data[SC_ENRAGE_WOLF]->val1 * 2);
+			if (sc != NULL && sc->data[SC_APEX_PHASE] != NULL
+			 && (skill_id == AT_PINION_SHOT || skill_id == AT_QUILL_SPEAR || skill_id == AT_QUILL_SPEAR_S
+				|| skill_id == AT_TEMPEST_FLAP))
+				ATK_ADDRATE(30);
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
 				ATK_ADDRATE(sd->bonus.long_attack_atk_rate);
