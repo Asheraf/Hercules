@@ -8022,6 +8022,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			 && (skill_id == AT_PINION_SHOT || skill_id == AT_QUILL_SPEAR || skill_id == AT_QUILL_SPEAR_S
 				|| skill_id == AT_TEMPEST_FLAP))
 				ATK_ADDRATE(30);
+			if (sc != NULL && sc->data[SC_ZEPHYR_LINK] != NULL && (wd.flag & BF_SHORT) != 0)
+				ATK_ADDRATE(15);
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
 				ATK_ADDRATE(sd->bonus.long_attack_atk_rate);

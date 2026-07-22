@@ -10257,6 +10257,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case AT_ZEPHYR_LINK:
 		case AT_FLIP_FLAP:
 		case AT_APEX_PHASE:
 		case AT_ALPHA_PHASE:

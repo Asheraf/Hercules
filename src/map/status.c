@@ -1939,6 +1939,11 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->bonus.long_attack_atk_rate += 6 * sc->data[SC_FLIP_FLAP]->val1;
 	if (sc->data[SC_FLIP_FLAP_TARGET] != NULL)
 		sd->bonus.long_attack_atk_rate += 6 * sc->data[SC_FLIP_FLAP_TARGET]->val1;
+	if (sc->data[SC_ZEPHYR_LINK] != NULL) {
+		sd->bonus.long_attack_atk_rate += 15;
+		for (int element = ELE_NEUTRAL; element < ELE_MAX; element++)
+			sd->magic_atk_ele[element] += 15;
+	}
 	if (sc->data[SC_HEAVEN_AND_EARTH] != NULL) {
 		int bonus = sc->data[SC_HEAVEN_AND_EARTH]->val2;
 
