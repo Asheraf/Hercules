@@ -5812,6 +5812,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case NC_ARMSCANNON:
 		case NC_SELFDESTRUCTION:
 		case NC_AXETORNADO:
+		case MT_MIGHTY_SMASH:
 		case GC_ROLLINGCUTTER:
 		case GC_COUNTERSLASH:
 		case LG_MOONSLASHER:
@@ -9605,6 +9606,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case RK_STORMBLAST:
 		case NC_AXETORNADO:
 		case MT_AXE_STOMP:
+		case MT_MIGHTY_SMASH:
 		case GC_COUNTERSLASH:
 		case SR_SKYNETBLOW:
 		case SR_RAMPAGEBLASTER:
@@ -18515,6 +18517,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_SUMMON_ABR_INFINITY:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
+				case MT_MIGHTY_SMASH:
 				case MT_SPARK_BLASTER:
 				case MT_TRIPLE_LASER:
 					break;

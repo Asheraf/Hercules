@@ -3634,6 +3634,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case MT_MIGHTY_SMASH:
+					skillratio += -100 + 80 + 240 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_AXE_STOMP] != NULL)
+						skillratio += 20 + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case NC_POWERSWING:
 					skillratio = 300 + 100*skill_lv + ( status_get_str(src)+status_get_dex(src) ) * status->get_lv(src) / 100;
 					if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
@@ -6328,6 +6334,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case MT_AXE_STOMP:
 				if (sd != NULL && sd->weapontype == W_2HAXE)
 					wd.div_ = 3;
+				break;
+			case MT_MIGHTY_SMASH:
+				if (sc != NULL && sc->data[SC_AXE_STOMP] != NULL)
+					wd.div_ = 7;
 				break;
 			case NW_THE_VIGILANTE_AT_NIGHT:
 				if (sd != NULL && sd->weapontype1 == W_GATLING)
