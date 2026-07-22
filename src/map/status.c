@@ -3309,8 +3309,11 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->mres = bst->mres;
 	if (flag & SCB_HPLUS)
 		st->hplus = bst->hplus;
-	if (flag & SCB_CRATE)
+	if ((flag & SCB_CRATE) != 0) {
 		st->crate = bst->crate;
+		if (sc != NULL && sc->data[SC_PRESENS_ACIES] != NULL)
+			st->crate = (int32)cap_value((int64)st->crate + sc->data[SC_PRESENS_ACIES]->val2, 0, SHRT_MAX);
+	}
 	if ((flag & SCB_MAXAP) != 0) {
 		st->max_ap = bst->max_ap;
 		if (st->ap > st->max_ap) {
@@ -10219,6 +10222,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_ARGUTUS_TELUM:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 5 * val1;
+				break;
+			case SC_PRESENS_ACIES:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 2 * val1;
 				break;
 			case SC_NEWMOON:
 				val2 = 7;
