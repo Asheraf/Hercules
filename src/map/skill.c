@@ -5349,6 +5349,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case RL_AM_BLAST:
 		case RL_SLUGSHOT:
 		case ABC_CHAIN_REACTION_SHOT_ATK:
+		case MT_TRIPLE_LASER:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
 		case HN_MEGA_SONIC_BLOW:
@@ -18515,6 +18516,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 				case MT_SPARK_BLASTER:
+				case MT_TRIPLE_LASER:
 					break;
 				default:
 				{
