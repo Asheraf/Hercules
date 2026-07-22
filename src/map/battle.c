@@ -3075,6 +3075,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 200 + 300 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case DK_SERVANT_W_DEMOL:
+					skillratio += -100 + 500 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case SJ_FALLINGSTAR_ATK:
 				case SJ_FALLINGSTAR_ATK2:
 					skillratio += 100 * skill_lv;
@@ -4929,6 +4933,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sd != NULL)
 					wd.div_ = sd->servantball_old;
 				break;
+			case DK_SERVANT_W_DEMOL:
+				if (sd != NULL)
+					wd.div_ = sd->servantball_old;
+				break;
 			case HT_PHANTASMIC:
 				//Since these do not consume ammo, they need to be explicitly set as arrow attacks.
 				flag.arrow = 1;
@@ -5173,12 +5181,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	}
 
 	//Check for critical
-	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM)
+	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
+		|| skill_id == DK_SERVANT_W_DEMOL)
 		&& sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
-		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM))
+		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
+			|| skill_id == DK_SERVANT_W_DEMOL))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5605,7 +5615,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					if (flag.cri != 0 && sd->bonus.crit_atk_rate != 0) {
 						int crit_atk_rate = sd->bonus.crit_atk_rate;
 
-						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM)
+						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
+							|| skill_id == DK_SERVANT_W_DEMOL)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

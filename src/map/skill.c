@@ -2062,6 +2062,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case DK_SERVANT_W_DEMOL:
+			if (sd != NULL)
+				pc->addservantball(sd, 1);
+			break;
 		case RK_DRAGONBREATH:
 			sc_start4(src, bl, SC_BURNING, 15, skill_lv, 1000, src->id, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -5247,6 +5251,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SP_SWHOO:
 		case DK_SERVANTWEAPON_ATK:
 		case DK_SERVANT_W_PHANTOM:
+		case DK_SERVANT_W_DEMOL:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -5258,6 +5263,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					sflag |= SD_ANIMATION; // original target gets no animation (as well as all NPC skills)
 
 				if ( tsc && tsc->data[SC_HOVERING] && ( skill_id == SR_WINDMILL || skill_id == LG_MOONSLASHER ) )
+					break;
+				if (skill_id == DK_SERVANT_W_DEMOL && (tsc == NULL || tsc->data[SC_SERVANT_SIGN] == NULL
+					 || tsc->data[SC_SERVANT_SIGN]->val1 != src->id))
 					break;
 
 				if ((skill_id == SP_SHA || skill_id == SP_SWHOO) && bl->type != BL_MOB)
@@ -7576,6 +7584,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 #endif
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case DK_SERVANT_W_DEMOL:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 		// Works just like the above list of skills, except animation caused by
 		// status must trigger AFTER the skill cast animation or it will cancel
@@ -16727,6 +16739,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		switch(skill_id) {
 		case DK_SERVANT_W_PHANTOM:
 			break;
+		case DK_SERVANT_W_DEMOL:
+			if (sd->servantball == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_EMPTY_SERVANTWEAPON, 1, 0);
+				return 0;
+			}
+			break;
 		case DK_SERVANT_W_SIGN:
 			if (sd->servantball < require.spiritball) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_EMPTY_SERVANTWEAPON, require.spiritball, 0);
@@ -17107,7 +17125,7 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 	st = &sd->battle_status;
 
 	require = skill->get_requirement(sd,skill_id,skill_lv);
-	if (skill_id == DK_SERVANT_W_PHANTOM)
+	if (skill_id == DK_SERVANT_W_PHANTOM || skill_id == DK_SERVANT_W_DEMOL)
 		sd->servantball_old = min(sd->servantball, require.spiritball);
 
 	if( require.hp > 0 && st->hp <= (unsigned int)require.hp) {
@@ -17292,6 +17310,7 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 				pc->delservantball(sd, req.spiritball);
 				break;
 			case DK_SERVANT_W_PHANTOM:
+			case DK_SERVANT_W_DEMOL:
 				if (sd->servantball_old == 0)
 					sd->servantball_old = min(sd->servantball, req.spiritball);
 				pc->delservantball(sd, sd->servantball_old);
@@ -17315,7 +17334,7 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 
 	if( type&2 )
 	{
-		if (skill_id == DK_SERVANT_W_PHANTOM)
+		if (skill_id == DK_SERVANT_W_PHANTOM || skill_id == DK_SERVANT_W_DEMOL)
 			sd->servantball_old = 0;
 
 		struct status_change *sc = &sd->sc;
