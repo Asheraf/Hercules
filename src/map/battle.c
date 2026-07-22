@@ -3207,6 +3207,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case SKE_STAR_LIGHT_KICK:
+					skillratio += -100 + 400 + 200 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_SKY_MOON:
 					skillratio += -100 + 1250 + 500 * skill_lv;
 					skillratio += 5 * st->pow;

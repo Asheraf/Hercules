@@ -5478,6 +5478,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SKE_STAR_LIGHT_KICK:
+		{
+			enum unit_dir dir = UNIT_DIR_NORTHEAST;
+
+			if (bl->x != src->x || bl->y != src->y)
+				dir = map->calc_dir(bl, src->x, src->y);
+			if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 1, true) == 0) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				clif->blown(src);
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+			}
+		}
+			break;
 		case IG_JUDGEMENT_CROSS:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18999,6 +19014,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case SKE_STAR_LIGHT_KICK:
 		case SKE_SKY_MOON:
 		case SKE_SKY_SUN:
 			if (sc == NULL || sc->data[SC_SKY_ENCHANT] == NULL) {
