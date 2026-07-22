@@ -2996,6 +2996,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SH_HYUN_ROK_CANNON:
+					skillratio += -100 + 1450 + 2250 * skill_lv;
+					skillratio += 5 * st->spl;
+					if (sd != NULL) {
+						skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						if (skill->sh_communed(src, SH_COMMUNE_WITH_HYUN_ROK) == true) {
+							skillratio += 450 * skill_lv;
+							skillratio += 25 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						}
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case SH_HYUN_ROKS_BREEZE:
 					skillratio += -100 + 650 + 750 * skill_lv;
 					skillratio += 5 * st->spl;
