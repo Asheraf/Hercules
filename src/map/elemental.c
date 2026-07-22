@@ -153,6 +153,7 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 	case ELEID_EL_TERA_S:
 	case ELEID_EL_TERA_M:
 	case ELEID_EL_TERA_L:
+	case ELEID_EM_TERREMOTUS:
 		//DEF + (Summon Tera Skill Level x 25) / ATK + (Summon Tera Skill Level x 5)
 		ele.def += summon_level * 25;
 		ele.atk += summon_level * 5;
@@ -167,8 +168,9 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 		ele.atk2 += 25 * skill_level;
 		ele.matk += 25 * skill_level;
 	}
-	if ((skill_level=pc->checkskill(sd, EM_ELEMENTAL_SPIRIT_M)) > 0 && (db->class_ == ELEID_EM_DILUVIO
-		|| db->class_ == ELEID_EM_ARDOR)) {
+	if ((skill_level = pc->checkskill(sd, EM_ELEMENTAL_SPIRIT_M)) > 0 &&
+		(db->class_ == ELEID_EM_ARDOR || db->class_ == ELEID_EM_DILUVIO || db->class_ == ELEID_EM_PROCELLA
+			|| db->class_ == ELEID_EM_TERREMOTUS)) {
 		ele.hp = ele.max_hp += 10000 + 3000 * skill_level;
 		ele.sp = ele.max_sp += 100 * skill_level;
 		ele.atk += 100 + 20 * skill_level;
@@ -269,6 +271,9 @@ static int elemental_delete(struct elemental_data *ed, int reply)
 			break;
 		case ELEID_EM_PROCELLA:
 			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_PROCELLA, INVALID_TIMER);
+			break;
+		case ELEID_EM_TERREMOTUS:
+			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_TERREMOTUS, INVALID_TIMER);
 			break;
 	}
 

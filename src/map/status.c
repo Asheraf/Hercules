@@ -1916,6 +1916,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->magic_atk_ele[ELE_WATER] += 10;
 	if (sc->data[SC_SUMMON_ELEMENTAL_PROCELLA] != NULL)
 		sd->magic_atk_ele[ELE_WIND] += 10;
+	if (sc->data[SC_SUMMON_ELEMENTAL_TERREMOTUS] != NULL)
+		sd->magic_atk_ele[ELE_EARTH] += 10;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;

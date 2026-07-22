@@ -12367,6 +12367,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 
+		case EM_SUMMON_ELEMENTAL_TERREMOTUS:
+			if (sd != NULL) {
+				if (sd->ed != NULL && sd->ed->elemental.class_ == ELEID_EL_TERA_L) {
+					elemental->delete_(sd->ed, 0);
+					if (elemental->create(sd, ELEID_EM_TERREMOTUS, skill->get_time(skill_id, skill_lv)) == 0)
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					else {
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						sc_start(src, bl, SC_SUMMON_ELEMENTAL_TERREMOTUS, 100, skill_lv,
+						         skill->get_time(skill_id, skill_lv), skill_id);
+					}
+				} else
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			}
+			break;
+
 		case EM_SUMMON_ELEMENTAL_PROCELLA:
 			if (sd != NULL) {
 				if (sd->ed != NULL && sd->ed->elemental.class_ == ELEID_EL_VENTUS_L) {
