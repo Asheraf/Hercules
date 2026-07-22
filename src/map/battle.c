@@ -3636,6 +3636,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 200;
 					RE_LVL_DMOD(100);
 					break;
+				case BO_MYSTERY_POWDER:
+					skillratio += -100 + 1500 + 4000 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_TRIPLE_LASER:
 					skillratio += -100 + 650 + 1150 * skill_lv + 12 * st->pow;
 					RE_LVL_DMOD(100);

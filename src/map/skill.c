@@ -5888,6 +5888,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case MT_SPARK_BLASTER:
 		case BO_EXPLOSIVE_POWDER:
 		case BO_MAYHEMIC_THORNS:
+		case BO_MYSTERY_POWDER:
 		case MT_POWERFUL_SWING:
 		case MT_ENERGY_CANNONADE:
 		case BO_ACIDIFIED_ZONE_WATER:
@@ -5952,6 +5953,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == BO_MAYHEMIC_THORNS)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				if (skill_id == BO_MYSTERY_POWDER) {
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					sc_start(src, src, skill->get_sc_type(skill_id), 100, skill_lv, skill->get_time(skill_id, skill_lv),
+					         skill_id);
+				}
 				if (skill_id == MT_POWERFUL_SWING)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == MT_ENERGY_CANNONADE)
