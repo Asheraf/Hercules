@@ -6405,6 +6405,8 @@ static void clif_skill_produce_mix_list(struct map_session_data *sd, int skill_i
 ///     4 = GN_MIX_COOKING
 ///     5 = GN_MAKEBOMB
 ///     6 = GN_S_PHARMACY
+///     7 = MT_M_MACHINE
+///     8 = BO_BIONIC_PHARMACY
 static void clif_cooking_list(struct map_session_data *sd, int trigger, uint16 skill_id, int qty, int list_type)
 {
 	int fd;
@@ -14063,6 +14065,8 @@ static void clif_parse_Cooking(int fd, struct map_session_data *sd) __attribute_
 ///     4 = GN_MIX_COOKING
 ///     5 = GN_MAKEBOMB
 ///     6 = GN_S_PHARMACY
+///     7 = MT_M_MACHINE
+///     8 = BO_BIONIC_PHARMACY
 static void clif_parse_Cooking(int fd, struct map_session_data *sd)
 {
 	const struct PACKET_CZ_REQ_MAKINGITEM *p = RFIFOP(fd, 0);
