@@ -3077,6 +3077,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SKE_DAWN_BREAK:
+					skillratio += -100 + 750 + 850 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
+					if (sc != NULL && (sc->data[SC_DAWN_MOON] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
+						skillratio += 200 + 200 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_MIDNIGHT_KICK:
 					skillratio += -100 + 850 + 1700 * skill_lv;
 					skillratio += 5 * st->pow;
