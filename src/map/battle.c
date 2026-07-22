@@ -4288,6 +4288,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 200 + 50 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case IG_IMPERIAL_PRESSURE:
+					skillratio += -100 + 3850 + 2650 * skill_lv + 7 * st->spl;
+					if (sd != NULL)
+						skillratio += 50 * pc->checkskill(sd, IG_SPEAR_SWORD_M);
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_AURA:
 					skillratio += -100 + 3650 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_ANGEL)
@@ -5454,6 +5460,10 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			if (sd && sd->charm_type != CHARM_TYPE_NONE && sd->charm_count > 0) {
 				s_ele = sd->charm_type;
 			}
+			break;
+		case IG_IMPERIAL_PRESSURE:
+			if (sc != NULL && sc->data[SC_GUARD_STANCE] != NULL)
+				s_ele = ELE_HOLY;
 			break;
 #ifdef RENEWAL
 		case CR_ACIDDEMONSTRATION:

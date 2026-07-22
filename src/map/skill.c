@@ -5865,6 +5865,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IG_SHIELD_SHOOTING:
 		case IG_OVERSLASH:
 		case IG_RADIANT_SPEAR:
+		case IG_IMPERIAL_PRESSURE:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -6008,6 +6009,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						                    BL_CHAR | BL_SKILL,
 						                    src, ABC_CHAIN_REACTION_SHOT_ATK, skill_lv, tick + 200 + status_get_amotion(src),
 						                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+						break;
+					case IG_IMPERIAL_PRESSURE:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case IG_OVERSLASH:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
