@@ -11944,6 +11944,14 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 					skill->castend_damage_id(src, bl, sce->val2, sce->val1, timer->gettick(), SD_LEVEL );
 			}
 			break;
+		case SC_SOUNDBLEND:
+			{
+				struct block_list *src = map->id2bl(sce->val2);
+				if (src != NULL && tid != INVALID_TIMER)
+					skill->castend_damage_id(src, bl, TR_SOUNDBLEND, sce->val1, timer->gettick(),
+					                         SD_LEVEL | SD_ANIMATION);
+			}
+			break;
 		case SC_RG_CCONFINE_S:
 			{
 				struct block_list *src = sce->val2 ? map->id2bl(sce->val2) : NULL;

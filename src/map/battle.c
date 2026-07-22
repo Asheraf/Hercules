@@ -1977,10 +1977,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case WM_METALICSOUND:
 					skillratio = 120 * skill_lv + 60 * ( sd? pc->checkskill(sd, WM_LESSON) : 10 );
 					RE_LVL_DMOD(100);
+					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				case WM_REVERBERATION_MAGIC:
 					skillratio = 100 * skill_lv + 100;
 					RE_LVL_DMOD(100);
+					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				case SO_FIREWALK:
 					skillratio = 60 * skill_lv;
@@ -2887,6 +2891,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sc != NULL && sc->data[SC_MYSTIC_SYMPHONY] != NULL)
 						skillratio *= 2;
 					break;
+				case TR_SOUNDBLEND:
+					skillratio += -100 + 120 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_MYSTIC_SYMPHONY] != NULL)
+						skillratio += skillratio * 100 / 100;
+					break;
 				case TR_METALIC_FURY:
 					skillratio += -100 + 3850 * skill_lv;
 					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL) {
@@ -3212,6 +3222,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case WM_REVERBERATION_MELEE:
 					skillratio += 200 + 100 * skill_lv;
 					RE_LVL_DMOD(100);
+					if (tsc != NULL && tsc->data[SC_SOUNDBLEND] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				case WM_SEVERE_RAINSTORM_MELEE:
 					skillratio = (st->agi + st->dex) * skill_lv / 5;
@@ -4633,6 +4645,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		s_ele = status_get_attack_sc_element(src,status->get_sc(src));
 	else if( s_ele == -3 ) //Use random element
 		s_ele = rnd()%ELE_MAX;
+	if (skill_id == TR_SOUNDBLEND && sd != NULL)
+		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == TR_METALIC_FURY && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
 

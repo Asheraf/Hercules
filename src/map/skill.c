@@ -3822,6 +3822,14 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
 			                                 type);
 			break;
+		case TR_SOUNDBLEND:
+			if ((flag & SD_ANIMATION) != 0)
+				dmg.dmotion = clif->skill_damage(dsrc, bl, tick, 10, dmg.dmotion, damage, dmg.div_, skill_id, -1,
+				                                 BDT_SPLASH);
+			else
+				dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id,
+				                                 skill_lv, type);
+			break;
 		case TR_ROSEBLOSSOM_ATK:
 			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
 			                                 BDT_SPLASH);
@@ -4123,6 +4131,10 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 				break;
 			case WM_METALICSOUND:
 				status_zap(bl, 0, damage*100/(100*(110-pc->checkskill(sd,WM_LESSON)*10)));
+				status_change_end(bl, SC_SOUNDBLEND, INVALID_TIMER);
+				break;
+			case WM_REVERBERATION_MAGIC:
+				status_change_end(bl, SC_SOUNDBLEND, INVALID_TIMER);
 				break;
 			case SR_TIGERCANNON:
 				status_zap(bl, 0, damage/10); // 10% of damage dealt
@@ -5987,6 +5999,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AB_HIGHNESSHEAL:
 		case AB_DUPLELIGHT_MAGIC:
 		case WM_METALICSOUND:
+		case TR_SOUNDBLEND:
 		case MH_ERASER_CUTTER:
 		case KO_KAIHOU:
 			skill->attack(BF_MAGIC,src,src,bl,skill_id,skill_lv,tick,flag);
@@ -8184,6 +8197,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case IQ_EXPOSION_BLASTER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case TR_SOUNDBLEND:
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, 0);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start2(src, bl, SC_SOUNDBLEND, 100, skill_lv, src->id, skill->get_time(skill_id, skill_lv),
+				          skill_id));
 			break;
 		case TR_MYSTIC_SYMPHONY:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
@@ -18603,6 +18622,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
 	if (skill_id == TR_RHYTHMSHOOTING)
+		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
+	if (skill_id == TR_SOUNDBLEND)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (skill_id == TR_METALIC_FURY)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
