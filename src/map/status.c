@@ -1932,6 +1932,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->left_weapon.addrace[RC_FORMLESS] += bonus;
 		sd->left_weapon.addrace[RC_PLANT] += bonus;
 	}
+	if (sc->data[SC_HIDDEN_CARD] != NULL)
+		sd->bonus.long_attack_atk_rate += sc->data[SC_HIDDEN_CARD]->val3;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -3431,6 +3433,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_PRON_MARCH]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_HIDDEN_CARD] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_HIDDEN_CARD]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
@@ -10446,6 +10450,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				status_percent_heal(bl, 100, 100);
 				val2 = 10 + 2 * val1;
 				val3 = 100 + 20 * val1;
+				break;
+			case SC_HIDDEN_CARD:
+				val1 = cap_value(val1, 1, 10);
+				val2 = 3 * val1;
+				val3 = 10 * val1;
 				break;
 			case SC_SPELL_ENCHANTING:
 				val1 = cap_value(val1, 1, 5);

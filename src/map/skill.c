@@ -7543,6 +7543,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case NW_HIDDEN_CARD:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case NW_INTENSIVE_AIM:
 			if (tsc != NULL && tsc->data[type] != NULL) {
 				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);

@@ -3103,6 +3103,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 20 * pc->checkskill(sd, NW_GRENADE_MASTERY);
 					RE_LVL_DMOD(100);
 					break;
+					if (sd != NULL && sc != NULL && sc->data[SC_HIDDEN_CARD] != NULL) {
+						if (sd->weapontype1 == W_GATLING)
+							skillratio += 200 * skill_lv;
+						else if (sd->weapontype1 == W_GRENADE)
+							skillratio += 340 * skill_lv;
+						else if (sd->weapontype1 == W_SHOTGUN)
+							skillratio += 400 * skill_lv;
+					}
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
