@@ -2825,6 +2825,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 400 + 50 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case WH_HAWKRUSH:
+					skillratio += -100 + 500 * skill_lv + 5 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case RA_CLUSTERBOMB:
 					skillratio += 100 + 100 * skill_lv;
 					break;
@@ -5743,7 +5747,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
-		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT)
+		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT
+		|| skill_id == WH_HAWKRUSH)
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
 		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT ||
@@ -5756,7 +5761,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
-			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW))
+			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW
+			|| skill_id == WH_HAWKRUSH))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -6210,7 +6216,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE
-							|| skill_id == ABC_FRENZY_SHOT)
+							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

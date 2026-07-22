@@ -1672,6 +1672,13 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 				// Automatic trigger of Warg Strike [Jobbie]
 				if( pc_iswug(sd) && (temp=pc->checkskill(sd,RA_WUGSTRIKE)) > 0 && rnd()%1000 <= sstatus->luk*3 )
 					skill->castend_damage_id(src,bl,RA_WUGSTRIKE,temp,tick,0);
+				if (pc_isfalcon(sd) == true && sd->weapontype == W_BOW && (attack_type & BF_LONG) != 0
+					&& (temp = pc->checkskill(sd, WH_HAWKRUSH)) > 0) {
+					rate = sstatus->con * 10 / 3 + 1;
+					rate += rate * (20 * pc->checkskill(sd, WH_NATUREFRIENDLY)) / 100;
+					if (rnd() % 1000 <= rate)
+						skill->castend_damage_id(src, bl, WH_HAWKRUSH, temp, tick, 0);
+				}
 				// Gank
 				if (dstmd && sd->weapontype != W_BOW &&
 					(temp = pc->checkskill(sd, RG_SNATCHER)) > 0 &&
@@ -5087,6 +5094,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case CD_EFFLIGO:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case WH_HAWKRUSH:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
