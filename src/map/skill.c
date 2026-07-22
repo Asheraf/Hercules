@@ -5741,6 +5741,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
+		case SKE_MIDNIGHT_KICK:
 		case SKE_RISING_MOON:
 		case SKE_NOON_BLAST:
 		case SKE_SUNSET_BLAST:
@@ -5927,6 +5928,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_THIRD_FLAME_BOMB:
 					case IQ_THIRD_CONSECRATION:
 					case IG_GRAND_JUDGEMENT:
+					case SKE_MIDNIGHT_KICK:
 					case SKE_RISING_MOON:
 					case SKE_NOON_BLAST:
 					case SKE_SUNSET_BLAST:
@@ -9363,6 +9365,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 
+		case SKE_MIDNIGHT_KICK:
 		case SH_HOWLING_OF_CHUL_HO:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
