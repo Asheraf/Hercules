@@ -13420,6 +13420,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case AG_STRANTUM_TREMOR:
 		case AG_TORNADO_STORM:
 		case AG_FLORAL_FLARE_ROAD:
+		case ABC_ABYSS_STRIKE:
 		case IG_CROSS_RAIN:
 		case CD_PNEUMATICUS_PROCELLA:
 		case SJ_BOOKOFCREATINGSTAR:
