@@ -14875,6 +14875,12 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case SS_KUNAIKAITEN:
+			sc_start(src, src, SC_SHADOW_CLOCK, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			flag |= 1; // both units keep the ammo, it is spent on group delete
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			skill->unitsetting(src, SS_KUNAIWAIKYOKU, skill_lv, x, y, 0);
+			break;
 		case SS_KUNAIWAIKYOKU:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
