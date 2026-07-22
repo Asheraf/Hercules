@@ -2106,6 +2106,11 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	if (sd->patk_rate < 0)
 		sd->patk_rate = 0;
+	if ((skill_lv = pc->checkskill(sd, TR_STAGE_MANNER)) > 0 && (sd->weapontype == W_BOW || sd->weapontype == W_MUSICAL
+		|| sd->weapontype == W_WHIP)) {
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 3, 0, SHRT_MAX);
+		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 3, 0, SHRT_MAX);
+	}
 	if (sd->weapontype == W_2HSTAFF && (skill_lv = pc->checkskill(sd, AG_TWOHANDSTAFF)) > 0)
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 2, 0, SHRT_MAX);
 	if (sd->patk_rate != 100)
