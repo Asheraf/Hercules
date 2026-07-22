@@ -5331,6 +5331,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_OLEUM_SANCTUM:
+		case IQ_MASSIVE_F_BLASTER:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -7708,6 +7709,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case IQ_OLEUM_SANCTUM:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case IQ_MASSIVE_F_BLASTER:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		// Works just like the above list of skills, except animation caused by
@@ -17936,7 +17942,14 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 			}
 			break;
 		case SR_RAMPAGEBLASTER:
-			req.spiritball = sd->spiritball?sd->spiritball:15;
+			if (sc != NULL && sc->data[SC_MASSIVE_F_BLASTER] != NULL)
+				req.spiritball = 0;
+			else
+				req.spiritball = sd->spiritball != 0 ? sd->spiritball : 15;
+			break;
+		case SR_RIDEINLIGHTNING:
+			if (sc != NULL && sc->data[SC_MASSIVE_F_BLASTER] != NULL)
+				req.spiritball = 0;
 			break;
 		case SR_GATEOFHELL:
 			if( sc && sc->data[SC_COMBOATTACK] && sc->data[SC_COMBOATTACK]->val1 == SR_FALLENEMPIRE )
