@@ -1681,6 +1681,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case HN_JACK_FROST_NOVA:
 			sc_start(src, bl, SC_MISTYFROST, 100, 0, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
+		case HN_NAPALM_VULCAN_STRIKE:
+			sc_start(src, bl, SC_CURSE, 5 * skill_lv, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			break;
 		case 0: { // Normal attacks (no skill used)
 			if( attack_type&BF_SKILL )
 				break; // If a normal attack is a skill, it's splash damage. [Inkfish]
@@ -6061,6 +6064,16 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				                    skill->splash_target(src), src, skill_id, skill_lv, tick,
 				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 				sc_start(src, src, SC_NO_SWITCH_WEAPON, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			}
+			break;
+		case HN_NAPALM_VULCAN_STRIKE:
+			if ((flag & 1) != 0) {
+				skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+				                     src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
+				                     skill->castend_damage_id);
 			}
 			break;
 		case KN_BOWLINGBASH:
