@@ -7627,6 +7627,15 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
 		}
+		case SOA_SOUL_GATHERING:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			if (sd != NULL) {
+				int limit = 5 + pc->checkskill(sd, SP_SOULENERGY) * 3;
+
+				for (int i = 0; i < limit; i++)
+					pc->addsoulball(sd, limit);
+			}
+			break;
 		case EM_ELEMENTAL_BUSTER:
 			if (sd != NULL && sd->ed != NULL) {
 				uint16 buster_element = 0;
@@ -18229,6 +18238,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SP_KAUTE: // Fail if below 30% MaxHP.
 			if (st->hp < 30 * st->max_hp / 100) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+			break;
+		case SOA_SOUL_GATHERING:
+			if (sc == NULL || sc->data[SC_SOULCOLLECT] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
 			break;
