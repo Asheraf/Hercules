@@ -7064,6 +7064,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER || skill_id == BO_MAYHEMIC_THORNS
 		|| skill_id == ABC_FRENZY_SHOT || skill_id == ABC_CHASING_SHOT
 		|| skill_id == IG_RADIANT_SPEAR || skill_id == SHC_CROSS_SLASH || skill_id == WH_WILD_WALK
+		|| skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW || skill_id == AT_ALPHA_CLAW
+		|| skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
@@ -7104,6 +7106,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
 			|| skill_id == SH_HOGOGONG_STRIKE || skill_id == SH_CHUL_HO_BATTERING
 			|| skill_id == HN_MEGA_SONIC_BLOW
+			|| ((skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW || skill_id == AT_ALPHA_CLAW
+				|| skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG) && sc != NULL
+				&& (sc->data[SC_ALPHA_PHASE] != NULL || sc->data[SC_INSANE3] != NULL))
 			|| (skill_id == SKE_NOON_BLAST && sc != NULL
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
@@ -7589,7 +7594,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
 							|| skill_id == NW_WILD_SHOT || skill_id == MT_TRIPLE_LASER
 							|| skill_id == BO_MAYHEMIC_THORNS || skill_id == IG_RADIANT_SPEAR
-							|| skill_id == SHC_CROSS_SLASH || skill_id == WH_WILD_WALK)
+							|| skill_id == SHC_CROSS_SLASH || skill_id == WH_WILD_WALK
+							|| skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW
+							|| skill_id == AT_ALPHA_CLAW || skill_id == AT_SAVAGE_LUNGE
+							|| skill_id == AT_FRENZY_FANG)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

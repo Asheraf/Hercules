@@ -10155,6 +10155,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case AT_ALPHA_PHASE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case HN_OVERCOMING_CRISIS:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
@@ -19673,6 +19677,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SKE_SKY_MOON:
 		case SKE_SKY_SUN:
 			if (sc == NULL || sc->data[SC_SKY_ENCHANT] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case AT_ALPHA_PHASE:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
