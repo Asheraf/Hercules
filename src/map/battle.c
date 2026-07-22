@@ -3090,6 +3090,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					break;
 				case DK_HACKANDSLASHER:
+				case DK_HACKANDSLASHER_ATK:
 					skillratio += -100 + 500 + 1000 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
@@ -3981,10 +3982,10 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
-	if (skill_id == DK_HACKANDSLASHER) {
+	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
 
-		return sd != NULL && sd->weapontype == W_2HSPEAR ? BF_LONG : BF_SHORT;
+		return sd != NULL && (sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR) ? BF_LONG : BF_SHORT;
 	}
 
 #ifdef RENEWAL
@@ -5206,12 +5207,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 	//Check for critical
 	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
-		|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER) && sstatus->cri &&
+		|| skill_id == DK_SERVANT_W_DEMOL
+		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
-			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER))
+			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
+			|| skill_id == DK_HACKANDSLASHER_ATK))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5639,7 +5642,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 						int crit_atk_rate = sd->bonus.crit_atk_rate;
 
 						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
-							|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER)
+							|| skill_id == DK_SERVANT_W_DEMOL
+							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
@@ -5932,9 +5936,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					ATK_ADDRATE(100);
 				break;
 		}
+		uint16 rskill = skill_id;/* redirect skill id */
 		if( skill_id ){
-			uint16 rskill;/* redirect skill id */
 			switch(skill_id){
+				case DK_HACKANDSLASHER_ATK:
+					rskill = DK_HACKANDSLASHER;
+					break;
 				case AB_DUPLELIGHT_MELEE:
 					rskill = AB_DUPLELIGHT;
 					break;
@@ -5973,7 +5980,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		}
 
 		if( sd ) {
-			if (skill_id && (i = pc->skillatk_bonus(sd, skill_id)))
+			if (skill_id != 0 && (i = pc->skillatk_bonus(sd, rskill)) != 0)
 				ATK_ADDRATE(i);
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
@@ -6038,7 +6045,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			}
 		}
 
-		if (tsd && skill_id && (i = pc->sub_skillatk_bonus(tsd, skill_id)))
+		if (tsd != NULL && skill_id != 0 && (i = pc->sub_skillatk_bonus(tsd, rskill)) != 0)
 			ATK_ADDRATE(-i);
 
 #ifdef RENEWAL

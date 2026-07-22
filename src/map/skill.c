@@ -3700,6 +3700,10 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 		case SJ_NOVAEXPLOSING:
 			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -2, BDT_SKILL);
 			break;
+		case DK_HACKANDSLASHER_ATK:
+			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
+			                                 type);
+			break;
 		case AB_DUPLELIGHT_MELEE:
 		case AB_DUPLELIGHT_MAGIC:
 			dmg.amotion = 300;/* makes the damage value not overlap with previous damage (when displayed by the client) */
