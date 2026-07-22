@@ -5241,6 +5241,23 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
 			break;
+		case SOA_TALISMAN_OF_RED_PHOENIX:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				skill->area_temp[0] = 0;
+				skill->area_temp[1] = bl->id;
+				skill->area_temp[2] = 0;
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL, src,
+				                    skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				if (sc != NULL && sc->data[SC_T_SECOND_GOD] != NULL) {
+					status_change_end(src, SC_T_SECOND_GOD, INVALID_TIMER);
+					sc_start(src, src, SC_T_THIRD_GOD, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				}
+			}
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
