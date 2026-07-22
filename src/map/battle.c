@@ -4054,6 +4054,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_CHASING_BREAK:
+					skillratio += -100 + 1550 + 450 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_CHASING] != NULL)
+						skillratio += 200 + 50 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_DEFT_STAB:
 					skillratio += -100 + 700 + 550 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
@@ -6408,6 +6414,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case ABC_HIT_AND_SLIDING:
 				if (sd != NULL && sd->weapontype == W_BOW)
 					wd.flag |= BF_LONG;
+				break;
+			case ABC_CHASING_BREAK:
+				if (sc != NULL && sc->data[SC_CHASING] != NULL)
+					wd.div_ = 7;
 				break;
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)

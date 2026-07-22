@@ -5920,6 +5920,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case BO_ACIDIFIED_ZONE_WIND:
 		case BO_ACIDIFIED_ZONE_FIRE:
 		case ABC_CHAIN_REACTION_SHOT:
+		case ABC_CHASING_BREAK:
 		case ABC_FROM_THE_ABYSS_ATK:
 		case TR_METALIC_FURY:
 		case TR_ROSEBLOSSOM_ATK:
@@ -6053,6 +6054,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						                    BL_CHAR | BL_SKILL,
 						                    src, ABC_CHAIN_REACTION_SHOT_ATK, skill_lv, tick + 200 + status_get_amotion(src),
 						                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+						break;
+					case ABC_CHASING_BREAK:
+					{
+						enum unit_dir dir = UNIT_DIR_NORTHEAST;
+
+						if (bl->x != src->x || bl->y != src->y)
+							dir = map->calc_dir(bl, src->x, src->y);
+
+						if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 1, true) == 0)
+							clif->blown(src);
+
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					}
 						break;
 					case IG_IMPERIAL_PRESSURE:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
