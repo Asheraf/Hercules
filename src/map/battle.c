@@ -2906,6 +2906,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case SC_FATALMENACE:
 					skillratio = 100 * (skill_lv+1);
+					if (sc != NULL && sc->data[SC_ABYSS_DAGGER] != NULL)
+						skillratio += 30 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
 				case SC_TRIANGLESHOT:
@@ -3188,6 +3190,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 1300 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_DEMIHUMAN || tst->race == RC_DRAGON)
 						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
+				case ABC_ABYSS_DAGGER:
+					skillratio += -100 + 350 + 1400 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
 				case IQ_SECOND_FLAME:
