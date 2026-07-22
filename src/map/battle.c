@@ -1699,6 +1699,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if ((flag & SKILL_ALTDMG_FLAG) != 0)
 						skillratio += skillratio * socery_lv / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				}
 				case AL_HOLYLIGHT:
@@ -2249,6 +2251,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if (sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 70 / 100;
 					break;
 				case HN_HELLS_DRIVE:
 					skillratio += -100 + 1700 + 900 * skill_lv;
@@ -2258,6 +2262,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if (sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 70 / 100;
 					break;
 				case HN_GROUND_GRAVITATION:
 					if ((flag & SKILL_ALTDMG_FLAG) != 0) {
@@ -2274,6 +2280,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if ((flag & SKILL_ALTDMG_FLAG) == 0 && sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
@@ -2424,6 +2432,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if ((flag & SKILL_ALTDMG_FLAG) == 0 && sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 70 / 100;
 					break;
 				case HN_NAPALM_VULCAN_STRIKE:
 					skillratio += -100 + 350 + 650 * skill_lv + 3 * st->spl;
@@ -2432,6 +2442,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					if (sd != NULL)
 						skillratio += skillratio * 2 * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
+						skillratio += skillratio * 40 / 100;
 					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
