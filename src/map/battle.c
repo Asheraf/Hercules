@@ -2109,6 +2109,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 2800 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case EM_DIAMOND_STORM:
+					skillratio += -100 + 600 + 3000 * skill_lv + 5 * st->spl;
+					if (sc != NULL && sc->data[SC_SUMMON_ELEMENTAL_DILUVIO] != NULL)
+						skillratio += 7500 - 300 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)

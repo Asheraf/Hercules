@@ -2108,6 +2108,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_MISFORTUNE, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case EM_DIAMOND_STORM:
+			sc_start(src, bl, SC_HANDICAPSTATE_FROSTBITE, 5, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			break;
 		case MT_RUSH_QUAKE:
 			sc_start(src, bl, SC_RUSH_QUAKE1, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -13841,6 +13844,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case AG_TORNADO_STORM:
 		case AG_FLORAL_FLARE_ROAD:
 		case ABC_ABYSS_STRIKE:
+		case EM_DIAMOND_STORM:
 		case IG_CROSS_RAIN:
 		case CD_PNEUMATICUS_PROCELLA:
 		case SJ_BOOKOFCREATINGSTAR:
