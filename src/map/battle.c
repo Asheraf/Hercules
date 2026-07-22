@@ -2874,6 +2874,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 850 + 700 * (skill_lv - 1) + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case ABR_BATTLE_BUSTER:
+					skillratio += -100 + 8000;
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -2882,6 +2885,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case NC_POWERSWING:
 					skillratio = 300 + 100*skill_lv + ( status_get_str(src)+status_get_dex(src) ) * status->get_lv(src) / 100;
+					if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
+						skillratio *= 2;
 					break;
 				case NC_AXETORNADO:
 					skillratio = 200 + 100 * skill_lv + st->vit;
@@ -5386,6 +5391,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	if(skill_id) {
 		wd.flag |= battle->range_type(src, target, skill_id, skill_lv);
 		switch(skill_id) {
+			case NC_POWERSWING:
+				if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
+					wd.div_ = -2;
+				break;
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)
 					wd.div_ = cap_value(sd->spiritball / 5, 1, 3);

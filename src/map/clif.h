@@ -612,6 +612,7 @@ enum clif_unittype {
 	CLUT_HOMNUCLUS = 0x8,
 	CLUT_MERCNARY  = 0x9,
 	CLUT_ELEMENTAL = 0xa,
+	CLUT_ABR        = 0xd,
 };
 /**
 * Receive configuration types
@@ -1144,6 +1145,8 @@ struct clif_interface {
 	void (*unknownname_ack) (int fd, struct block_list *bl);
 	void (*monster_hp_bar) (struct mob_data *md, struct map_session_data *sd);
 	bool (*show_monster_hp_bar) (struct block_list *bl);
+	void (*summon_init) (struct mob_data *md);
+	void (*summon_hp_bar) (struct mob_data *md);
 	int (*hpmeter) (struct map_session_data *sd);
 	void (*hpmeter_single) (int fd, int id, unsigned int hp, unsigned int maxhp, unsigned int sp, unsigned int maxsp);
 	int (*hpmeter_sub) (struct block_list *bl, va_list ap);

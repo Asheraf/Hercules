@@ -308,7 +308,11 @@ static unsigned char clif_bl_type(struct block_list *bl)
 	case BL_MOB:
 		vd = status->get_viewdata(bl);
 		nullpo_retr(CLUT_NPC, vd);
-		return pc->db_checkid(vd->class_) ? CLUT_PC : CLUT_MOB;
+		if (pc->db_checkid(vd->class_) != 0)
+			return CLUT_PC;
+		if (BL_UCAST(BL_MOB, bl)->special_state.ai == AI_ABR)
+			return CLUT_ABR;
+		return CLUT_MOB;
 	case BL_NPC:
 		vd = status->get_viewdata(bl);
 		nullpo_retr(CLUT_NPC, vd);
@@ -1690,6 +1694,8 @@ static bool clif_spawn(struct block_list *bl)
 				clif->specialeffect(&md->bl,423,AREA);
 			else if (md->special_state.size==SZ_MEDIUM)
 				clif->specialeffect(&md->bl,421,AREA);
+			if (md->special_state.ai == AI_ABR)
+				clif->summon_init(md);
 		}
 			break;
 		case BL_NPC:
@@ -21313,6 +21319,46 @@ static bool clif_show_monster_hp_bar(struct block_list *bl)
 	return false;
 }
 
+static void clif_summon_init(struct mob_data *md)
+{
+#if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
+	nullpo_retv(md);
+
+	struct block_list *master = battle->get_master(&md->bl);
+	if (master == NULL)
+		return;
+
+	struct PACKET_ZC_SUMMON_HP_INIT p = { 0 };
+
+	p.PacketType = HEADER_ZC_SUMMON_HP_INIT;
+	p.summonAID = md->bl.id;
+	p.CurrentHP = md->status.hp;
+	p.MaxHP = md->status.max_hp;
+
+	clif->send(&p, sizeof(p), master, SELF);
+#endif
+}
+
+static void clif_summon_hp_bar(struct mob_data *md)
+{
+#if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
+	nullpo_retv(md);
+
+	struct block_list *master = battle->get_master(&md->bl);
+	if (master == NULL)
+		return;
+
+	struct PACKET_ZC_SUMMON_HP_UPDATE p = { 0 };
+
+	p.PacketType = HEADER_ZC_SUMMON_HP_UPDATE;
+	p.summonAID = md->bl.id;
+	p.VarId = SP_HP;
+	p.Value = md->status.hp;
+
+	clif->send(&p, sizeof(p), master, SELF);
+#endif
+}
+
 /* [Ind/Hercules] placeholder for unsupported incoming packets (avoids server disconnecting client) */
 static void clif_parse_dull(int fd, struct map_session_data *sd)
 {
@@ -26955,6 +27001,8 @@ void clif_defaults(void)
 	clif->unknownname_ack = clif_unknownname_ack;
 	clif->monster_hp_bar = clif_monster_hp_bar;
 	clif->show_monster_hp_bar = clif_show_monster_hp_bar;
+	clif->summon_init = clif_summon_init;
+	clif->summon_hp_bar = clif_summon_hp_bar;
 	clif->hpmeter = clif_hpmeter;
 	clif->hpmeter_single = clif_hpmeter_single;
 	clif->hpmeter_sub = clif_hpmeter_sub;

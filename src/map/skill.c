@@ -2466,7 +2466,8 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 	}
 
-	if (md && battle_config.summons_trigger_autospells && md->master_id && md->special_state.ai != AI_NONE) {
+	if (md != NULL && battle_config.summons_trigger_autospells != 0 && md->master_id != 0
+	 && md->special_state.ai != AI_NONE && md->special_state.ai != AI_ABR) {
 		//Pass heritage to Master for status causing effects. [Skotlex]
 		sd = map->id2sd(md->master_id);
 		src = sd?&sd->bl:src;
@@ -12068,6 +12069,23 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case MT_SUMMON_ABR_BATTLE_WARIOR:
+			if (sd != NULL) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				struct mob_data *summon_md = mob->once_spawn_sub(src, src->m, src->x, src->y, DEFAULT_MOB_JNAME,
+				                                                MOBID_ABR_BATTLE_WARIOR, "", SZ_SMALL, AI_ABR, 0);
+				if (summon_md != NULL) {
+					summon_md->master_id = src->id;
+					summon_md->special_state.ai = AI_ABR;
+					if (summon_md->deletetimer != INVALID_TIMER)
+						timer->delete_(summon_md->deletetimer, mob->timer_delete);
+					summon_md->deletetimer = timer->add(timer->gettick() + skill->get_time(skill_id, skill_lv),
+					                                    mob->timer_delete, summon_md->bl.id, 0);
+					mob->spawn(summon_md);
+				}
+			}
+			break;
 		case EL_CIRCLE_OF_FIRE:
 		case EL_PYROTECHNIC:
 		case EL_HEATER:
@@ -16209,7 +16227,8 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 	md = BL_UCCAST(BL_MOB, bl);
 
 	if( md->master_id != src_id
-	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA) )
+	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:
+	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
 		return 0; //Non alchemist summoned mobs have nothing to do here.
 	if(md->class_==mob_class)
 		(*c)++;
@@ -16516,6 +16535,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_AXE_STOMP:
 				case MT_RUSH_QUAKE:
 				case MT_D_MACHINE:
+				case MT_SUMMON_ABR_BATTLE_WARIOR:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 					break;
@@ -17891,6 +17911,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 				if( c >= skill->get_maxcount(skill_id,skill_lv) || c != i) {
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					return 0;
+				}
+			}
+			break;
+		case MT_SUMMON_ABR_BATTLE_WARIOR: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_ABR_BATTLE_WARIOR, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
 				}
 			}
 			break;

@@ -1516,17 +1516,23 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md, int64 tick)
 		md->master_dist=distance_bl(&md->bl, bl);
 
 		// Since the master was in near immediately before, teleport is carried out and it pursues.
-		if(bl->m != md->bl.m ||
-			(old_dist<10 && md->master_dist>18) ||
-			md->master_dist > MAX_MINCHASE
-		){
+		if (bl->m != md->bl.m
+		 || (md->special_state.ai == AI_ABR && md->master_dist > AREA_SIZE + 1)
+		 || (md->special_state.ai != AI_ABR
+		    && ((old_dist < 10 && md->master_dist > 18) || md->master_dist > MAX_MINCHASE))) {
 			md->master_dist = 0;
 			unit->warp(&md->bl,bl->m,bl->x,bl->y,CLR_TELEPORT);
 			return 1;
 		}
 
-		if(md->target_id) //Slave is busy with a target.
+		if (md->target_id != 0) { //Slave is busy with a target.
+			if (md->special_state.ai == AI_ABR && bl->type == BL_PC && md->master_dist > 5) {
+				mob->unlocktarget(md, tick);
+				unit->walk_tobl(&md->bl, bl, MOB_SLAVEDISTANCE, 1);
+				return 1;
+			}
 			return 0;
+		}
 
 		// Approach master if within view range, chase back to Master's area also if standing on top of the master.
 		if( (md->master_dist>MOB_SLAVEDISTANCE || md->master_dist == 0)
@@ -2463,6 +2469,11 @@ static void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 	if (battle_config.show_mob_info&3)
 		clif->blname_ack(0, &md->bl);
 
+#if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
+	if ((battle_config.show_monster_hp_bar & 1) != 0 && md->special_state.ai == AI_ABR)
+		clif->summon_hp_bar(md);
+#endif
+
 #if PACKETVER >= 20131223
 	// Resend ZC_NOTIFY_MOVEENTRY to Update the HP
 	if (clif->show_monster_hp_bar(&md->bl))
@@ -3232,6 +3243,10 @@ static void mob_heal(struct mob_data *md, unsigned int heal)
 	nullpo_retv(md);
 	if (battle_config.show_mob_info&3)
 		clif->blname_ack(0, &md->bl);
+#if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
+	if ((battle_config.show_monster_hp_bar & 1) != 0 && md->special_state.ai == AI_ABR)
+		clif->summon_hp_bar(md);
+#endif
 #if PACKETVER >= 20131223
 	// Resend ZC_NOTIFY_MOVEENTRY to Update the HP
 	if (clif->show_monster_hp_bar(&md->bl))
