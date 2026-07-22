@@ -2127,6 +2127,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case SS_KUNAIWAIKYOKU:
 		case SS_FUUMASHOUAKU:
 		case SS_KAGEGARI:
 			sc_start(src, bl, SC_NIGHTMARE, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
@@ -5140,6 +5141,18 @@ static bool skill_mirage_cast(struct block_list *src, struct block_list *bl, uin
 		struct skill_unit *su = sg->unit.data;
 
 		switch (skill_id) {
+			case SS_KUNAIWAIKYOKU:
+				if ((int)distance_xy(x, y, su->bl.x, su->bl.y) > skill->get_range(skill_id, skill_lv))
+					continue;
+				clif->skill_poseffect(&su->bl, skill_id, skill_lv, x, y, tick);
+				{
+					int range = skill->get_splash(skill_id, skill_lv);
+
+					map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+					                   src, skill_id, skill_lv, tick,
+					                   flag | BCT_ENEMY | SKILL_ALTDMG_FLAG | 1, skill->castend_damage_id);
+				}
+				break;
 			case SS_KAGENOMAI:
 				clif->skill_nodamage(&su->bl, &su->bl, skill_id, skill_lv, 1);
 				map->foreachinrange(skill->area_sub, &su->bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
@@ -6731,6 +6744,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SS_KUNAIWAIKYOKU:
 		case SS_KAGENOMAI:
 		case SS_KAGEGARI:
 			if ((flag & 1) != 0)
@@ -14860,6 +14874,17 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
+		case SS_KUNAIWAIKYOKU:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			skill->mirage_cast(src, NULL, skill_id, skill_lv, x, y, tick, flag);
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			flag |= 1; // the unit keeps the ammo, it is spent on group delete
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+		}
 			break;
 		case SS_FUUMAKOUCHIKU:
 			skill->area_temp[1] = 0;
