@@ -1996,6 +1996,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->int_ += skill_lv;
 	if ((pc->checkskill(sd,SU_POWEROFLAND)) > 0)
 		bstatus->int_ += 20;
+	if ((skill_lv = pc->checkskill(sd, NW_GRENADE_MASTERY)) > 0)
+		bstatus->con += skill_lv;
 
 	// Bonuses from cards and equipment as well as base stat, remember to avoid overflows.
 	i = bstatus->str + sd->status.str + sd->param_bonus[0] + sd->param_equip[0];
