@@ -3545,6 +3545,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 20 * pc->checkskill(sd, NW_GRENADE_MASTERY);
 					RE_LVL_DMOD(100);
 					break;
+				case NW_MIDNIGHT_FALLEN:
+					skillratio += -100 + 2500 + 850 * skill_lv + 5 * st->con;
 					if (sd != NULL && sc != NULL && sc->data[SC_HIDDEN_CARD] != NULL) {
 						if (sd->weapontype1 == W_GATLING)
 							skillratio += 200 * skill_lv;
@@ -3553,6 +3555,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						else if (sd->weapontype1 == W_SHOTGUN)
 							skillratio += 400 * skill_lv;
 					}
+					RE_LVL_DMOD(100);
+					break;
 				case HN_DOUBLEBOWLINGBASH:
 					skillratio += -100 + 250 + 400 * skill_lv + 5 * st->pow;
 					if (sd != NULL)

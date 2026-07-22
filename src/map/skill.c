@@ -15697,6 +15697,17 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   skill->castend_damage_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, flag);
 			break;
+		case NW_MIDNIGHT_FALLEN:
+			r = skill->get_splash(skill_id, skill_lv);
+			if (sd != NULL) {
+				if (sd->weapontype1 == W_GATLING)
+					r++;
+				else if (sd->weapontype1 == W_GRENADE)
+					r += 2;
+			}
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			break;
 		case NW_WILD_FIRE:
 			r = skill->get_splash(skill_id, skill_lv);
 			if (sd != NULL && sd->weapontype1 == W_GRENADE)
