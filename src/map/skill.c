@@ -6067,6 +6067,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AL_HOLYLIGHT:
 			status_change_end(bl, SC_PLATINUM_ALTER, INVALID_TIMER);
 			FALLTHROUGH
+		case SOA_EXORCISM_OF_MALICIOUS_SOUL:
 		case AG_DESTRUCTIVE_HURRICANE:
 		case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 		case AG_ASTRAL_STRIKE:
@@ -9027,6 +9028,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case AG_FROZEN_SLASH:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			break;
+
+		case SOA_EXORCISM_OF_MALICIOUS_SOUL:
+			if (sd != NULL) {
+				sd->soulball_old = sd->soulball;
+				pc->delsoulball(sd, sd->soulball, false);
+			}
+			skill->area_temp[1] = 0;
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id,
+			                    skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			break;
 
 		case AG_DESTRUCTIVE_HURRICANE:
@@ -18558,6 +18571,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SP_SOULREAPER:
 		case SP_SOULEXPLOSION:
 		case SP_KAUTE:
+		case SOA_EXORCISM_OF_MALICIOUS_SOUL:
 			if (sd->soulball < require.spiritball) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_SPIRITS, require.spiritball, 0);
 				return 0;
@@ -19315,6 +19329,8 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 			case SP_SOULEXPLOSION:
 			case SP_KAUTE:
 				pc->delsoulball(sd, req.spiritball, false);
+				break;
+			case SOA_EXORCISM_OF_MALICIOUS_SOUL:
 				break;
 			case DK_SERVANT_W_SIGN:
 				pc->delservantball(sd, req.spiritball);

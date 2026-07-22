@@ -487,7 +487,7 @@ END_ZEROED_BLOCK;
 	int charm_count;
 	enum spirit_charm_types charm_type;
 	int charm_timer[MAX_SPIRITCHARM];
-	int soulball;
+	int soulball, soulball_old;
 	int servantball;
 	int servantball_old;
 	int abyssball;

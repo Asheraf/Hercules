@@ -2105,6 +2105,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 1000 + 200 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case SOA_EXORCISM_OF_MALICIOUS_SOUL:
+					skillratio += -100 + 150 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, SOA_SOUL_MASTERY) * 2;
+					skillratio += st->spl;
+					if ((tsc != NULL && tsc->data[SC_SOULCURSE] != NULL)
+					 || (sc != NULL && sc->data[SC_TOTEM_OF_TUTELARY] != NULL))
+						skillratio += 100 * skill_lv;
+					if (sd != NULL)
+						skillratio *= sd->soulball_old;
+					RE_LVL_DMOD(100);
+					break;
 				case AG_DEADLY_PROJECTION:
 					skillratio += -100 + 2800 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
