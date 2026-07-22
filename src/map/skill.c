@@ -1832,6 +1832,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 
 		case WZ_METEOR:
+		case HN_METEOR_STORM_BUSTER:
 			sc_start(src, bl, SC_STUN, 3 * skill_lv, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
 
@@ -4809,6 +4810,23 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 			if(src->m != skl->map)
 				break;
 			switch( skl->skill_id ) {
+				case HN_METEOR_STORM_BUSTER: {
+					int area = 4;
+					int tmpx = skl->x - area + rnd() % (area * 2 + 1);
+					int tmpy = skl->y - area + rnd() % (area * 2 + 1);
+
+					if (map->getcell(src->m, src, tmpx, tmpy, CELL_CHKLANDPROTECTOR) != 0)
+						break;
+
+					int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+					clif->skill_poseffect(src, skl->skill_id, skl->skill_lv, tmpx, tmpy, tick);
+					map->foreachinarea(skill->area_sub, src->m, tmpx - splash, tmpy - splash, tmpx + splash,
+					                   tmpy + splash, BL_CHAR,
+						src, skl->skill_id, skl->skill_lv, tick, skl->flag | BCT_ENEMY | SD_SPLASH | SKILL_ALTDMG_FLAG | 1, skill->castend_damage_id);
+					skill->unitsetting(src, skl->skill_id, skl->skill_lv, tmpx, tmpy,
+					                   skill->get_unit_interval(skl->skill_id, skl->skill_lv));
+				}
+					break;
 				case NW_HASTY_FIRE_IN_THE_HOLE:
 					if (status->isdead(src) == false) {
 						int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
@@ -5309,6 +5327,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				                    skill_id, skill_lv, tick,
 				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
+			break;
+		case HN_METEOR_STORM_BUSTER:
+			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -14200,6 +14221,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case LG_EARTHDRIVE:
 		case SC_ESCAPE:
 		case SU_CN_METEOR:
+		case HN_METEOR_STORM_BUSTER:
 		case SOA_TALISMAN_OF_BLACK_TORTOISE:
 			break; //Effect is displayed on respective switch case.
 		default:
@@ -14578,6 +14600,22 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 
 				skill->addtimerskill(src,tick+i*1000,0,tmpx,tmpy,skill_id,skill_lv,-1,0);
 			}
+			break;
+
+		case HN_METEOR_STORM_BUSTER:
+			if (map->getcell(src->m, src, x, y, CELL_CHKLANDPROTECTOR) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 1;
+			}
+
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+				src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | SKILL_ALTDMG_FLAG | 1, skill->castend_damage_id);
+			skill->unitsetting(src, skill_id, skill_lv, x, y, skill->get_unit_interval(skill_id, skill_lv));
+			for (r = 1; r <= skill->get_time(skill_id, skill_lv) / skill->get_time2(skill_id, skill_lv); r++)
+				skill->addtimerskill(src, tick + (int64)r * skill->get_time2(skill_id, skill_lv), 0, x, y, skill_id,
+				                     skill_lv, 0, flag);
 			break;
 
 		case SOA_TALISMAN_OF_BLACK_TORTOISE:
@@ -15337,6 +15375,10 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 	sc = status->get_sc(src); // for traps, firewall and fogwall - celest
 
 	switch (skill_id) {
+		case HN_METEOR_STORM_BUSTER:
+			limit = flag;
+			flag = 0;
+			break;
 		case NW_GRENADES_DROPPING:
 			limit = skill->get_time2(skill_id, skill_lv);
 			break;
@@ -16319,6 +16361,9 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 
 		case UNT_DUMMYSKILL:
 			switch (sg->skill_id) {
+				case HN_METEOR_STORM_BUSTER:
+					skill->attack(BF_MAGIC, ss, ss, bl, sg->skill_id, sg->skill_lv, tick, 0);
+					break;
 				case SOA_TALISMAN_OF_BLACK_TORTOISE:
 					skill->attack(skill->get_type(sg->skill_id, sg->skill_lv), ss, ss, bl, sg->skill_id, sg->skill_lv,
 					              tick, 0);
@@ -22337,13 +22382,14 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 
 			default:
 				if ((group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
-					|| group->skill_id == AG_ALL_BLOOM_ATK2) && group->val2 == 1)
+					|| group->skill_id == AG_ALL_BLOOM_ATK2 || group->skill_id == HN_METEOR_STORM_BUSTER)
+					&& group->val2 == 1)
 					break;
 				skill->delunit(su);
 		}
 	} else {// skill unit is still active
 		if (group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
-			|| group->skill_id == AG_ALL_BLOOM_ATK2) {
+			|| group->skill_id == AG_ALL_BLOOM_ATK2 || group->skill_id == HN_METEOR_STORM_BUSTER) {
 			if (group->val2 == 0
 			 && (DIFF_TICK(tick, group->tick) >= group->limit - group->interval
 			  || DIFF_TICK(tick, group->tick) >= su->limit - group->interval)
@@ -22351,7 +22397,9 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 				struct block_list *src = map->id2bl(group->src_id);
 
 				if (src != NULL) {
-					clif->skill_poseffect(src, group->skill_id, -1, bl->x, bl->y, tick);
+					clif->skill_poseffect(src, group->skill_id,
+					                      group->skill_id == HN_METEOR_STORM_BUSTER ? group->skill_lv : -1, bl->x,
+					                      bl->y, tick);
 					group->val2 = 1;
 				}
 			}
@@ -22421,7 +22469,7 @@ static int skill_unit_timer_sub(union DBKey key, struct DBData *data, va_list ap
 			}
 		}
 		if (group->skill_id == AG_VIOLENT_QUAKE_ATK || group->skill_id == AG_ALL_BLOOM_ATK
-			|| group->skill_id == AG_ALL_BLOOM_ATK2) {
+			|| group->skill_id == AG_ALL_BLOOM_ATK2 || group->skill_id == HN_METEOR_STORM_BUSTER) {
 			skill->delunit(su);
 			return 0;
 		}

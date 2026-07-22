@@ -1686,6 +1686,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case MG_FROSTDIVER:
 					skillratio += 10 * skill_lv;
 					break;
+				case HN_METEOR_STORM_BUSTER: {
+					int socery_lv = sd != NULL ? pc->checkskill(sd, HN_SELFSTUDY_SOCERY) : 0;
+
+					if ((flag & SKILL_ALTDMG_FLAG) != 0)
+						skillratio += -100 + 300 + 320 * skill_lv;
+					else
+						skillratio += -100 + 450 + 160 * skill_lv;
+					skillratio += socery_lv * 5 * skill_lv;
+					skillratio += 3 * st->spl;
+					RE_LVL_DMOD(100);
+					if ((flag & SKILL_ALTDMG_FLAG) != 0)
+						skillratio += skillratio * socery_lv / 100;
+					break;
+				}
 				case AL_HOLYLIGHT:
 					skillratio += 25;
 					if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
@@ -4945,6 +4959,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		ad.div_ = 2;
 	if (skill_id == ABC_ABYSS_SQUARE && mflag == 2)
 		ad.div_ = 2;
+	if (skill_id == HN_METEOR_STORM_BUSTER && (mflag & SKILL_ALTDMG_FLAG) != 0)
+		ad.div_ = -3;
 	if (skill_id == SOA_TALISMAN_OF_FOUR_BEARING_GOD && sc != NULL) {
 		if (sc->data[SC_T_FIRST_GOD] != NULL)
 			ad.div_ = 2;
