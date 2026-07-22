@@ -3077,6 +3077,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_SEKIENHOU:
+					skillratio += -100 + 600 + 1100 * skill_lv;
+					skillratio += 5 * st->spl;
+					if (sd != NULL)
+						skillratio += 70 * skill_lv * pc->checkskill(sd, SS_ANTENPOU);
+					RE_LVL_DMOD(100);
+					break;
 				case SS_KUNAIKUSSETSU:
 					skillratio += -100 + 300 + 450 * skill_lv;
 					skillratio += 5 * st->pow;
