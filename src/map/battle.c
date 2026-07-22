@@ -3673,6 +3673,10 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 	s_sc = status->get_sc(src);
 	sc = status->get_sc(bl);
 
+	if (s_sc != NULL && s_sc->data[SC_MYSTIC_SYMPHONY] != NULL && (flag & (BF_WEAPON | BF_MAGIC)) != 0
+		&& (status_get_race(bl) == RC_FISH || status_get_race(bl) == RC_DEMIHUMAN))
+		damage += damage / 2;
+
 	if( sc && sc->data[SC_INVINCIBLE] && !sc->data[SC_INVINCIBLEOFF] )
 		return 1;
 
