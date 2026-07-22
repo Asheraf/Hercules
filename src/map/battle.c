@@ -2955,6 +2955,16 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 150 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case BO_ACIDIFIED_ZONE_WATER:
+				case BO_ACIDIFIED_ZONE_WATER_ATK:
+					skillratio += -100 + 400 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL) {
+						skillratio += skillratio * 50 / 100;
+						if (tst->race == RC_FORMLESS || tst->race == RC_PLANT)
+							skillratio += skillratio * 50 / 100;
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case NC_POWERSWING:
 					skillratio = 300 + 100*skill_lv + ( status_get_str(src)+status_get_dex(src) ) * status->get_lv(src) / 100;
 					if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
@@ -6565,6 +6575,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		uint16 rskill = skill_id;/* redirect skill id */
 		if( skill_id ){
 			switch(skill_id){
+				case BO_ACIDIFIED_ZONE_WATER_ATK:
+					rskill = BO_ACIDIFIED_ZONE_WATER;
+					break;
 				case DK_HACKANDSLASHER_ATK:
 					rskill = DK_HACKANDSLASHER;
 					break;

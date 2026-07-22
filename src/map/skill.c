@@ -5488,6 +5488,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_DEFT_STAB:
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
+		case BO_ACIDIFIED_ZONE_WATER:
 		case ABC_CHAIN_REACTION_SHOT:
 		case ABC_FROM_THE_ABYSS_ATK:
 		case IQ_OLEUM_SANCTUM:
@@ -5521,6 +5522,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 				if (skill_id == CD_PETITIO)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				if (skill_id == BO_ACIDIFIED_ZONE_WATER) {
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					if (bl->type == BL_PC && (skill_id != BO_ACIDIFIED_ZONE_WATER || rnd() % 100 < 1))
+						skill->castend_pos2(src, bl->x, bl->y, skill_id, skill_lv, tick, 0);
+				}
 #ifndef RENEWAL
 				switch (skill_id) {
 				case AS_SPLASHER:
@@ -14153,6 +14159,10 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case BO_ACIDIFIED_ZONE_WATER:
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
 		default:
 			if (skill->castend_pos2_unknown(src, &x, &y, &skill_id, &skill_lv, &tick, &flag))
 				return 1;
@@ -16010,6 +16020,10 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 				flag |= 2;
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, flag);
 		}
+			break;
+		case UNT_ACIDIFIED_ZONE_WATER:
+			skill->attack(skill->get_type(BO_ACIDIFIED_ZONE_WATER_ATK, sg->skill_lv), ss, &src->bl, bl,
+			              BO_ACIDIFIED_ZONE_WATER_ATK, sg->skill_lv, tick, 0);
 			break;
 		case UNT_DEEPBLINDTRAP:
 		case UNT_SOLIDTRAP:
@@ -18849,6 +18863,10 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 		case SO_PSYCHIC_WAVE:
 			if( sc && (sc->data[SC_HEATER_OPTION] || sc->data[SC_COOLER_OPTION] || sc->data[SC_BLAST_OPTION] ||  sc->data[SC_CURSED_SOIL_OPTION] ))
 				req.sp += req.sp * 150 / 100;
+			break;
+		case BO_ACIDIFIED_ZONE_WATER:
+			if (sc != NULL && sc->data[SC_RESEARCHREPORT] != NULL && req.amount[0] > 0)
+				req.amount[0]--;
 			break;
 		default:
 			skill->get_requirement_unknown(sc, sd, &skill_id, &skill_lv, &req);
