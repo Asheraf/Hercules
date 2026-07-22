@@ -7377,6 +7377,23 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case BO_THE_WHOLE_PROTECTION:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				static const unsigned int equip[] = { EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HEAD_TOP };
+
+				for (uint8 i = 0; i < ARRAYLENGTH(equip); i++) {
+					if (bl->type != BL_PC || (dstsd != NULL && pc->checkequip(dstsd, equip[i]) < 0))
+						continue;
+					sc_start(src, bl, (sc_type)(SC_PROTECTWEAPON + i), 100, skill_lv,
+					         skill->get_time(skill_id, skill_lv), skill_id);
+				}
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv), src, skill_id,
+				                      skill_lv, tick,
+				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case WH_WIND_SIGN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
