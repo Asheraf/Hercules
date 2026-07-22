@@ -3334,6 +3334,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->res = bst->res;
 		if (sc != NULL && sc->data[SC_FIRM_FAITH] != NULL)
 			st->res = (int32)cap_value((int64)st->res + sc->data[SC_FIRM_FAITH]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_D_MACHINE] != NULL)
+			st->res = (int32)cap_value((int64)st->res + sc->data[SC_D_MACHINE]->val3, 0, SHRT_MAX);
 	}
 	if (flag & SCB_MRES)
 		st->mres = bst->mres;
@@ -5513,6 +5515,8 @@ static defType status_calc_def(struct block_list *bl, struct status_change *sc, 
 		def -= sc->data[SC_ATTACK_STANCE]->val2;
 	if (sc->data[SC_CLIMAX_CRYIMP] != NULL)
 		def += 300;
+	if (sc->data[SC_D_MACHINE] != NULL)
+		def += sc->data[SC_D_MACHINE]->val2;
 
 	return (defType)cap_value(def,DEFTYPE_MIN,DEFTYPE_MAX);
 }
@@ -10260,6 +10264,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_COMPETENTIA:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 10 * val1;
+				break;
+			case SC_D_MACHINE:
+				val2 = 200 + 50 * val1;
+				val3 = 20 * val1;
 				break;
 			case SC_RELIGIO:
 				val1 = cap_value(val1, 1, 5);

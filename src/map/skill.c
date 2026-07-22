@@ -12064,6 +12064,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			}
 			break;
+		case MT_D_MACHINE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case EL_CIRCLE_OF_FIRE:
 		case EL_PYROTECHNIC:
 		case EL_HEATER:
@@ -16511,6 +16515,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case NC_MAGMA_ERUPTION_DOTDAMAGE:
 				case MT_AXE_STOMP:
 				case MT_RUSH_QUAKE:
+				case MT_D_MACHINE:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 					break;
