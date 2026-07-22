@@ -2064,6 +2064,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case RK_WINDCUTTER:
 			sc_start(src, bl, SC_FEAR, 3 + 2 * skill_lv, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case CD_ARBITRIUM:
+			sc_start(src, bl, SC_HANDICAPSTATE_DEEPSILENCE, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+			         skill_id);
+			break;
 		case DK_SERVANT_W_PHANTOM:
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
@@ -5375,6 +5379,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_FLAME_BOMB:
 		case IQ_THIRD_CONSECRATION:
 		case IG_GRAND_JUDGEMENT:
+		case CD_ARBITRIUM:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
