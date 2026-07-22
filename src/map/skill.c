@@ -5497,6 +5497,17 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				skill->castend_damage_id(src, bl, ABC_ABYSS_FLAME_ATK, skill_lv, tick, flag);
 			}
 			break;
+		case TR_RHYTHMICAL_WAVE:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL,
+				                     src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				if (sd != NULL)
+					battle->consume_ammo(sd, skill_id, skill_lv);
+			}
+			break;
 		case SKE_STAR_LIGHT_KICK:
 		{
 			enum unit_dir dir = UNIT_DIR_NORTHEAST;
@@ -20526,6 +20537,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	if (skill_id == TR_METALIC_FURY)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (skill_id == TR_ROSEBLOSSOM)
+		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
+	if (skill_id == TR_RHYTHMICAL_WAVE)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (add_ap <= 0)
 		return;

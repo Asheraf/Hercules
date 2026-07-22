@@ -2247,6 +2247,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case TR_RHYTHMICAL_WAVE:
+					skillratio += -100 + 250 + 3650 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, TR_STAGE_MANNER) * 25;
+					skillratio += 5 * st->spl;
+					if (sc != NULL && sc->data[SC_MYSTIC_SYMPHONY] != NULL)
+						skillratio += 200 + 1000 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case HN_JUPITEL_THUNDER_STORM:
 					skillratio += -100 + 1800 * skill_lv;
 					if (sd != NULL)
@@ -5486,6 +5495,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 	if (skill_id == TR_SOUNDBLEND && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == TR_METALIC_FURY && sd != NULL)
+		s_ele = sd->bonus.arrow_ele;
+	if (skill_id == TR_RHYTHMICAL_WAVE && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
 
 	if ((skill_id == SU_CN_METEOR || skill_id == SU_CN_METEOR2 || skill_id == SH_HYUN_ROKS_BREEZE
