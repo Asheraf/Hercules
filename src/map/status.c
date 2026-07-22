@@ -10216,6 +10216,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 5);
 				val2 = 5 * val1;
 				break;
+			case SC_ARGUTUS_TELUM:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 5 * val1;
+				break;
 			case SC_NEWMOON:
 				val2 = 7;
 				tick_time = 1000;

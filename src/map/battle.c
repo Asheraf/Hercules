@@ -6419,7 +6419,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			ATK_ADDRATE(sstatus->patk);
 
 		if ((wd.damage != 0 || wd.damage2 != 0) && tstatus->res > 0) {
-			double reduction = (double)tstatus->res / (tstatus->res + 400.0) * 0.8;
+			int res = tstatus->res;
+
+			if (sc != NULL && sc->data[SC_ARGUTUS_TELUM] != NULL)
+				res -= res * sc->data[SC_ARGUTUS_TELUM]->val2 / 100;
+
+			double reduction = (double)res / (res + 400.0) * 0.8;
 			wd.damage -= (int64)(wd.damage * reduction);
 			wd.damage2 -= (int64)(wd.damage2 * reduction);
 		}
