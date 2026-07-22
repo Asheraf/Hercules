@@ -2870,6 +2870,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 450 + 1150 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case MT_A_MACHINE:
+					skillratio += -100 + 850 + 700 * (skill_lv - 1) + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -5670,9 +5674,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
-		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER) && sstatus->cri &&
+		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
+		|| skill_id == MT_A_MACHINE) && sstatus->cri &&
 		(!skill_id ||
-		skill_id == KN_AUTOCOUNTER ||
+		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
@@ -6135,7 +6140,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
-							|| skill_id == SHC_FATAL_SHADOW_CROW)
+							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

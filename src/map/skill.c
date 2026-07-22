@@ -16512,6 +16512,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_AXE_STOMP:
 				case MT_RUSH_QUAKE:
 				case MT_M_MACHINE:
+				case MT_A_MACHINE:
 					break;
 				default:
 				{
