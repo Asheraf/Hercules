@@ -2953,6 +2953,9 @@ static int skill_counter_additional_effect(struct block_list *src, struct block_
 	}
 
 	switch(skill_id){
+		case AT_FRENZY_FANG:
+			skill->update_pulse_of_madness(src);
+			break;
 		case AT_SAVAGE_LUNGE:
 		case AT_ALPHA_CLAW:
 		case AT_FERAL_CLAW:
@@ -7162,6 +7165,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				clif->snap(src, src->x, src->y);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 		}
+			break;
+		case AT_FRENZY_FANG:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case SKE_RISING_SUN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -19277,6 +19284,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case AT_FRENZY_FANG:
 		case AT_SAVAGE_LUNGE:
 			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
