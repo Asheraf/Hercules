@@ -5805,6 +5805,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case ABC_DEFT_STAB:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
+					case HN_JUPITEL_THUNDER_STORM:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case ABC_CHAIN_REACTION_SHOT:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						map->foreachinrange(skill->area_sub, bl,
