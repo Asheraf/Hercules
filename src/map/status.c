@@ -3416,6 +3416,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->mres = bst->mres;
 		if (sc != NULL && sc->data[SC_SHADOW_STRIP] != NULL && bl->type != BL_PC)
 			st->mres -= st->mres * sc->data[SC_SHADOW_STRIP]->val2 / 100;
+		if (sc != NULL && sc->data[SC_GEF_NOCTURN] != NULL)
+			st->mres = max(st->mres - sc->data[SC_GEF_NOCTURN]->val2, 0);
 	}
 	if (flag & SCB_HPLUS)
 		st->hplus = bst->hplus;
@@ -10385,6 +10387,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				status_percent_heal(bl, 100, 100);
 				val2 = 10 + 2 * val1;
 				val3 = 100 + 20 * val1;
+				break;
+			case SC_GEF_NOCTURN:
+				val2 = 10 * val1;
+				if ((val3 & 2) != 0)
+					val2 *= 2;
 				break;
 			case SC_D_MACHINE:
 				val2 = 200 + 50 * val1;
