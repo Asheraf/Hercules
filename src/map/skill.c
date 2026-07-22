@@ -14788,6 +14788,12 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				sc_start(src, src, type, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src,skill_id,skill_lv,x,y,0);
 			break;
+		case SS_SHINKIROU:
+			flag |= 1;
+			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
 		case SS_TOKEDASU:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
