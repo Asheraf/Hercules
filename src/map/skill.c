@@ -3873,6 +3873,7 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			break;
 		case EM_EL_FLAMEROCK:
 		case EM_EL_AGE_OF_ICE:
+		case EM_EL_STORM_WIND:
 			dmg.dmotion = clif->skill_damage(dsrc, bl, tick, dmg.amotion, dmg.dmotion, damage, dmg.div_, skill_id, -1,
 			                                 BDT_MULTIHIT);
 			break;
@@ -6164,6 +6165,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case TR_ROSEBLOSSOM_ATK:
 		case EM_EL_FLAMEROCK:
 		case EM_EL_AGE_OF_ICE:
+		case EM_EL_STORM_WIND:
 		case HN_JUPITEL_THUNDER_STORM:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
@@ -6436,6 +6438,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						break;
 					case EM_EL_FLAMEROCK:
 					case EM_EL_AGE_OF_ICE:
+					case EM_EL_STORM_WIND:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case CD_DIVINUS_FLOS:
