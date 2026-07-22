@@ -10688,6 +10688,7 @@ static int status_get_val_flag(enum sc_type type)
 	switch (type) {
 		case SC_CHARGINGPIERCE:
 		case SC_CHARGINGPIERCE_COUNT:
+		case SC_E_SLASH_COUNT:
 			val_flag |= 1;
 			break;
 	}

@@ -6035,6 +6035,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			else if( sd )
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
 			break;
+		case SHC_ETERNAL_SLASH:
+			if (sc != NULL && ((sc->data[SC_COMBOATTACK] != NULL
+			 && sc->data[SC_COMBOATTACK]->val1 == GC_WEAPONBLOCKING) || sc->data[SC_WEAPONBLOCK_ON] != NULL)) {
+				struct status_change_entry *sce = sc->data[SC_E_SLASH_COUNT];
+
+				sc_start(src, src, SC_E_SLASH_COUNT, 100, sce != NULL ? min(5, sce->val1 + 1) : 1,
+				         skill->get_time(skill_id, skill_lv), skill_id);
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else if (sd != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
+			}
+			break;
 
 		case GC_CROSSRIPPERSLASHER:
 			if( sd && !(sc && sc->data[SC_ROLLINGCUTTER]) )
@@ -16910,7 +16923,9 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case GC_COUNTERSLASH:
 		case GC_WEAPONCRUSH:
-			if( !(sc && sc->data[SC_COMBOATTACK] && sc->data[SC_COMBOATTACK]->val1 == GC_WEAPONBLOCKING) ) {
+		case SHC_ETERNAL_SLASH:
+			if (sc == NULL || ((sc->data[SC_COMBOATTACK] == NULL
+			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) && sc->data[SC_WEAPONBLOCK_ON] == NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
 				return 0;
 			}
