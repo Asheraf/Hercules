@@ -1160,25 +1160,46 @@ static int status_calc_mob_(struct mob_data *md, enum e_status_calc_opt opt)
 		}
 	}
 
-	if (flag&16 && mbl) {
-		//Max HP setting from Summon Flora/marine Sphere
-		struct unit_data *ud = unit->bl2ud(mbl);
-		//Remove special AI when this is used by regular mobs.
-		if (mbl->type == BL_MOB && BL_UCAST(BL_MOB, mbl)->special_state.ai == AI_NONE)
-			md->special_state.ai = AI_NONE;
-		if (ud) {
-			// different levels of HP according to skill level
-			if (ud->skill_id == AM_SPHEREMINE) {
-				mstatus->max_hp = 2000 + 400*ud->skill_lv;
-			} else if(ud->skill_id == KO_ZANZOU) {
-				mstatus->max_hp = 3000 + 3000 * ud->skill_lv + status_get_max_sp(battle->get_master(mbl));
-			} else { //AM_CANNIBALIZE
-				mstatus->max_hp = 1500 + 200*ud->skill_lv + 10*status->get_lv(mbl);
-				mstatus->mode |= MD_CANATTACK|MD_AGGRESSIVE;
+	if ((flag & 16) != 0 && mbl != NULL) {
+		if (md->special_state.ai == AI_ABR) {
+			struct map_session_data *msd = BL_CAST(BL_PC, mbl);
+			struct status_data *masterstatus = status->get_status_data(mbl);
+
+			if (msd != NULL && masterstatus != &status->dummy) {
+				int mastery = pc->checkskill(msd, MT_ABR_M);
+				int64 atk = 2 * (int64)masterstatus->batk + 600 * mastery + 200;
+
+				mstatus->max_hp = (uint32)cap_value(((int64)5000 + 40000 * mastery) * masterstatus->vit / 100, 1,
+				                                    INT_MAX);
+				mstatus->rhw.atk = (unsigned int)cap_value(atk * 70 / 100, 0, UINT_MAX);
+				mstatus->rhw.atk2 = (unsigned int)cap_value(atk, 0, UINT_MAX);
+				mstatus->def = (defType)cap_value((int64)masterstatus->def + 20 * mastery, DEFTYPE_MIN, DEFTYPE_MAX);
+				mstatus->mdef = (defType)cap_value((int64)masterstatus->mdef + 4 * mastery, DEFTYPE_MIN, DEFTYPE_MAX);
+				mstatus->flee = (int32)cap_value((int64)masterstatus->flee + 10 * mastery, INT_MIN, INT_MAX);
+				mstatus->speed = masterstatus->speed;
+				mstatus->hp = mstatus->max_hp;
+				mstatus->sp = mstatus->max_sp;
 			}
-			mstatus->hp = mstatus->max_hp;
-			if( ud->skill_id == NC_SILVERSNIPER )
-				mstatus->rhw.atk = mstatus->rhw.atk2 = 200 * ud->skill_lv;
+		} else {
+			//Max HP setting from Summon Flora/marine Sphere
+			struct unit_data *ud = unit->bl2ud(mbl);
+			//Remove special AI when this is used by regular mobs.
+			if (mbl->type == BL_MOB && BL_UCAST(BL_MOB, mbl)->special_state.ai == AI_NONE)
+				md->special_state.ai = AI_NONE;
+			if (ud != NULL) {
+				// different levels of HP according to skill level
+				if (ud->skill_id == AM_SPHEREMINE) {
+					mstatus->max_hp = 2000 + 400*ud->skill_lv;
+				} else if (ud->skill_id == KO_ZANZOU) {
+					mstatus->max_hp = 3000 + 3000 * ud->skill_lv + status_get_max_sp(battle->get_master(mbl));
+				} else { //AM_CANNIBALIZE
+					mstatus->max_hp = 1500 + 200*ud->skill_lv + 10*status->get_lv(mbl);
+					mstatus->mode |= MD_CANATTACK|MD_AGGRESSIVE;
+				}
+				mstatus->hp = mstatus->max_hp;
+				if (ud->skill_id == NC_SILVERSNIPER)
+					mstatus->rhw.atk = mstatus->rhw.atk2 = 200 * ud->skill_lv;
+			}
 		}
 	}
 

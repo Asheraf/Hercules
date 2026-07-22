@@ -111,6 +111,7 @@ enum ai {
 	AI_SPHERE,   //2: Alchemist Marine Sphere
 	AI_FLORA,    //3: Alchemist Summon Flora
 	AI_ZANZOU,   //4: Summon Zanzou
+	AI_ABR,      //5: Meister ABR Summon
 
 	AI_MAX
 };
