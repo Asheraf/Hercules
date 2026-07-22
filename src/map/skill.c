@@ -2328,6 +2328,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			if (skill->area_temp[3] == 1)
 				sc_start(src, bl, SC_STUN, 10, skill_lv, skill_get_time(skill_id, skill_lv), skill_id); // TODO: What's the chance/time?
 			break;
+		case IQ_OLEUM_SANCTUM:
+			sc_start(src, bl, SC_HOLY_OIL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case RL_S_STORM:
 			skill->break_equip(bl, EQP_HEAD_TOP, max(skill_lv * 500, (sstatus->dex * skill_lv * 10) - (tstatus->agi * 20)), BCT_ENEMY);
 			break;
@@ -5327,6 +5330,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case DK_SERVANT_W_DEMOL:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
+		case IQ_OLEUM_SANCTUM:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -7700,6 +7704,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case DK_SERVANT_W_DEMOL:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
+			break;
+		case IQ_OLEUM_SANCTUM:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		// Works just like the above list of skills, except animation caused by
 		// status must trigger AFTER the skill cast animation or it will cancel

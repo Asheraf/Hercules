@@ -3049,6 +3049,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if( sc && sc->data[SC_BLAST_OPTION] )
 						skillratio += (sd ? sd->status.job_level * 5 : 0);
 					break;
+				case IQ_OLEUM_SANCTUM:
+					skillratio += -100 + 500 + 2000 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:
 				case EL_FIRE_BOMB_ATK:
@@ -3578,6 +3582,9 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		if (sc->data[SC_RAID] != NULL)
 			damage += damage * sc->data[SC_RAID]->val2 / 100;
 #endif
+
+		if (sc->data[SC_HOLY_OIL] != NULL && (flag & (BF_LONG | BF_WEAPON)) == (BF_LONG | BF_WEAPON))
+			damage += damage * (3 * sc->data[SC_HOLY_OIL]->val1) / 100;
 
 		if( damage ) {
 			if( sc->data[SC_DEEP_SLEEP] ) {
@@ -5411,13 +5418,14 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 		|| skill_id == DK_SERVANT_W_DEMOL
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
-		|| skill_id == DK_STORMSLASH) && sstatus->cri &&
+		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
-			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH))
+			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
+			|| skill_id == IQ_OLEUM_SANCTUM))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5854,7 +5862,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 						if (skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 							|| skill_id == DK_SERVANT_W_DEMOL
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
-							|| skill_id == DK_STORMSLASH)
+							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
