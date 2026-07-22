@@ -2523,6 +2523,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case SP_SHA:
 			sc_start(src, bl, SC_SP_SHA, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case HN_GROUND_GRAVITATION:
+			sc_start(src, bl, SC_GROUNDGRAVITY, 100, 0, skill->get_time2(skill_id, skill_lv), skill_id);
+			break;
 		default:
 			skill->additional_effect_unknown(src, bl, &skill_id, &skill_lv, &attack_type, &dmg_lv, &tick);
 			break;
@@ -3446,6 +3449,8 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			dmg.div_= pd->a_skill->div_;
 		}
 	}
+	if (skill_id == HN_GROUND_GRAVITATION && (flag & SKILL_ALTDMG_FLAG) != 0)
+		dmg.div_ = -2;
 	if (skill_id == NC_ARMSCANNON || skill_id == NC_BOOSTKNUCKLE || skill_id == NC_VULCANARM) {
 		struct status_change *csc = status->get_sc(src);
 
@@ -5732,11 +5737,14 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
+		case HN_GROUND_GRAVITATION:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
 				// skill->area_temp[2] counts how many targets have already been processed
 				int sflag = skill->area_temp[0] & 0xFFF, heal;
+				if (skill_id == HN_GROUND_GRAVITATION && (flag & SKILL_ALTDMG_FLAG) != 0)
+					sflag |= SKILL_ALTDMG_FLAG;
 				if( flag&SD_LEVEL )
 					sflag |= SD_LEVEL; // -1 will be used in packets instead of the skill level
 				if( (skill->area_temp[1] != bl->id && !(skill->get_inf2(skill_id)&INF2_NPC_SKILL)) || flag&SD_ANIMATION )
@@ -15159,6 +15167,18 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case HN_GROUND_GRAVITATION:
+			if (map->getcell(src->m, src, x, y, CELL_CHKLANDPROTECTOR) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
+			}
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | SKILL_ALTDMG_FLAG | 1,
+			                   skill->castend_damage_id);
+			skill->unitsetting(src, skill_id, skill_lv, x, y, flag);
+			break;
 		case NW_WILD_FIRE:
 			r = skill->get_splash(skill_id, skill_lv);
 			if (sd != NULL && sd->weapontype1 == W_GRENADE)
@@ -17081,6 +17101,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_LIGHTNING_LAND:
 		case UNT_VENOM_SWAMP:
 		case UNT_CONFLAGRATION:
+		case UNT_GROUND_GRAVITATION:
 		case UNT_JACK_FROST_NOVA:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;

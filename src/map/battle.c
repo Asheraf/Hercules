@@ -2259,6 +2259,22 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
 					break;
+				case HN_GROUND_GRAVITATION:
+					if ((flag & SKILL_ALTDMG_FLAG) != 0) {
+						skillratio += -100 + 3000 + 1500 * skill_lv;
+						if (sd != NULL)
+							skillratio += pc->checkskill(sd, HN_SELFSTUDY_SOCERY) * 4 * skill_lv;
+						skillratio += 5 * st->spl;
+					} else {
+						skillratio += -100 + 800 + 700 * skill_lv;
+						if (sd != NULL)
+							skillratio += pc->checkskill(sd, HN_SELFSTUDY_SOCERY) * 2 * skill_lv;
+						skillratio += 2 * st->spl;
+					}
+					RE_LVL_DMOD(100);
+					if ((flag & SKILL_ALTDMG_FLAG) == 0 && sd != NULL)
+						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)
@@ -4301,6 +4317,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 #endif
 		if (sc->data[SC_SHIELDCHAINRUSH] != NULL)
 			damage += damage / 10;
+		if (sc->data[SC_GROUNDGRAVITY] != NULL && (flag & (BF_MAGIC | BF_WEAPON)) != 0)
+			damage += damage * 10 / 100;
 
 		if( sc->data[SC_LEXAETERNA] && skill_id != PF_SOULBURN
 #ifdef RENEWAL

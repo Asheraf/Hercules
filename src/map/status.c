@@ -6017,6 +6017,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 						val = max(val, 20);
 					if (sc->data[SC_SP_SHA] != NULL)
 						val = max(val, sc->data[SC_SP_SHA]->val2);
+					if (sc->data[SC_GROUNDGRAVITY] != NULL)
+						val = max(val, 20);
 
 					if( sd && sd->bonus.speed_rate + sd->bonus.speed_add_rate > 0 ) // permanent item-based speedup
 						val = max( val, sd->bonus.speed_rate + sd->bonus.speed_add_rate );
