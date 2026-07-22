@@ -2378,6 +2378,17 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		for (int size = SZ_SMALL; size <= SZ_BIG; size++)
 			sd->weapon_subsize[size] += defense_bonus[size][skill_index];
 	}
+	if ((skill_lv = pc->checkskill(sd, MT_TWOAXEDEF)) > 0 && sd->weapontype == W_2HAXE) {
+		static const int defense_bonus[3][10] = {
+			{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+			{ 2, 3, 5, 6, 8, 9, 11, 12, 14, 15 },
+			{ 3, 5, 7, 9, 10, 12, 13, 15, 16, 18 },
+		};
+		int skill_index = cap_value(skill_lv, 1, 10) - 1;
+
+		for (int size = SZ_SMALL; size <= SZ_BIG; size++)
+			sd->weapon_subsize[size] += defense_bonus[size][skill_index];
+	}
 	if ((skill_lv = pc->checkskill(sd, IQ_WILL_OF_FAITH)) > 0 && sd->weapontype == W_KNUCKLE) {
 		static const int race_attack[10] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 		int skill_index = cap_value(skill_lv, 1, 10) - 1;
