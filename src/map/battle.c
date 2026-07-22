@@ -2992,6 +2992,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SH_CHUL_HO_SONIC_CLAW:
+					skillratio += -100 + 1450 + 2650 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL) {
+						skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						if (skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO) == true) {
+							skillratio += -50 + 350 * skill_lv;
+							skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						}
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case TR_RHYTHMSHOOTING:
 					skillratio += -100 + 550 + 950 * skill_lv;
 					if (sd != NULL && pc->checkskill(sd, TR_STAGE_MANNER) > 0)
@@ -6143,6 +6155,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
+		|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
+		&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6162,6 +6176,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 			|| (skill_id == NW_SPIRAL_SHOOTING && sd != NULL && sd->weapontype1 == W_RIFLE)
 			|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
+			|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
+			&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6624,7 +6640,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH
 							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
-							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE)
+							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
+							|| skill_id == SH_CHUL_HO_SONIC_CLAW)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
