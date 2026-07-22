@@ -4790,6 +4790,20 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 			if(src->m != skl->map)
 				break;
 			switch( skl->skill_id ) {
+				case NW_HASTY_FIRE_IN_THE_HOLE:
+					if (status->isdead(src) == false) {
+						int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+
+						if ((skl->flag & 1) != 0)
+							splash++;
+						if ((skl->flag & 2) != 0)
+							splash++;
+						map->foreachinarea(skill->area_sub, src->m, skl->x - splash, skl->y - splash,
+						                   skl->x + splash, skl->y + splash, BL_CHAR, src, skl->skill_id,
+						                   skl->skill_lv, tick, skl->flag | BCT_ENEMY | 1,
+						                   skill->castend_damage_id);
+					}
+					break;
 				case WZ_METEOR:
 				case SU_CN_METEOR:
 					if (skl->type >= 0) {
@@ -14694,6 +14708,13 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			r = skill->get_splash(skill_id, skill_lv);
 			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
 			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			break;
+		case NW_HASTY_FIRE_IN_THE_HOLE:
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			skill->addtimerskill(src, tick + 300, 0, x, y, skill_id, skill_lv, 0, flag | 1);
+			skill->addtimerskill(src, tick + 600, 0, x, y, skill_id, skill_lv, 0, flag | 3);
 			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
