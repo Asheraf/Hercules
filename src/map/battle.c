@@ -3040,6 +3040,19 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case ABR_INFINITY_BUSTER:
 					skillratio += -100 + 50000;
 					break;
+				case NW_THE_VIGILANTE_AT_NIGHT:
+					if (sd != NULL && sd->weapontype1 == W_GATLING) {
+						skillratio += -100 + 350 * skill_lv;
+						if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+							skillratio += sc->data[SC_INTENSIVE_AIM_COUNT]->val1 * 100 * skill_lv;
+					} else {
+						skillratio += -100 + 950 + 700 * skill_lv;
+						if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+							skillratio += sc->data[SC_INTENSIVE_AIM_COUNT]->val1 * 200 * skill_lv;
+					}
+					skillratio += 5 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -5653,6 +5666,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case MT_AXE_STOMP:
 				if (sd != NULL && sd->weapontype == W_2HAXE)
 					wd.div_ = 3;
+				break;
+			case NW_THE_VIGILANTE_AT_NIGHT:
+				if (sd != NULL && sd->weapontype1 == W_GATLING)
+					wd.div_ += 3;
 				break;
 #ifndef RENEWAL
 			case MO_FINGEROFFENSIVE:

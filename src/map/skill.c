@@ -7499,6 +7499,28 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			break;
+		case NW_THE_VIGILANTE_AT_NIGHT:
+			if ((flag & 1) != 0) {
+				skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				skill->area_temp[0] = 0;
+				skill->area_temp[1] = bl->id;
+				skill->area_temp[2] = 0;
+				if (sd != NULL && sd->weapontype1 == W_GATLING) {
+					range = 5;
+					clif->skill_nodamage(src, bl, NW_THE_VIGILANTE_AT_NIGHT_GUN_GATLING, skill_lv, 1);
+				} else {
+					clif->skill_nodamage(src, bl, NW_THE_VIGILANTE_AT_NIGHT_GUN_SHOTGUN, skill_lv, 1);
+				}
+				map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_nodamage_id);
+				struct status_change *sc = status->get_sc(src);
+				if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
+			}
+			break;
 		case EM_ELEMENTAL_BUSTER:
 			if (sd != NULL && sd->ed != NULL) {
 				uint16 buster_element = 0;
