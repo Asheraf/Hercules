@@ -5853,6 +5853,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
+		case SS_RAIDENPOU:
 		case SS_SEKIENHOU:
 		case SS_KAGEGISSEN:
 		case SKE_DAWN_BREAK:
@@ -6043,6 +6044,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_THIRD_FLAME_BOMB:
 					case IQ_THIRD_CONSECRATION:
 					case IG_GRAND_JUDGEMENT:
+					case SS_RAIDENPOU:
 					case SS_SEKIENHOU:
 						skill->mirage_cast(src, NULL, SS_ANTENPOU, skill_lv, 0, 0, tick, flag);
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
