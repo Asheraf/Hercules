@@ -2565,10 +2565,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 #ifdef RENEWAL
 					// @TODO: Confirm if shield weight must be considered for RE_LVL_DMOD
 					skillratio += -100 + 300 + 200 * skill_lv;
+					if (sd != NULL && sc != NULL && sc->data[SC_SHIELD_POWER] != NULL)
+						skillratio += skill_lv * 14 * pc->checkskill(sd, IG_SHIELD_MASTERY);
 					RE_LVL_DMOD(100);
 #else
 					skillratio += 30 * skill_lv;
 #endif
+					if (sc != NULL && sc->data[SC_SHIELD_POWER] != NULL)
+						skillratio += skillratio * 50 / 100;
 					break;
 				case WS_CARTTERMINATION:
 					i = 10 * (16 - skill_lv);
@@ -2856,6 +2860,9 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio = 150 * skill_lv + st->str;
 					if( sd ) {
 						short index = sd->equip_index[EQI_HAND_L];
+
+						if (sc != NULL && sc->data[SC_SHIELD_POWER] != NULL)
+							skillratio += skill_lv * 15 * pc->checkskill(sd, IG_SHIELD_MASTERY);
 						if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR )
 						skillratio += sd->inventory_data[index]->weight / 10;
 					}
@@ -2904,8 +2911,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case LG_EARTHDRIVE:
 					if( sd ) {
 						short index = sd->equip_index[EQI_HAND_L];
+
 						if( index >= 0 && sd->inventory_data[index] && sd->inventory_data[index]->type == IT_ARMOR )
 						skillratio = (1 + skill_lv) * sd->inventory_data[index]->weight / 10;
+						if (sc != NULL && sc->data[SC_SHIELD_POWER] != NULL)
+							skillratio += skill_lv * 37 * pc->checkskill(sd, IG_SHIELD_MASTERY);
 					}
 					RE_LVL_DMOD(100);
 					break;
@@ -3295,6 +3305,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case IQ_THIRD_PUNISH:
 					skillratio += -100 + 450 + 1800 * skill_lv + 10 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
+				case IG_SHIELD_SHOOTING:
+					skillratio += -100 + 1000 + 3500 * skill_lv + 10 * st->pow;
+					if (sd != NULL) {
+						short index = sd->equip_index[EQI_HAND_L];
+
+						skillratio += skill_lv * 150 * pc->checkskill(sd, IG_SHIELD_MASTERY);
+						if (index >= 0 && sd->inventory_data[index] != NULL
+							&& sd->inventory_data[index]->type == IT_ARMOR) {
+							skillratio += (sd->inventory_data[index]->weight * 7 / 6) / 10;
+							skillratio += sd->status.inventory[index].refine * 100;
+						}
+					}
 					RE_LVL_DMOD(100);
 					break;
 				case DK_DRAGONIC_AURA:
