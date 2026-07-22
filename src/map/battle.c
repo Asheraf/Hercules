@@ -3153,6 +3153,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 650 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case SHC_IMPACT_CRATER:
+					skillratio += -100 + 200 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_SECOND_FLAME:
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);
@@ -5640,7 +5644,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
-		|| skill_id == SHC_ETERNAL_SLASH) && sstatus->cri &&
+		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
@@ -5651,7 +5655,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
-			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH))
+			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
+			|| skill_id == SHC_IMPACT_CRATER))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5710,6 +5715,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case SHC_SAVAGE_IMPACT:
 			case SHC_ETERNAL_SLASH:
 				cri /= 2;
+				break;
+			case SHC_IMPACT_CRATER:
+				if (sd == NULL || sd->weapontype1 != W_KATAR)
+					cri = 0;
+				else
+					cri /= 2;
 				break;
 		}
 		if(tsd && tsd->bonus.critical_def)
@@ -6097,7 +6108,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
-							|| skill_id == SHC_ETERNAL_SLASH)
+							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

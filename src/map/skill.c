@@ -5399,6 +5399,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case CD_ARBITRIUM:
 		case CD_PETITIO:
 		case SHC_SAVAGE_IMPACT:
+		case SHC_IMPACT_CRATER:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -7970,6 +7971,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case IQ_MASSIVE_F_BLASTER:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case SHC_IMPACT_CRATER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
@@ -16930,9 +16936,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case GC_COUNTERSLASH:
 		case GC_WEAPONCRUSH:
-		case SHC_ETERNAL_SLASH:
-			if (sc == NULL || ((sc->data[SC_COMBOATTACK] == NULL
-			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) && sc->data[SC_WEAPONBLOCK_ON] == NULL)) {
+			if (sc == NULL || sc->data[SC_COMBOATTACK] == NULL
+			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
 				return 0;
 			}
@@ -16940,6 +16945,13 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SHC_POTENT_VENOM:
 			if (sc == NULL || sc->data[SC_EDP] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SHC_ETERNAL_SLASH:
+			if (sc == NULL || ((sc->data[SC_COMBOATTACK] == NULL
+			 || sc->data[SC_COMBOATTACK]->val1 != GC_WEAPONBLOCKING) && sc->data[SC_WEAPONBLOCK_ON] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
 				return 0;
 			}
 			break;
