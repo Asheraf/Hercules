@@ -2174,6 +2174,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, NW_P_F_I)) > 0 && sd->weapontype >= W_REVOLVER && sd->weapontype <= W_GRENADE)
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv + 2, 0, SHRT_MAX);
+	if (sd->weapontype == W_BOOK && (skill_lv = pc->checkskill(sd, SKE_WAR_BOOK_MASTERY)) > 0)
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv + 2, 0, SHRT_MAX);
 	if (sd->weapontype == W_2HSTAFF && (skill_lv = pc->checkskill(sd, AG_TWOHANDSTAFF)) > 0)
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 2, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY)) > 0) {
@@ -2290,6 +2292,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->hit += 20;
 	if ((sd->weapontype == W_1HSWORD || sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR)
 		&& (skill_lv = pc->checkskill(sd, IG_SPEAR_SWORD_M)) > 0)
+		bstatus->hit += skill_lv * 3;
+	if (sd->weapontype == W_BOOK && (skill_lv = pc->checkskill(sd, SKE_WAR_BOOK_MASTERY)) > 0)
 		bstatus->hit += skill_lv * 3;
 
 	// ----- FLEE CALCULATION -----
