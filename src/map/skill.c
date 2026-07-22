@@ -13014,6 +13014,28 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				}
 			}
 			break;
+		case SOA_SOUL_OF_HEAVEN_AND_EARTH:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				struct status_change *sc = status->get_sc(src);
+
+				if (check_distance_bl(src, bl, AREA_SIZE) != 0)
+					clif->skill_nodamage(bl, bl, skill_id, skill_lv, 1);
+				status_percent_heal(bl, 0, 100);
+				if (src != bl && sc != NULL && sc->data[SC_TOTEM_OF_TUTELARY] != NULL && dstsd != NULL) {
+					uint32 old_ap = dstsd->battle_status.ap;
+
+					dstsd->battle_status.ap = (uint32)cap_value((int64)dstsd->battle_status.ap + 3 * skill_lv, 0,
+					                                           dstsd->battle_status.max_ap);
+					if (old_ap != dstsd->battle_status.ap)
+						clif->updatestatus(dstsd, SP_AP);
+				}
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			} else {
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv), src, skill_id,
+				                      skill_lv, tick,
+				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case ABR_NET_REPAIR:
 			if ((flag & 1) != 0) {
 				int heal = (int)cap_value((int64)tstatus->max_hp * 10 / 100, 0, INT_MAX);

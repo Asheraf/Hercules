@@ -6979,6 +6979,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				ATK_ADDRATE(i);
 			if (sc != NULL && sc->data[SC_RUSH_QUAKE2] != NULL && (wd.flag & (BF_SHORT | BF_LONG)) != 0)
 				ATK_ADDRATE(5 * sc->data[SC_RUSH_QUAKE2]->val1);
+			if (sc != NULL && sc->data[SC_HEAVEN_AND_EARTH] != NULL
+			 && (wd.flag & (BF_SHORT | BF_LONG)) != 0)
+				ATK_ADDRATE(sc->data[SC_HEAVEN_AND_EARTH]->val2);
 	#ifdef RENEWAL
 			if( wd.flag&BF_LONG )
 				ATK_ADDRATE(sd->bonus.long_attack_atk_rate);

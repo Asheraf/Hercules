@@ -1934,6 +1934,12 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	}
 	if (sc->data[SC_HIDDEN_CARD] != NULL)
 		sd->bonus.long_attack_atk_rate += sc->data[SC_HIDDEN_CARD]->val3;
+	if (sc->data[SC_HEAVEN_AND_EARTH] != NULL) {
+		int bonus = sc->data[SC_HEAVEN_AND_EARTH]->val2;
+
+		for (int element = ELE_NEUTRAL; element < ELE_MAX; element++)
+			sd->magic_atk_ele[element] += bonus;
+	}
 	if (sc->data[SC_TALISMAN_OF_FIVE_ELEMENTS] != NULL) {
 		int bonus = sc->data[SC_TALISMAN_OF_FIVE_ELEMENTS]->val2;
 
@@ -10470,6 +10476,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				status_percent_heal(bl, 100, 100);
 				val2 = 10 + 2 * val1;
 				val3 = 100 + 20 * val1;
+				break;
+			case SC_HEAVEN_AND_EARTH:
+				val1 = cap_value(val1, 1, 10);
+				val2 = 5 + 2 * val1;
 				break;
 			case SC_HIDDEN_CARD:
 				val1 = cap_value(val1, 1, 10);
