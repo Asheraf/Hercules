@@ -3202,6 +3202,16 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 2500 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_CHAIN_REACTION_SHOT:
+					skillratio += -100 + 850 * skill_lv + 15 * st->con;
+					RE_LVL_DMOD(100);
+					break;
+				case ABC_CHAIN_REACTION_SHOT_ATK:
+					skillratio += -100 + 950 + 2650 * skill_lv + 15 * st->con;
+					if (sc != NULL && sc->data[SC_CHASING] != NULL)
+						skillratio += 1100 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_SECOND_FLAME:
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);

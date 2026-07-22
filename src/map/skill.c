@@ -5075,6 +5075,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case RL_BANISHING_BUSTER:
 		case RL_AM_BLAST:
 		case RL_SLUGSHOT:
+		case ABC_CHAIN_REACTION_SHOT_ATK:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
 		case IG_JUDGEMENT_CROSS:
@@ -5426,6 +5427,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_ABYSS_DAGGER:
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
+		case ABC_CHAIN_REACTION_SHOT:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5484,6 +5486,14 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case ABC_CHAIN_REACTION_SHOT:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						map->foreachinrange(skill->area_sub, bl,
+						                    skill->get_splash(ABC_CHAIN_REACTION_SHOT_ATK, skill_lv),
+						                    BL_CHAR | BL_SKILL,
+						                    src, ABC_CHAIN_REACTION_SHOT_ATK, skill_lv, tick + 200 + status_get_amotion(src),
+						                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+						break;
 					case IG_OVERSLASH:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						skill->area_temp[0] = map->foreachinrange(skill->area_sub, bl,
@@ -17826,6 +17836,17 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 	// perform skill-specific checks (and actions)
 	switch( skill_id ) {
+		case ABC_CHAIN_REACTION_SHOT:
+		{
+			int ammo_index = sd->equip_index[EQI_AMMO];
+
+			if (ammo_index < 0 || sd->inventory_data[ammo_index] == NULL
+				|| sd->status.inventory[ammo_index].amount < 8) {
+				clif->arrow_fail(sd, 0);
+				return 0;
+			}
+		}
+			break;
 		case PR_BENEDICTIO:
 			skill->check_pc_partner(sd, skill_id, &skill_lv, 1, 1);
 			break;
