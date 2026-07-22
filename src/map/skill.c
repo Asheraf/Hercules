@@ -2127,6 +2127,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case SS_KAGEGARI:
+			sc_start(src, bl, SC_NIGHTMARE, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			break;
 		case SH_HOWLING_OF_CHUL_HO:
 			sc_start(src, bl, SC_HOGOGONG, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
@@ -6675,6 +6678,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SS_TOKEDASU:
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case SS_KAGEGARI:
+			if ((flag & 1) != 0)
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case SKE_STAR_CANNON:
 		case SKE_TWINKLING_GALAXY:
@@ -14793,6 +14800,14 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
+		case SS_KAGEGARI:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+		}
 			break;
 		case SS_TOKEDASU:
 		{

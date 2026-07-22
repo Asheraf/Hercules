@@ -3077,6 +3077,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_KAGEGARI:
+					skillratio += -100 + 600 + 900 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, SS_KAGEGISSEN);
+					RE_LVL_DMOD(100);
+					break;
 				case SS_SHIMIRU:
 				case SS_TOKEDASU:
 					skillratio += -100 + 700 * skill_lv;
