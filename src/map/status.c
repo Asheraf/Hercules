@@ -1863,6 +1863,11 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	}
 	if (sc->data[SC_SINCERE_FAITH] != NULL)
 		sd->bonus.perfect_hit += sc->data[SC_SINCERE_FAITH]->val3;
+	if (sc->data[SC_HOLY_S] != NULL) {
+		sd->subele[ELE_DARK] += sc->data[SC_HOLY_S]->val2;
+		sd->subele[ELE_UNDEAD] += sc->data[SC_HOLY_S]->val2;
+		sd->magic_atk_ele[ELE_HOLY] += sc->data[SC_HOLY_S]->val2;
+	}
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -10181,6 +10186,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 40 * val1;
 				val3 = 3 * val1;
 				total_tick = INFINITE_DURATION;
+				break;
+			case SC_HOLY_S:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 5 + 2 * val1;
 				break;
 			case SC_NEWMOON:
 				val2 = 7;
