@@ -3059,6 +3059,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 150 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case IQ_EXPOSION_BLASTER:
+					skillratio += -100 + 450 + 2600 * skill_lv + 10 * st->pow;
+					if (tsc != NULL && tsc->data[SC_HOLY_OIL] != NULL)
+						skillratio += 950 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 					// Physical Elemental Spirits Attack Skills
 				case EL_CIRCLE_OF_FIRE:
 				case EL_FIRE_BOMB_ATK:
@@ -5425,14 +5431,15 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == DK_SERVANT_W_DEMOL
 		|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 		|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
-		|| skill_id == IQ_MASSIVE_F_BLASTER) && sstatus->cri &&
+		|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER) && sstatus->cri &&
 		(!skill_id ||
 		skill_id == KN_AUTOCOUNTER ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
 			|| skill_id == DK_HACKANDSLASHER_ATK || skill_id == DK_STORMSLASH
-			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER))
+			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
+			|| skill_id == IQ_EXPOSION_BLASTER))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -5870,7 +5877,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == DK_SERVANT_W_DEMOL
 							|| skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK
 							|| skill_id == DK_STORMSLASH || skill_id == IQ_OLEUM_SANCTUM
-							|| skill_id == IQ_MASSIVE_F_BLASTER)
+							|| skill_id == IQ_MASSIVE_F_BLASTER || skill_id == IQ_EXPOSION_BLASTER)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

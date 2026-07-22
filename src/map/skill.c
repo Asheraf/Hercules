@@ -5332,6 +5332,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case AG_SOUL_VC_STRIKE:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
+		case IQ_EXPOSION_BLASTER:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -7708,6 +7709,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 		case IQ_OLEUM_SANCTUM:
+		case IQ_EXPOSION_BLASTER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
