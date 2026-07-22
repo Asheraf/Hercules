@@ -3391,6 +3391,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ABYSS_SLAYER]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_PRON_MARCH] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_PRON_MARCH]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
@@ -5953,6 +5955,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 			if (sc->data[SC_MOVHASTE_HORSE])
 				val = max(val, sc->data[SC_MOVHASTE_HORSE]->val1);
 			if (sc->data[SC_JAWAII_SERENADE] != NULL)
+				val = max(val, 25);
+			if (sc->data[SC_PRON_MARCH] != NULL)
 				val = max(val, 25);
 			if( sd && sd->bonus.speed_rate + sd->bonus.speed_add_rate < 0 ) // permanent item-based speedup
 				val = max( val, -(sd->bonus.speed_rate + sd->bonus.speed_add_rate) );
@@ -10400,6 +10404,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 3 * val1;
 				if ((val3 & 2) != 0)
 					val2 *= 2;
+			case SC_PRON_MARCH:
+				val2 = 3 * val1;
+				if ((val3 & 2) != 0)
+					val2 *= 2;
+				break;
 			case SC_GEF_NOCTURN:
 			case SC_AIN_RHAPSODY:
 				val2 = 10 * val1;

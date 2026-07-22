@@ -8320,6 +8320,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case TR_PRON_MARCH:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start4(src, bl, type, 100, skill_lv, 0, flag, 0,
+				                               skill->get_time(skill_id, skill_lv), skill_id));
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sd->skill_id_song = skill_id;
+				sd->skill_lv_song = skill_lv;
+				if (skill->check_pc_partner(sd, skill_id, &skill_lv, AREA_SIZE, 0) > 0)
+					flag |= 2;
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv), src, skill_id,
+				                      skill_lv, tick,
+				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case IQ_MASSIVE_F_BLASTER:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
