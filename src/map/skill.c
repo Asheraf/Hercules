@@ -6994,7 +6994,9 @@ static int skill_castend_id(int tid, int64 tick, int id, intptr_t data)
 				inf &= ~BCT_NEUTRAL;
 			}
 
-			if( sd && (inf2&INF2_CHORUS_SKILL) && skill->check_pc_partner(sd, ud->skill_id, &ud->skill_lv, 1, 0) < 1 ) {
+			sc = status->get_sc(src);
+			if (sd != NULL && (inf2 & INF2_CHORUS_SKILL) != 0 && (sc == NULL || sc->data[SC_KVASIR_SONATA] == NULL)
+				&& skill->check_pc_partner(sd, ud->skill_id, &ud->skill_lv, 1, 0) < 1) {
 				clif->skill_fail(sd, ud->skill_id, USESKILL_FAIL_NEED_HELPER, 0, 0);
 				break;
 			}
@@ -8166,6 +8168,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, bl, skill_id, skill_lv, tick, flag);
 			break;
 		case TR_MYSTIC_SYMPHONY:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case TR_KVASIR_SONATA:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
@@ -16953,6 +16959,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch( skill_id ) {
+		case TR_KVASIR_SONATA:
+			if (sd->status.party_id == 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case IG_GUARDIAN_SHIELD:
 		case IG_ULTIMATE_SACRIFICE:
 			if (sc == NULL || sc->data[SC_GUARD_STANCE] == NULL) {

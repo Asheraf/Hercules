@@ -1669,7 +1669,9 @@ static int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill
 #else
 		static const int ensemble_range = 1;
 #endif
-		if ((skill->get_inf2(skill_id)&INF2_ENSEMBLE_SKILL) && skill->check_pc_partner(sd, skill_id, &skill_lv, ensemble_range, 0) < 1) {
+		if ((skill->get_inf2(skill_id) & INF2_ENSEMBLE_SKILL) != 0
+			&& (skill_id == CG_MOONLIT || sd->sc.data[SC_KVASIR_SONATA] == NULL)
+			&& skill->check_pc_partner(sd, skill_id, &skill_lv, ensemble_range, 0) < 1) {
 			clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 			return 0;
 		}
