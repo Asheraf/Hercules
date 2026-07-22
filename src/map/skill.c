@@ -5566,6 +5566,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			sc_start(src, src, SC_CRESCIVEBOLT, 100, stack, skill->get_time(skill_id, skill_lv), skill_id);
 		}
 			break;
+		case WH_WILD_WALK:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			sc_start(src, src, SC_WILD_WALK, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case TR_RHYTHMSHOOTING:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18612,6 +18617,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			case WH_SOLIDTRAP:
 			case WH_SWIFTTRAP:
 			case WH_FLAMETRAP:
+			case WH_WILD_WALK:
 			case RA_WUGDASH:
 			case RA_WUGRIDER:
 			case RA_WUGSTRIKE:

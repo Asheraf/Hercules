@@ -5542,6 +5542,8 @@ static int status_calc_flee(struct block_list *bl, struct status_change *sc, int
 		flee += sc->data[SC_MER_FLEE]->val2;
 	if (sc->data[SC_HALLUCINATIONWALK])
 		flee += sc->data[SC_HALLUCINATIONWALK]->val2;
+	if (sc->data[SC_WILD_WALK] != NULL)
+		flee += sc->data[SC_WILD_WALK]->val3;
 	if (sc->data[SC_WATER_BARRIER])
 		flee -= sc->data[SC_WATER_BARRIER]->val3;
 #ifdef RENEWAL
@@ -6075,6 +6077,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 				val = max( val, sc->data[SC_WIND_STEP_OPTION]->val2 );
 			if( sc->data[SC_FULL_THROTTLE] )
 				val = max( val, 25);
+			if (sc->data[SC_WILD_WALK] != NULL)
+				val = max(val, sc->data[SC_WILD_WALK]->val2);
 			if (sc->data[SC_SHADOW_CLOCK] != NULL)
 				val = max(val, 50);
 			if (sc->data[SC_MOVHASTE_HORSE])
@@ -9753,6 +9757,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_HALLUCINATIONWALK:
 				val2 = 50 * val1; // Evasion rate of physical attacks. Flee
 				val3 = 10 * val1; // Evasion rate of magical attacks.
+				break;
+			case SC_WILD_WALK:
+				val2 = (1 + val1 / 2) * 25;
+				val3 = 50 + 50 * val1;
 				break;
 			case SC_WHITEIMPRISON:
 				status_change_end(bl, SC_BURNING, INVALID_TIMER);
