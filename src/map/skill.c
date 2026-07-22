@@ -1163,6 +1163,13 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 		case CD_MEDIALE_VOTUM:
 			hp = (status->get_lv(src) + status_get_int(src)) / 5 * 30;
 			break;
+		case CD_DILECTIO_HEAL:
+			hp = (status->get_lv(src) + status_get_int(src)) / 5 * 30;
+#ifdef RENEWAL
+			if (sd != NULL && (skill2_lv = pc->checkskill(sd, HP_MEDITATIO)) > 0)
+				hp += hp * skill2_lv * 2 / 100;
+#endif
+			break;
 		case SU_TUNABELLY:
 			hp = status_get_max_hp(target) * ((20 * skill_lv) - 10) / 100;
 			break;
@@ -1214,8 +1221,8 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 
 	sc = status->get_sc(src);
 	if( sc && sc->count && sc->data[SC_OFFERTORIUM] ) {
-		if (skill_id == AB_HIGHNESSHEAL || skill_id == AB_CHEAL || skill_id == CD_MEDIALE_VOTUM
-			|| skill_id == PR_SANCTUARY || skill_id == AL_HEAL)
+		if (skill_id == AB_HIGHNESSHEAL || skill_id == AB_CHEAL || skill_id == CD_DILECTIO_HEAL
+			|| skill_id == CD_MEDIALE_VOTUM || skill_id == PR_SANCTUARY || skill_id == AL_HEAL)
 			hp += hp * sc->data[SC_OFFERTORIUM]->val2 / 100;
 	}
 	if (sc != NULL && sc->count > 0 && sc->data[SC_MEDIALE] != NULL && skill_id == CD_MEDIALE_VOTUM)
@@ -1258,6 +1265,11 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 
 	if (sd != NULL && status_get_hplus(src) > 0)
 		hp = (int)cap_value((int64)hp + (int64)hp * status_get_hplus(src) / 100, INT_MIN, INT_MAX);
+	if (skill_id == CD_DILECTIO_HEAL) {
+		static const int recovery_rate[5] = { 110, 125, 130, 135, 140 };
+
+		hp = (int)cap_value((int64)hp * recovery_rate[cap_value(skill_lv, 1, 5) - 1] / 100, 0, INT_MAX);
+	}
 #endif // RENEWAL
 	return hp;
 }
@@ -7246,6 +7258,23 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				clif->skill_nodamage(src, bl, skill_id, skill_lv,
 				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
 				                              skill_id));
+			}
+			break;
+		case CD_DILECTIO_HEAL:
+			if ((flag & 1) != 0) {
+				if (sd == NULL || sd->status.party_id == 0 || (flag & 2) != 0) {
+					int heal = skill->calc_heal(src, bl, skill_id, skill_lv, true);
+
+					clif->skill_nodamage(NULL, bl, AL_HEAL, heal, 1);
+					status->heal(bl, heal, 0, STATUS_HEAL_DEFAULT);
+				} else {
+					party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv), src, skill_id,
+					                      skill_lv, tick,
+					                          flag | BCT_PARTY | 3, skill->castend_nodamage_id);
+				}
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				skill->castend_nodamage_id(bl, bl, skill_id, skill_lv, tick, 1);
 			}
 			break;
 		case AG_VIOLENT_QUAKE:

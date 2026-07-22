@@ -8163,6 +8163,10 @@ static int pc_skillheal_bonus(struct map_session_data *sd, uint16 skill_id)
 			if ((battle_config.skill_add_heal_rate & 128) == 0)
 				bonus = 0;
 			break;
+		case CD_DILECTIO_HEAL:
+			if ((battle_config.skill_add_heal_rate & 256) == 0)
+				bonus = 0;
+			break;
 		}
 	}
 
