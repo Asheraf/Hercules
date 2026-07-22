@@ -3297,11 +3297,15 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->patk = bst->patk;
 		if (sc != NULL && sc->data[SC_POWERFUL_FAITH] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_POWERFUL_FAITH]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
+		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 	}
@@ -10231,6 +10235,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_PRESENS_ACIES:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 2 * val1;
+				break;
+			case SC_COMPETENTIA:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 10 * val1;
 				break;
 			case SC_NEWMOON:
 				val2 = 7;

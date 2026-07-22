@@ -7203,6 +7203,24 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case CD_COMPETENTIA:
+			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
+				int hp = (int)cap_value((int64)tstatus->max_hp * 20 * skill_lv / 100, 0, INT_MAX);
+				int sp = (int)cap_value((int64)tstatus->max_sp * 20 * skill_lv / 100, 0, INT_MAX);
+
+				clif->skill_nodamage(NULL, bl, AL_HEAL, hp, 1);
+				status->heal(bl, hp, 0, STATUS_HEAL_DEFAULT);
+				clif->skill_nodamage(NULL, bl, MG_SRECOVERY, sp, 1);
+				status->heal(bl, 0, sp, STATUS_HEAL_DEFAULT);
+				clif->skill_nodamage(bl, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+			} else {
+				party->foreachsamemap(skill->area_sub, sd, skill->get_splash(skill_id, skill_lv), src, skill_id,
+				                      skill_lv, tick,
+				                          flag | BCT_PARTY | 1, skill->castend_nodamage_id);
+			}
+			break;
 		case CD_PRESENS_ACIES:
 		case CD_ARGUTUS_TELUM:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
