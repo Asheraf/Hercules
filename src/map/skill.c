@@ -5937,6 +5937,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_ABYSS_FLAME_ATK:
 		case ABC_FROM_THE_ABYSS_ATK:
 		case TR_METALIC_FURY:
+		case EM_PSYCHIC_STREAM:
 		case TR_ROSEBLOSSOM_ATK:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
@@ -6098,6 +6099,23 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							clif->blown(src);
 
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+					}
+						break;
+					case EM_PSYCHIC_STREAM:
+					{
+						enum unit_dir dir = UNIT_DIR_NORTHEAST;
+
+						if (bl->x != src->x || bl->y != src->y)
+							dir = map->calc_dir(bl, src->x, src->y);
+
+						if ((sc == NULL || sc->data[SC_SV_ROOTTWIST] == NULL)
+						 && unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 1, true) == 0) {
+							clif->blown(src);
+							skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+							clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						} else if (sd != NULL) {
+							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+						}
 					}
 						break;
 					case IG_IMPERIAL_PRESSURE:
@@ -19466,6 +19484,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				default:
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 					return 0;
+			}
+			break;
+		case EM_PSYCHIC_STREAM:
+			if (sc != NULL && sc->data[SC_ENERGYCOAT] != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				return 0;
 			}
 			break;
 		default:

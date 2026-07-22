@@ -251,8 +251,8 @@
 #define MAX_SKILL_ID 10020   // [Ind/Hercules] max used skill ID
 #endif
 #ifndef MAX_SKILL_TREE
-// Update this max as necessary. 87 is the value needed for Elemental Master.
-#define MAX_SKILL_TREE 90
+// Update this max as necessary. 105 is the value needed for Hyper Novice.
+#define MAX_SKILL_TREE 105
 #endif
 #ifndef DEFAULT_WALK_SPEED
 #define DEFAULT_WALK_SPEED 150

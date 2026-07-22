@@ -2182,6 +2182,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 150 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case EM_PSYCHIC_STREAM:
+					skillratio += -100 + 1750 + 3850 * skill_lv + 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case SOA_TALISMAN_OF_SOUL_STEALING:
 					skillratio += -100 + 500 + 1250 * skill_lv;
 					if (sd != NULL) {
