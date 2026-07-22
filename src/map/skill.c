@@ -7615,6 +7615,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			if (sd != NULL)
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 			break;
+		case SOA_TALISMAN_OF_MAGICIAN: {
+			int index = dstsd != NULL ? dstsd->equip_index[EQI_HAND_R] : -1;
+
+			if (index < 0 || dstsd->inventory_data[index] == NULL || dstsd->inventory_data[index]->type != IT_WEAPON) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		}
 		case EM_ELEMENTAL_BUSTER:
 			if (sd != NULL && sd->ed != NULL) {
 				uint16 buster_element = 0;

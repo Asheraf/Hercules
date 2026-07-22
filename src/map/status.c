@@ -3454,6 +3454,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_SPELL_ENCHANTING]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_JAWAII_SERENADE] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_JAWAII_SERENADE]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_TALISMAN_OF_MAGICIAN] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_TALISMAN_OF_MAGICIAN]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_RES) != 0) {
 		st->res = bst->res;
@@ -10468,6 +10470,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				tick_time = 100;
 				break;
 			case SC_TALISMAN_OF_WARRIOR:
+			case SC_TALISMAN_OF_MAGICIAN:
 				val2 = 2 * val1;
 				break;
 			case SC_SPELL_ENCHANTING:
