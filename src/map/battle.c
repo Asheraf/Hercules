@@ -3157,6 +3157,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 200 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case SHC_FATAL_SHADOW_CROW:
+					skillratio += -100 + 1300 * skill_lv + 10 * st->pow;
+					if (tst->race == RC_DEMIHUMAN || tst->race == RC_DRAGON)
+						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_SECOND_FLAME:
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);
@@ -4323,7 +4329,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
-	if (skill_id == SHC_SAVAGE_IMPACT)
+	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW)
 		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
@@ -5658,7 +5664,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
-			|| skill_id == SHC_IMPACT_CRATER))
+			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW))
 	{
 		short cri = sstatus->cri;
 		if (sd != NULL) {
@@ -6110,7 +6116,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == IQ_FIRST_BRAND || skill_id == IQ_SECOND_FAITH
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
-							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER)
+							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
+							|| skill_id == SHC_FATAL_SHADOW_CROW)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

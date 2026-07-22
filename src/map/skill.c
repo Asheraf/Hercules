@@ -2375,6 +2375,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_CONSECRATION:
 			status_change_end(bl, SC_SECOND_BRAND, INVALID_TIMER);
 			break;
+		case SHC_FATAL_SHADOW_CROW:
+			sc_start(src, bl, SC_DARKCROW, 100, sd != NULL ? max(1, pc->checkskill(sd, GC_DARKCROW)) : 1,
+			         skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case RL_S_STORM:
 			skill->break_equip(bl, EQP_HEAD_TOP, max(skill_lv * 500, (sstatus->dex * skill_lv * 10) - (tstatus->agi * 20)), BCT_ENEMY);
 			break;
@@ -5404,6 +5408,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case CD_PETITIO:
 		case SHC_SAVAGE_IMPACT:
 		case SHC_IMPACT_CRATER:
+		case SHC_FATAL_SHADOW_CROW:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
@@ -5504,6 +5509,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						clif->blown(src);
 						break;
 					case SHC_SAVAGE_IMPACT:
+					case SHC_FATAL_SHADOW_CROW:
 					{
 						enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
 
