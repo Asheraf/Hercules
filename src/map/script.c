@@ -12335,7 +12335,7 @@ static BUILDIN(monster)
 	if (script_hasdata(st, 10))
 	{
 		ai = script_getnum(st, 10);
-		if (ai > AI_FLORA) {
+		if (ai >= AI_MAX) {
 			ShowWarning("buildin_monster: Attempted to spawn non-existing ai %u for monster class %d\n", ai, class_);
 			return false;
 		}
@@ -12489,7 +12489,7 @@ static BUILDIN(areamonster)
 
 	if (script_hasdata(st, 12)) {
 		ai = script_getnum(st, 12);
-		if (ai > AI_FLORA) {
+		if (ai >= AI_MAX) {
 			ShowWarning("buildin_monster: Attempted to spawn non-existing ai %u for monster class %d\n", ai, class_);
 			return false;
 		}

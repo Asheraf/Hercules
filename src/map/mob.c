@@ -1517,8 +1517,9 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md, int64 tick)
 
 		// Since the master was in near immediately before, teleport is carried out and it pursues.
 		if (bl->m != md->bl.m
-		 || (md->special_state.ai == AI_ABR && md->master_dist > AREA_SIZE + 1)
-		 || (md->special_state.ai != AI_ABR
+		 || ((md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC)
+		    && md->master_dist > AREA_SIZE + 1)
+		 || (md->special_state.ai != AI_ABR && md->special_state.ai != AI_BIONIC
 		    && ((old_dist < 10 && md->master_dist > 18) || md->master_dist > MAX_MINCHASE))) {
 			md->master_dist = 0;
 			unit->warp(&md->bl,bl->m,bl->x,bl->y,CLR_TELEPORT);
@@ -1526,7 +1527,8 @@ static int mob_ai_sub_hard_slavemob(struct mob_data *md, int64 tick)
 		}
 
 		if (md->target_id != 0) { //Slave is busy with a target.
-			if (md->special_state.ai == AI_ABR && bl->type == BL_PC && md->master_dist > 5) {
+			if ((md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC)
+			 && bl->type == BL_PC && md->master_dist > 5) {
 				mob->unlocktarget(md, tick);
 				unit->walk_tobl(&md->bl, bl, MOB_SLAVEDISTANCE, 1);
 				return 1;
@@ -2470,7 +2472,8 @@ static void mob_damage(struct mob_data *md, struct block_list *src, int damage)
 		clif->blname_ack(0, &md->bl);
 
 #if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
-	if ((battle_config.show_monster_hp_bar & 1) != 0 && md->special_state.ai == AI_ABR)
+	if ((battle_config.show_monster_hp_bar & 1) != 0
+	    && (md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC))
 		clif->summon_hp_bar(md);
 #endif
 
@@ -3244,7 +3247,8 @@ static void mob_heal(struct mob_data *md, unsigned int heal)
 	if (battle_config.show_mob_info&3)
 		clif->blname_ack(0, &md->bl);
 #if PACKETVER_MAIN_NUM >= 20200916 || PACKETVER_RE_NUM >= 20200724
-	if ((battle_config.show_monster_hp_bar & 1) != 0 && md->special_state.ai == AI_ABR)
+	if ((battle_config.show_monster_hp_bar & 1) != 0
+	    && (md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC))
 		clif->summon_hp_bar(md);
 #endif
 #if PACKETVER >= 20131223

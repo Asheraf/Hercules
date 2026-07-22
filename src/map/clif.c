@@ -312,7 +312,7 @@ static unsigned char clif_bl_type(struct block_list *bl)
 			return CLUT_PC;
 		if (BL_UCAST(BL_MOB, bl)->special_state.ai == AI_ABR)
 			return CLUT_ABR;
-		return CLUT_MOB;
+		return BL_UCAST(BL_MOB, bl)->special_state.ai == AI_BIONIC ? CLUT_BIONIC : CLUT_MOB;
 	case BL_NPC:
 		vd = status->get_viewdata(bl);
 		nullpo_retr(CLUT_NPC, vd);
@@ -1710,7 +1710,7 @@ static bool clif_spawn(struct block_list *bl)
 				clif->specialeffect(&md->bl,423,AREA);
 			else if (md->special_state.size==SZ_MEDIUM)
 				clif->specialeffect(&md->bl,421,AREA);
-			if (md->special_state.ai == AI_ABR)
+			if (md->special_state.ai == AI_ABR || md->special_state.ai == AI_BIONIC)
 				clif->summon_init(md);
 		}
 			break;

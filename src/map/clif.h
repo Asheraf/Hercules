@@ -613,6 +613,7 @@ enum clif_unittype {
 	CLUT_MERCNARY  = 0x9,
 	CLUT_ELEMENTAL = 0xa,
 	CLUT_ABR        = 0xd,
+	CLUT_BIONIC    = 0xe,
 };
 /**
 * Receive configuration types

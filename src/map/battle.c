@@ -8367,7 +8367,9 @@ static int battle_check_target(struct block_list *src, struct block_list *target
 			if (md->special_state.ai == AI_NONE) {
 				//Normal mobs
 				const struct mob_data *target_md = BL_CCAST(BL_MOB, target);
-				if ((target_md != NULL && t_bl->type == BL_PC && target_md->special_state.ai != AI_ZANZOU && target_md->special_state.ai != AI_ATTACK)
+				if ((target_md != NULL && t_bl->type == BL_PC && target_md->special_state.ai != AI_ZANZOU
+					&& target_md->special_state.ai != AI_ATTACK && target_md->special_state.ai != AI_BIONIC
+					&& target_md->special_state.ai != AI_ABR)
 				 || (t_bl->type == BL_MOB && BL_UCCAST(BL_MOB, t_bl)->special_state.ai == AI_NONE))
 					state |= BCT_PARTY; //Normal mobs with no ai are friends.
 				else
