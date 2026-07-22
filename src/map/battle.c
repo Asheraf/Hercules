@@ -3192,6 +3192,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (strbonus > 130) //Max base stat limit on official is 130. So well allow no higher then 130 STR here. This limit prevents
 						strbonus = 130; //the division from going any lower then 20 so the server wont divide by 0 if someone has 150 STR. [Rytech]
 					skillratio = 50 * skill_lv + (sd ? sd->cart_weight : battle_config.max_cart_weight) / 10 / (150 - strbonus) + 50 * (sd ? pc->checkskill(sd, GN_REMODELING_CART) : 5);
+					if (sc != NULL && sc->data[SC_BIONIC_WOODENWARRIOR] != NULL)
+						skillratio *= 2;
 				}
 					break;
 				case GN_CARTCANNON:
@@ -6398,6 +6400,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				break;
 			case GN_CARTCANNON:
 				GET_NORMAL_ATTACK((sc && sc->data[SC_MAXIMIZEPOWER] ? 1 : 0) | (sc && sc->data[SC_WEAPONPERFECT] ? 8 : 0), skill_id);
+				if (sc != NULL && sc->data[SC_BIONIC_WOODENWARRIOR] != NULL)
+					wd.div_ = 2;
 				ATK_ADD(sd ? sd->bonus.arrow_atk : 0);
 				wd.damage = battle->calc_masteryfix(src, target, skill_id, skill_lv, wd.damage, wd.div_, 0, flag.weapon);
 				ATK_RATE(battle->calc_skillratio(BF_WEAPON, src, target, skill_id, skill_lv, skillratio, wflag));
