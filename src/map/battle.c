@@ -2191,6 +2191,21 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
 					break;
+				case IG_JUDGEMENT_CROSS:
+					skillratio += -100 + 1950 * skill_lv + 10 * st->spl;
+					if (tst->race == RC_PLANT || tst->race == RC_INSECT)
+						skillratio += 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					if (sd != NULL) {
+						i = 0;
+						if (sd->has_shield != 0)
+							i += pc->checkskill(sd, IG_SHIELD_MASTERY);
+						if (sd->weapontype == W_1HSWORD || sd->weapontype == W_1HSPEAR || sd->weapontype == W_2HSPEAR)
+							i += pc->checkskill(sd, IG_SPEAR_SWORD_M);
+						if (i > 0)
+							skillratio += skillratio * i / 100;
+					}
+					break;
 				default:
 					battle->calc_skillratio_magic_unknown(&attack_type, src, target, &skill_id, &skill_lv, &skillratio, &flag);
 					break;

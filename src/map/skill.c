@@ -5033,6 +5033,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case RL_SLUGSHOT:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
+		case IG_JUDGEMENT_CROSS:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 #ifdef RENEWAL
 		case BA_DISSONANCE:
