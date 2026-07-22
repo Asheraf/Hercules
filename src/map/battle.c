@@ -3077,6 +3077,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_KAGEGISSEN:
+					skillratio += -100 + 1500 + 950 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 150 * skill_lv * pc->checkskill(sd, SS_KAGENOMAI);
+					RE_LVL_DMOD(100);
+					if ((flag & SKILL_ALTDMG_FLAG) != 0)
+						skillratio = skillratio * 3 / 10;
+					break;
 				case SS_KAGENOMAI:
 					skillratio += -100 + 750 + 900 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -6468,7 +6477,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 		&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-		|| skill_id == SKE_ALL_IN_THE_SKY
+		|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6495,7 +6504,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 			&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
-			|| skill_id == SKE_ALL_IN_THE_SKY
+			|| skill_id == SKE_ALL_IN_THE_SKY || skill_id == SS_KAGEGISSEN
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6965,7 +6974,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
 							|| skill_id == HN_MEGA_SONIC_BLOW
 							|| skill_id == SKE_NOON_BLAST
-							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY)
+							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
+							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

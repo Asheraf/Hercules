@@ -5146,6 +5146,16 @@ static bool skill_mirage_cast(struct block_list *src, struct block_list *bl, uin
 				                    flag | BCT_ENEMY | SD_SPLASH | SD_ANIMATION | SKILL_ALTDMG_FLAG | 1,
 				                    skill->castend_damage_id);
 				break;
+			case SS_KAGEGISSEN:
+				if (bl == NULL)
+					break;
+				skill->area_temp[1] = 0;
+				clif->skill_nodamage(&su->bl, bl, skill_id, skill_lv, 1);
+				map->foreachinpath(skill->attack_area, su->bl.m, su->bl.x, su->bl.y, bl->x, bl->y,
+				                   skill->get_splash(skill_id, skill_lv), skill->get_maxcount(skill_id, skill_lv),
+				                   skill->splash_target(src), skill->get_type(skill_id, skill_lv),
+				                   src, src, skill_id, skill_lv, tick, SKILL_ALTDMG_FLAG, BCT_ENEMY);
+				break;
 		}
 	}
 
@@ -5829,6 +5839,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
+		case SS_KAGEGISSEN:
 		case SKE_DAWN_BREAK:
 		case SKE_MIDNIGHT_KICK:
 		case SKE_RISING_MOON:
