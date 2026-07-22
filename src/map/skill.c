@@ -5150,6 +5150,24 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
 		case NW_ONLY_ONE_BULLET:
+		case NW_SPIRAL_SHOOTING:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				if (sd != NULL && sd->weapontype1 == W_GRENADE)
+					range += 2;
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				skill->area_temp[0] = 0;
+				skill->area_temp[1] = bl->id;
+				skill->area_temp[2] = 0;
+				map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
+					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
+			}
+			break;
 		case ABC_FRENZY_SHOT:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
