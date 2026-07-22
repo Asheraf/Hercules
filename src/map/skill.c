@@ -6048,6 +6048,12 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_GC_WEAPONBLOCKING, 0, 0);
 			}
 			break;
+		case SHC_SHADOW_STAB:
+			status_change_end(src, SC_CLOAKING, INVALID_TIMER);
+			status_change_end(src, SC_CLOAKINGEXCEED, INVALID_TIMER);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 		case GC_CROSSRIPPERSLASHER:
 			if( sd && !(sc && sc->data[SC_ROLLINGCUTTER]) )

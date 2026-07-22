@@ -3149,6 +3149,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 120 * skill_lv + st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case SHC_SHADOW_STAB:
+					skillratio += -100 + 650 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case IQ_SECOND_FLAME:
 					skillratio += -100 + 200 + 2900 * skill_lv + 9 * st->pow;
 					RE_LVL_DMOD(100);
