@@ -9730,6 +9730,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case HN_OVERCOMING_CRISIS:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			status_percent_heal(bl, 100, 0);
+			break;
 		case SS_FOUR_CHARM:
 		{
 			sc_type charm = SC_NONE;

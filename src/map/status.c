@@ -3486,6 +3486,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_BLESSING_OF_M_CREATURES] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_BLESSING_OF_M_CREATURES]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_OVERCOMING_CRISIS] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_OVERCOMING_CRISIS]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
@@ -3493,6 +3495,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_TEMPORARY_COMMUNION]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_BLESSING_OF_M_CREATURES] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_BLESSING_OF_M_CREATURES]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_OVERCOMING_CRISIS] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_OVERCOMING_CRISIS]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_COMPETENTIA] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_COMPETENTIA]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ABYSS_SLAYER] != NULL)
@@ -6462,6 +6466,8 @@ static unsigned int status_calc_maxhp(struct block_list *bl, struct status_chang
 		maxhp += maxhp * sc->data[SC_INCMHPRATE]->val1 / 100;
 	if (sc->data[SC_INCMHP])
 		maxhp += (sc->data[SC_INCMHP]->val1);
+	if (sc->data[SC_OVERCOMING_CRISIS] != NULL)
+		maxhp += sc->data[SC_OVERCOMING_CRISIS]->val3;
 	if (sc->data[SC_MTF_MHP])
 		maxhp += (sc->data[SC_MTF_MHP]->val1);
 	if (sc->data[SC_APPLEIDUN])
@@ -10529,6 +10535,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_TEMPORARY_COMMUNION:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 3 * val1;
+				break;
+			case SC_OVERCOMING_CRISIS:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 3 * val1;
+				val3 = 15000 * val1;
 				break;
 			case SC_BLESSING_OF_M_CREATURES:
 				val1 = cap_value(val1, 1, 5);
