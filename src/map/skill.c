@@ -5494,6 +5494,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			}
 		}
 			break;
+		case IG_IMPERIAL_CROSS:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case IG_JUDGEMENT_CROSS:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18578,6 +18582,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case IG_GRAND_JUDGEMENT:
 		case IG_OVERSLASH:
 		case IG_RADIANT_SPEAR:
+		case IG_IMPERIAL_CROSS:
 			if (sc == NULL || sc->data[SC_ATTACK_STANCE] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;

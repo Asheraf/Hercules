@@ -3693,6 +3693,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 800;
 					RE_LVL_DMOD(100);
 					break;
+				case IG_IMPERIAL_CROSS:
+					skillratio += -100 + 1650 + 1350 * skill_lv;
+					skillratio += pc->checkskill(sd, IG_SPEAR_SWORD_M) * 25;
+					skillratio += 5 * st->pow;
+					if (sc != NULL && sc->data[SC_SPEAR_SCAR] != NULL)
+						skillratio += 100 + 300 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case LG_SHIELDPRESS:
 					skillratio = 150 * skill_lv + st->str;
 					if( sd ) {
