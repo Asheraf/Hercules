@@ -2953,6 +2953,7 @@ static int skill_counter_additional_effect(struct block_list *src, struct block_
 	}
 
 	switch(skill_id){
+		case AT_SAVAGE_LUNGE:
 		case AT_ALPHA_CLAW:
 		case AT_FERAL_CLAW:
 		case AT_PRIMAL_CLAW:
@@ -6090,6 +6091,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_SAVAGE_LUNGE:
 		case AT_ALPHA_CLAW:
 		case AT_FERAL_CLAW:
 		case AT_PRIMAL_CLAW:
@@ -6256,6 +6258,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						} else if (sd != NULL) {
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 						}
+					}
+						break;
+					case AT_SAVAGE_LUNGE:
+					{
+						enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+						if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 2, true) != 0) {
+							if (sd != NULL)
+								clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+							map->freeblock_unlock();
+							return 1;
+						}
+						clif->blown(src);
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						skill->area_temp[3] = 0;
 					}
 						break;
 					case AT_ALPHA_CLAW:
@@ -19256,6 +19273,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
 				&& sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
+		case AT_SAVAGE_LUNGE:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
 			}
