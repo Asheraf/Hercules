@@ -3228,6 +3228,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 1100 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_FRENZY_SHOT:
+					skillratio += -100 + 350 + 825 * skill_lv + 15 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_DEFT_STAB:
 					skillratio += -100 + 700 + 550 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
@@ -5446,6 +5450,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
 					wd.div_ = -2;
 				break;
+			case ABC_FRENZY_SHOT:
+				if (rnd() % 100 < 5 * skill_lv)
+					wd.div_ = 3;
+				break;
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)
 					wd.div_ = cap_value(sd->spiritball / 5, 1, 3);
@@ -5735,9 +5743,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
-		|| skill_id == MT_A_MACHINE) && sstatus->cri &&
-		(!skill_id ||
-		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE ||
+		|| skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT)
+		&& sstatus->cri != 0 &&
+		(skill_id == 0 ||
+		skill_id == KN_AUTOCOUNTER || skill_id == MT_A_MACHINE || skill_id == ABC_FRENZY_SHOT ||
 		skill_id == SN_SHARPSHOOTING || skill_id == MA_SHARPSHOOTING ||
 		skill_id == NJ_KIRIKAGE || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 			|| skill_id == DK_SERVANT_W_DEMOL || skill_id == DK_HACKANDSLASHER
@@ -6200,7 +6209,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == IQ_THIRD_PUNISH || skill_id == CD_EFFLIGO
 							|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
-							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE)
+							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE
+							|| skill_id == ABC_FRENZY_SHOT)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
