@@ -7477,6 +7477,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch(skill_id) {
+		case NW_GRENADE_FRAGMENT:
+			status_change_end(src, SC_GRENADE_FRAGMENT_1, INVALID_TIMER);
+			status_change_end(src, SC_GRENADE_FRAGMENT_2, INVALID_TIMER);
+			status_change_end(src, SC_GRENADE_FRAGMENT_3, INVALID_TIMER);
+			status_change_end(src, SC_GRENADE_FRAGMENT_4, INVALID_TIMER);
+			status_change_end(src, SC_GRENADE_FRAGMENT_5, INVALID_TIMER);
+			status_change_end(src, SC_GRENADE_FRAGMENT_6, INVALID_TIMER);
+			if (skill_lv < 7)
+				sc_start(src, src, (enum sc_type)(SC_GRENADE_FRAGMENT_1 + skill_lv - 1), 100, skill_lv,
+				         skill->get_time(skill_id, skill_lv), skill_id);
+			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
+			break;
 		case NW_INTENSIVE_AIM:
 			if (tsc != NULL && tsc->data[type] != NULL) {
 				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
