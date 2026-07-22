@@ -5900,6 +5900,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_NOON_BLAST:
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
+		case SH_HYUN_ROK_SPIRIT_POWER:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -6097,6 +6098,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case SKE_NOON_BLAST:
 					case SKE_SUNSET_BLAST:
 					case SH_CHUL_HO_BATTERING:
+					case SH_HYUN_ROK_SPIRIT_POWER:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
