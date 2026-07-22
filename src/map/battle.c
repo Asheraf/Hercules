@@ -3614,6 +3614,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 650 + 3750 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case MT_POWERFUL_SWING:
+					skillratio += -100 + 300 + 880 * skill_lv + 5 * st->pow;
+					if (sc != NULL && sc->data[SC_AXE_STOMP] != NULL)
+						skillratio += 100 + 100 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case MT_SPARK_BLASTER:
 					skillratio += -100 + 600 + 1400 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
