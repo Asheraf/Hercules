@@ -1174,6 +1174,8 @@ static int pc_isequip(struct map_session_data *sd, int n)
 
 		if ((item->equip & EQP_ACC) != 0 && sd->sc.data[SC__STRIPACCESSARY] != NULL)
 			return 0;
+		if (itemdb_is_shadowequip(item->equip) && sd->sc.data[SC_SHADOW_STRIP] != NULL)
+			return 0;
 
 		if (item->equip != 0 && sd->sc.data[SC_KYOUGAKU] != NULL)
 			return 0;

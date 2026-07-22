@@ -9121,6 +9121,24 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				skill->produce_mix(sd, skill_id, ITEMID_POISON_BOTTLE, 0, 0, 0, 1); //Produce a Deadly Poison Bottle.
 			}
 			break;
+		case ABC_STRIP_SHADOW: {
+			int duration;
+			int rate = 50 * (skill_lv + 3) + 2 * (sstatus->dex - tstatus->dex);
+			int success = 0;
+
+			duration = skill->get_time(skill_id, skill_lv);
+			if (bl->type == BL_PC)
+				duration += max(1, skill_lv + 500 * (sstatus->dex - tstatus->dex));
+			else
+				duration += 15000 + max(1, skill_lv + 500 * (sstatus->dex - tstatus->dex));
+
+			if (tsc != NULL && (tsc->option & OPTION_MADOGEAR) == 0 && rate > 0 && (rnd() % 1000) < rate)
+				success = sc_start(src, bl, SC_SHADOW_STRIP, 100, skill_lv, duration, skill_id);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, success);
+			if (sd != NULL && success == 0)
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			break;
+		}
 
 		case RG_STRIPWEAPON:
 		case RG_STRIPSHIELD:

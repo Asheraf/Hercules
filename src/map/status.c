@@ -3394,9 +3394,14 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->res = (int32)cap_value((int64)st->res + sc->data[SC_FIRM_FAITH]->val3, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_D_MACHINE] != NULL)
 			st->res = (int32)cap_value((int64)st->res + sc->data[SC_D_MACHINE]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_SHADOW_STRIP] != NULL && bl->type != BL_PC)
+			st->res -= st->res * sc->data[SC_SHADOW_STRIP]->val2 / 100;
 	}
-	if (flag & SCB_MRES)
+	if ((flag & SCB_MRES) != 0) {
 		st->mres = bst->mres;
+		if (sc != NULL && sc->data[SC_SHADOW_STRIP] != NULL && bl->type != BL_PC)
+			st->mres -= st->mres * sc->data[SC_SHADOW_STRIP]->val2 / 100;
+	}
 	if (flag & SCB_HPLUS)
 		st->hplus = bst->hplus;
 	if ((flag & SCB_CRATE) != 0) {
@@ -7913,6 +7918,28 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			}
 			if (total_tick == 1) return 1; //Minimal duration: Only strip without causing the SC
 			break;
+		case SC_SHADOW_STRIP:
+			if (sd != NULL && (flag & SCFLAG_LOADED) == 0) {
+				bool success = false;
+				int i;
+
+				if (sc->data[SC_PROTECTSHADOWEQUIP] != NULL)
+					return 0;
+				if (itemdb_is_shadowequip(sd->bonus.unstripable_equip) == true)
+					return 0;
+				for (i = EQI_SHADOW_ARMOR; i <= EQI_SHADOW_ACC_L; i++) {
+					int index = sd->equip_index[i];
+
+					if (index >= 0 && index < MAX_INVENTORY && sd->inventory_data[index] != NULL) {
+						pc->unequipitem(sd, index, PCUNEQUIPITEM_RECALC | PCUNEQUIPITEM_FORCE);
+						success = true;
+					}
+				}
+				if (success == false)
+					return 0;
+			}
+			if (total_tick == 1) return 1; //Minimal duration: Only strip without causing the SC
+			break;
 
 #ifdef RENEWAL
 		case SC_RAID:
@@ -8360,6 +8387,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_NOEQUIPHELM:
 				if (!sd) //Int reduction
 					val2 = 40;
+				break;
+			case SC_SHADOW_STRIP:
+				if (sd == NULL)
+					val2 = 25;
 				break;
 			case SC_AUTOSPELL:
 				//Val1 Skill LV of Autospell
