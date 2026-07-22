@@ -9499,6 +9499,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
 			break;
+		case SKE_ENCHANTING_SKY:
+			status_change_end(bl, SC_RISING_SUN, INVALID_TIMER);
+			status_change_end(bl, SC_NOON_SUN, INVALID_TIMER);
+			status_change_end(bl, SC_SUNSET_SUN, INVALID_TIMER);
+			status_change_end(bl, SC_RISING_MOON, INVALID_TIMER);
+			status_change_end(bl, SC_MIDNIGHT_MOON, INVALID_TIMER);
+			status_change_end(bl, SC_DAWN_MOON, INVALID_TIMER);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case SH_TEMPORARY_COMMUNION:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv,
 			                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
@@ -18658,7 +18668,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case SKE_NOON_BLAST:
-			if (sc == NULL || (sc->data[SC_RISING_SUN] == NULL && sc->data[SC_NOON_SUN] == NULL)) {
+			if (sc == NULL || (sc->data[SC_RISING_SUN] == NULL && sc->data[SC_NOON_SUN] == NULL
+				&& sc->data[SC_SKY_ENCHANT] == NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
