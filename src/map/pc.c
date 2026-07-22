@@ -6464,6 +6464,9 @@ static int pc_checkallowskill(struct map_session_data *sd)
 		SC_FEARBREEZE,
 		SC_EXEEDBREAK,
 	};
+	const enum sc_type sca_list[] = {
+		SC_TALISMAN_OF_WARRIOR,
+	};
 	const enum sc_type scs_list[] = {
 		SC_AUTOGUARD,
 		SC_DEFENDER,
@@ -6483,6 +6486,14 @@ static int pc_checkallowskill(struct map_session_data *sd)
 		if( sd->sc.data[scw_list[i]]
 		 && !pc_check_weapontype(sd,skill->get_weapontype(status->sc2skill(scw_list[i]))))
 			status_change_end(&sd->bl, scw_list[i], INVALID_TIMER);
+	}
+
+	int index = sd->equip_index[EQI_HAND_R];
+	if (index < 0 || index >= MAX_INVENTORY || sd->inventory_data[index] == NULL
+		|| sd->inventory_data[index]->type != IT_WEAPON) {
+		for (i = 0; i < ARRAYLENGTH(sca_list); i++)
+			if (sd->sc.data[sca_list[i]] != NULL)
+				status_change_end(&sd->bl, sca_list[i], INVALID_TIMER);
 	}
 
 	if(sd->sc.data[SC_STRUP] && sd->weapontype != W_FIST)

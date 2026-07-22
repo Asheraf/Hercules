@@ -3439,6 +3439,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_HIDDEN_CARD] != NULL)
 			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_HIDDEN_CARD]->val2, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_TALISMAN_OF_WARRIOR] != NULL)
+			st->patk = (int32)cap_value((int64)st->patk + sc->data[SC_TALISMAN_OF_WARRIOR]->val2, 0, SHRT_MAX);
 	}
 	if ((flag & SCB_SMATK) != 0) {
 		st->smatk = bst->smatk;
@@ -10464,6 +10466,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val3 = skill->calc_heal(src, bl, SOA_TALISMAN_OF_PROTECTION, val1, true);
 				val4 = tick / 3000;
 				tick_time = 100;
+				break;
+			case SC_TALISMAN_OF_WARRIOR:
+				val2 = 2 * val1;
 				break;
 			case SC_SPELL_ENCHANTING:
 				val1 = cap_value(val1, 1, 5);
