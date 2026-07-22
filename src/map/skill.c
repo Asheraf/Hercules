@@ -4804,6 +4804,15 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 						                   skill->castend_damage_id);
 					}
 					break;
+				case NW_GRENADES_DROPPING:
+					if (status->isdead(src) == false) {
+						int area = skill->get_splash(skl->skill_id, skl->skill_lv);
+						int tmpx = skl->x - area + rnd() % (area * 2 + 1);
+						int tmpy = skl->y - area + rnd() % (area * 2 + 1);
+
+						skill->unitsetting(src, skl->skill_id, skl->skill_lv, tmpx, tmpy, skl->flag);
+					}
+					break;
 				case WZ_METEOR:
 				case SU_CN_METEOR:
 					if (skl->type >= 0) {
@@ -14716,6 +14725,18 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			skill->addtimerskill(src, tick + 300, 0, x, y, skill_id, skill_lv, 0, flag | 1);
 			skill->addtimerskill(src, tick + 600, 0, x, y, skill_id, skill_lv, 0, flag | 3);
 			break;
+		case NW_GRENADES_DROPPING: {
+			int i, tmpx, tmpy;
+
+			r = skill->get_splash(skill_id, skill_lv);
+			tmpx = x - r + rnd() % (r * 2 + 1);
+			tmpy = y - r + rnd() % (r * 2 + 1);
+			skill->unitsetting(src, skill_id, skill_lv, tmpx, tmpy, flag);
+			for (i = 1; i < skill->get_time(skill_id, skill_lv) / skill->get_unit_interval(skill_id, skill_lv); i++)
+				skill->addtimerskill(src, tick + i * skill->get_unit_interval(skill_id, skill_lv), 0, x, y, skill_id,
+				                     skill_lv, 0, flag);
+			break;
+		}
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
@@ -14908,6 +14929,9 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 	sc = status->get_sc(src); // for traps, firewall and fogwall - celest
 
 	switch (skill_id) {
+		case NW_GRENADES_DROPPING:
+			limit = skill->get_time2(skill_id, skill_lv);
+			break;
 		case SO_ELEMENTAL_SHIELD:
 			val2 = 300 * skill_lv + 65 * (st->int_ + status->get_lv(src)) + st->max_sp;
 			break;
@@ -16604,6 +16628,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_SOLIDTRAP:
 		case UNT_SWIFTTRAP:
 		case UNT_FLAMETRAP:
+		case UNT_GRENADES_DROPPING:
 			skill->attack(BF_WEAPON, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_ASTRAL_STRIKE:
