@@ -2372,6 +2372,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 50 * skill_lv;
 					RE_LVL_DMOD(100);
 					break;
+				case CD_DIVINUS_FLOS:
+					skillratio += -100 + 4000 * skill_lv + 10 * st->spl;
+					if (sd != NULL)
+						skillratio += 70 * pc->checkskill(sd, CD_FIDUS_ANIMUS);
+					RE_LVL_DMOD(100);
+					break;
 				case IG_CROSS_RAIN:
 					if (sc != NULL && sc->data[SC_HOLY_S] != NULL)
 						skillratio += -100 + (650 + 15 * pc->checkskill(sd, IG_SPEAR_SWORD_M)) * skill_lv;
@@ -5524,6 +5530,11 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			if (sd && sd->charm_type != CHARM_TYPE_NONE && sd->charm_count > 0) {
 				s_ele = sd->charm_type;
 			}
+			break;
+		case AB_ADORAMUS:
+		case CD_DIVINUS_FLOS:
+			if (sc != NULL && sc->data[SC_ANCILLA] != NULL)
+				s_ele = ELE_NEUTRAL;
 			break;
 		case IG_IMPERIAL_PRESSURE:
 			if (sc != NULL && sc->data[SC_GUARD_STANCE] != NULL)

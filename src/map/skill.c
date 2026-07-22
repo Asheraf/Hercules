@@ -1244,19 +1244,22 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 		hp += hp * sc->data[SC_MEDIALE]->val2 / 100;
 	sc = status->get_sc(target);
 	if (sc && sc->count) {
-		if(sc->data[SC_CRITICALWOUND] && heal) // Critical Wound has no effect on offensive heal. [Inkfish]
+		if (sc->data[SC_CRITICALWOUND] != NULL && heal == true) // Critical Wound has no effect on offensive heal. [Inkfish]
 			hp -= hp * sc->data[SC_CRITICALWOUND]->val2/100;
-		if(sc->data[SC_DEATHHURT] && heal)
+		if (sc->data[SC_DEATHHURT] != NULL && heal == true)
 			hp -= hp * 20/100;
-		if(sc->data[SC_HEALPLUS] && skill_id != NPC_EVILLAND && skill_id != BA_APPLEIDUN)
+		if (sc->data[SC_HEALPLUS] != NULL && skill_id != NPC_EVILLAND && skill_id != BA_APPLEIDUN)
 			hp += hp * sc->data[SC_HEALPLUS]->val1/100; // Only affects Heal, Sanctuary and PotionPitcher.(like bHealPower) [Inkfish]
+		if (skill_id != SOA_TALISMAN_OF_PROTECTION && sc->data[SC_ANCILLA] != NULL && skill_id != NPC_EVILLAND
+			&& skill_id != BA_APPLEIDUN)
+			hp += hp * sc->data[SC_ANCILLA]->val1 / 100;
 		if (sc->data[SC_VITALIZE_POTION] != NULL && skill_id != NPC_EVILLAND && skill_id != BA_APPLEIDUN)
 			hp += hp * sc->data[SC_VITALIZE_POTION]->val3 / 100;
-		if(sc->data[SC_WATER_INSIGNIA] && sc->data[SC_WATER_INSIGNIA]->val1 == 2)
+		if (sc->data[SC_WATER_INSIGNIA] != NULL && sc->data[SC_WATER_INSIGNIA]->val1 == 2)
 			hp += hp / 10;
 		if (sc->data[SC_ASSUMPTIO_BUFF] != NULL)
 			hp += hp * 2 * sc->data[SC_ASSUMPTIO_BUFF]->val1 / 100;
-		if (sc->data[SC_VITALITYACTIVATION])
+		if (sc->data[SC_VITALITYACTIVATION] != NULL)
 			hp = hp * 150 / 100;
 		if (sc->data[SC_NO_RECOVER_STATE])
 			hp = 0;
@@ -5939,11 +5942,13 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case TR_METALIC_FURY:
 		case EM_PSYCHIC_STREAM:
 		case TR_ROSEBLOSSOM_ATK:
+		case HN_JUPITEL_THUNDER_STORM:
+		case HN_HELLS_DRIVE:
+		case HN_GROUND_GRAVITATION:
+		case CD_DIVINUS_FLOS:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
-		case HN_HELLS_DRIVE:
-		case HN_GROUND_GRAVITATION:
 		case SS_KINRYUUHOU:
 		case SS_RAIDENPOU:
 		case SS_SEKIENHOU:
@@ -6117,6 +6122,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 						}
 					}
+						break;
+					case CD_DIVINUS_FLOS:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case IG_IMPERIAL_PRESSURE:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);

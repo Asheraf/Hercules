@@ -3021,6 +3021,8 @@ static void status_calc_regen_pc(struct map_session_data *sd, struct status_data
 		regen->hp += regen->hp * sc->data[SC_BUCHEDENOEL]->val1 / 100;
 		regen->sp += regen->sp * sc->data[SC_BUCHEDENOEL]->val2 / 100;
 	}
+	if (sc->data[SC_ANCILLA] != NULL)
+		regen->sp = (int)cap_value((int64)regen->sp * (100 + sc->data[SC_ANCILLA]->val2) / 100, 0, INT_MAX);
 
 	// Skill HP/SP restore bonuses
 	struct regen_data_sub *skill_regen = regen->skill;
@@ -10738,6 +10740,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 			case SC_BASILICA_BUFF: // Renewal version of Basilica, where it is a buff.
 				val2 = 3 * val1; // Holy MATK % Increase
 				val3 = 5 * val1; // ATK % Increase
+				break;
+			case SC_ANCILLA:
+				val1 = 15;
+				val2 = 30;
 				break;
 			case SC_POWERFUL_FAITH:
 			{
