@@ -12078,6 +12078,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
 		case MT_SUMMON_ABR_DUAL_CANNON:
 		case MT_SUMMON_ABR_MOTHER_NET:
+		case MT_SUMMON_ABR_INFINITY:
 			if (sd != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
@@ -12090,8 +12091,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					case MT_SUMMON_ABR_DUAL_CANNON:
 						mob_id = MOBID_ABR_DUAL_CANNON;
 						break;
-					default:
+					case MT_SUMMON_ABR_MOTHER_NET:
 						mob_id = MOBID_ABR_MOTHER_NET;
+						break;
+					default:
+						mob_id = MOBID_ABR_INFINITY;
 						break;
 				}
 				struct mob_data *summon_md = mob->once_spawn_sub(src, src->m, src->x, src->y, DEFAULT_MOB_JNAME,
@@ -16274,8 +16278,8 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 	if( md->master_id != src_id
 	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:
 	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR
-	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON || skill_id == MT_SUMMON_ABR_MOTHER_NET?AI_ABR:
-	    skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
+	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON || skill_id == MT_SUMMON_ABR_MOTHER_NET
+	    || skill_id == MT_SUMMON_ABR_INFINITY?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
 		return 0; //Non alchemist summoned mobs have nothing to do here.
 	if(md->class_==mob_class)
 		(*c)++;
@@ -16585,6 +16589,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_SUMMON_ABR_BATTLE_WARIOR:
 				case MT_SUMMON_ABR_DUAL_CANNON:
 				case MT_SUMMON_ABR_MOTHER_NET:
+				case MT_SUMMON_ABR_INFINITY:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 					break;
@@ -18008,6 +18013,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 				}
 			}
 			break;
+		case MT_SUMMON_ABR_INFINITY: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_ABR_INFINITY, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
+				}
+			}
+			break;
 		default:
 			if (!skill->check_condition_castend_unknown(sd, &skill_id, &skill_lv, target))
 				break;
@@ -18599,6 +18619,9 @@ static bool skill_get_requirement_off_unknown(struct status_change *sc, uint16 *
 
 static bool skill_get_requirement_item_unknown(struct status_change *sc, struct map_session_data *sd, uint16 *skill_id, uint16 *skill_lv, uint16 *idx, int *i)
 {
+	if (*skill_id == MT_A_MACHINE && sc != NULL && sc->data[SC_ABR_INFINITY] != NULL)
+		return true;
+
 	return false;
 }
 

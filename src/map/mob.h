@@ -461,6 +461,7 @@ enum mob_id {
 	MOBID_ABR_BATTLE_WARIOR = 20834, ///< ABR_BATTLE_WARIOR / ABR Battle Warrior
 	MOBID_ABR_DUAL_CANNON  = 20835, ///< ABR_DUAL_CANNON / ABR Dual Cannon
 	MOBID_ABR_MOTHER_NET   = 20836, ///< ABR_MOTHER_NET / ABR Mother Net
+	MOBID_ABR_INFINITY     = 20837, ///< ABR_INFINITY / ABR Infinity
 
 	// Mora
 	MOBID_POM_SPIDER       = 2132, ///<       POM_SPIDER / Pom Spider
