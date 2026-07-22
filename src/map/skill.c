@@ -6605,6 +6605,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_TWINKLING_GALAXY_AREA, 0, 0);
 			}
 			break;
+		case SS_TOKEDASU:
+			if ((flag & 1) != 0)
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case SKE_STAR_CANNON:
 		case SKE_TWINKLING_GALAXY:
 		case SH_HOWLING_OF_CHUL_HO:
@@ -14706,6 +14710,19 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			if ( skill_id == WM_SEVERE_RAINSTORM )
 				sc_start(src, src, type, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src,skill_id,skill_lv,x,y,0);
+			break;
+		case SS_TOKEDASU:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			sc_start(src, src, SC_SHADOW_CLOCK, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			unit->set_dir(src, map->calc_dir(src, x, y));
+			skill->blown(src, src, skill->get_blewcount(skill_id, skill_lv), unit->getdir(src),
+			             0x1 | 0x2); // suppress the packet and ignore no-knockback
+			clif->blown(src);
+		}
 			break;
 		case SKE_STAR_CANNON:
 		{

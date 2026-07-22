@@ -3077,6 +3077,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_TOKEDASU:
+					skillratio += -100 + 700 * skill_lv;
+					skillratio += 5 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_ALL_IN_THE_SKY:
 					skillratio += -100 + 250 + 1200 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -4482,6 +4487,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		}
 #endif
 
+		if (sc->data[SC_SHADOW_CLOCK] != NULL && (flag & (BF_WEAPON | BF_MAGIC)) != 0)
+			damage = damage * 85 / 100;
 		if(sc->data[SC_DEFENDER] &&
 #ifdef RENEWAL
 			((flag&(BF_LONG|BF_WEAPON)) == (BF_LONG|BF_WEAPON) || skill_id == CR_ACIDDEMONSTRATION))

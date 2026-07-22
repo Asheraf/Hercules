@@ -6069,6 +6069,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 				val = max( val, sc->data[SC_WIND_STEP_OPTION]->val2 );
 			if( sc->data[SC_FULL_THROTTLE] )
 				val = max( val, 25);
+			if (sc->data[SC_SHADOW_CLOCK] != NULL)
+				val = max(val, 50);
 			if (sc->data[SC_MOVHASTE_HORSE])
 				val = max(val, sc->data[SC_MOVHASTE_HORSE]->val1);
 			if (sc->data[SC_JAWAII_SERENADE] != NULL)
