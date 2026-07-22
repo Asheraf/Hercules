@@ -137,6 +137,7 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 	case ELEID_EL_AQUA_S:
 	case ELEID_EL_AQUA_M:
 	case ELEID_EL_AQUA_L:
+	case ELEID_EM_DILUVIO:
 		//MDEF + (Summon Aqua Skill Level x 10) / MATK + (Summon Aqua Skill Level x 20)
 		ele.mdef += summon_level * 10;
 		ele.matk += summon_level * 20;
@@ -165,7 +166,8 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 		ele.atk2 += 25 * skill_level;
 		ele.matk += 25 * skill_level;
 	}
-	if ((skill_level=pc->checkskill(sd, EM_ELEMENTAL_SPIRIT_M)) > 0 && db->class_ == ELEID_EM_ARDOR) {
+	if ((skill_level=pc->checkskill(sd, EM_ELEMENTAL_SPIRIT_M)) > 0 && (db->class_ == ELEID_EM_DILUVIO
+		|| db->class_ == ELEID_EM_ARDOR)) {
 		ele.hp = ele.max_hp += 10000 + 3000 * skill_level;
 		ele.sp = ele.max_sp += 100 * skill_level;
 		ele.atk += 100 + 20 * skill_level;
@@ -260,6 +262,9 @@ static int elemental_delete(struct elemental_data *ed, int reply)
 	switch (ed->elemental.class_) {
 		case ELEID_EM_ARDOR:
 			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_ARDOR, INVALID_TIMER);
+			break;
+		case ELEID_EM_DILUVIO:
+			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_DILUVIO, INVALID_TIMER);
 			break;
 	}
 

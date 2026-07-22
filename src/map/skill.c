@@ -12351,6 +12351,22 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 
+		case EM_SUMMON_ELEMENTAL_DILUVIO:
+			if (sd != NULL) {
+				if (sd->ed != NULL && sd->ed->elemental.class_ == ELEID_EL_AQUA_L) {
+					elemental->delete_(sd->ed, 0);
+					if (elemental->create(sd, ELEID_EM_DILUVIO, skill->get_time(skill_id, skill_lv)) == 0)
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+					else {
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						sc_start(src, bl, SC_SUMMON_ELEMENTAL_DILUVIO, 100, skill_lv,
+						         skill->get_time(skill_id, skill_lv), skill_id);
+					}
+				} else
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			}
+			break;
+
 		case SO_EL_CONTROL:
 			if( sd ) {
 				uint32 mode = EL_MODE_PASSIVE; // Standard mode.

@@ -1912,6 +1912,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 	}
 	if (sc->data[SC_SUMMON_ELEMENTAL_ARDOR] != NULL)
 		sd->magic_atk_ele[ELE_FIRE] += 10;
+	if (sc->data[SC_SUMMON_ELEMENTAL_DILUVIO] != NULL)
+		sd->magic_atk_ele[ELE_WATER] += 10;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
