@@ -5153,6 +5153,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			sc_start(src, src, SC_CRESCIVEBOLT, 100, stack, skill->get_time(skill_id, skill_lv), skill_id);
 		}
 			break;
+		case TR_RHYTHMSHOOTING:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case TR_ROSEBLOSSOM:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -18597,6 +18601,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP || skill_id == WH_SWIFTTRAP
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
+	if (skill_id == TR_RHYTHMSHOOTING)
+		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (skill_id == TR_ROSEBLOSSOM)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (add_ap <= 0)
