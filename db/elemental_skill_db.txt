@@ -116,3 +116,4 @@
 //================
 20819,8452,1,1	//EM_EL_EARTH_CARE,Earth Care
 20819,8453,1,2	//EM_EL_STRONG_PROTECTION,Strong Protection
+20819,8454,1,4	//EM_EL_AVALANCHE,Avalanche
