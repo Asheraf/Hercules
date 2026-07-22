@@ -2837,6 +2837,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += skillratio * 50 / 100;
 					RE_LVL_DMOD(100);
 					break;
+				case WH_GALESTORM:
+					skillratio += -100 + 1350 * skill_lv + 10 * st->con;
+					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_CALAMITYGALE] != NULL
+					 && (status_get_race(target) == RC_BRUTE || status_get_race(target) == RC_FISH))
+						skillratio += skillratio * 50 / 100;
+					break;
 				case RA_CLUSTERBOMB:
 					skillratio += 100 + 100 * skill_lv;
 					break;

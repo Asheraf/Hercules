@@ -5380,6 +5380,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case WL_COMET:
 		case WL_JACKFROST:
 		case RA_ARROWSTORM:
+		case WH_GALESTORM:
 		case RA_WUGDASH:
 		case NC_VULCANARM:
 		case NC_ARMSCANNON:
@@ -5509,6 +5510,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case WH_GALESTORM:
+						if (sd != NULL
+							&& map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+						    src, skill_id, skill_lv, tick, BCT_ENEMY, skill->area_sub_count) >= 3) {
+							uint32 old_ap = sd->battle_status.ap;
+
+							sd->battle_status.ap = (uint32)cap_value((int64)sd->battle_status.ap + 10, 0,
+								sd->battle_status.max_ap);
+							if (old_ap != sd->battle_status.ap)
+								clif->updatestatus(sd, SP_AP);
+						}
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case ABC_DEFT_STAB:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
