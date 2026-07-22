@@ -12312,6 +12312,25 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 		case BO_WOODEN_FAIRY:
+		case BO_HELLTREE:
+			if (sd != NULL) {
+				struct mob_data *summon_md;
+
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+				summon_md = mob->once_spawn_sub(src, src->m, src->x, src->y, DEFAULT_MOB_JNAME,
+				                                  skill_id == BO_HELLTREE ? MOBID_BIONIC_HELLTREE : MOBID_BIONIC_WOODEN_FAIRY, "", SZ_SMALL, AI_BIONIC, 0);
+				if (summon_md != NULL) {
+					summon_md->master_id = src->id;
+					summon_md->special_state.ai = AI_BIONIC;
+					if (summon_md->deletetimer != INVALID_TIMER)
+						timer->delete_(summon_md->deletetimer, mob->timer_delete);
+					summon_md->deletetimer = timer->add(timer->gettick() + skill->get_time(skill_id, skill_lv),
+					                                    mob->timer_delete, summon_md->bl.id, 0);
+					mob->spawn(summon_md);
+				}
+			}
+			break;
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
 		case MT_SUMMON_ABR_DUAL_CANNON:
 		case MT_SUMMON_ABR_MOTHER_NET:
@@ -16568,7 +16587,8 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 
 	if( md->master_id != src_id
 	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:
-	    skill_id == BO_WOODENWARRIOR || skill_id == BO_CREEPER?AI_BIONIC:
+	    skill_id == BO_WOODENWARRIOR || skill_id == BO_WOODEN_FAIRY || skill_id == BO_CREEPER
+	    || skill_id == BO_HELLTREE?AI_BIONIC:
 	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR
 	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON || skill_id == MT_SUMMON_ABR_MOTHER_NET
 	    || skill_id == MT_SUMMON_ABR_INFINITY?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
@@ -18309,6 +18329,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
 					                  MOBID_BIONIC_WOODENWARRIOR, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
+				}
+			}
+			break;
+		case BO_HELLTREE: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_BIONIC_HELLTREE, skill_id, &c);
 					if (c >= maxcount) {
 						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
 						return 0;
