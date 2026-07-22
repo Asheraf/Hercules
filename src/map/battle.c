@@ -3337,6 +3337,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 500 * skill_lv + 5 * st->pow;
 					RE_LVL_DMOD(100);
 					break;
+				case SHC_DANCING_KNIFE:
+					skillratio += -100 + 200 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case DK_HACKANDSLASHER:
 				case DK_HACKANDSLASHER_ATK:
 					skillratio += -100 + 500 + 1000 * skill_lv + 7 * st->pow;

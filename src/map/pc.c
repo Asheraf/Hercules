@@ -6432,6 +6432,7 @@ static int pc_checkallowskill(struct map_session_data *sd)
 		SC_ADRENALINE,
 		SC_ADRENALINE2,
 		SC_DANCING,
+		SC_DANCING_KNIFE,
 		SC_GS_GATLINGFEVER,
 #ifdef RENEWAL
 		SC_EDP,

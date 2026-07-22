@@ -10327,6 +10327,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				tick_time = 3000;
 				val4 = total_tick / tick_time;
 				break;
+			case SC_DANCING_KNIFE:
+				tick_time = 300;
+				val4 = total_tick / tick_time;
+				break;
 			case SC_SOULGOLEM:
 				val2 = 60 * val1; // DEF Increase
 				val3 = 15 + 5 * val1; // MDEF Increase
@@ -12927,6 +12931,13 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 						break;
 				}
 				sc_timer_next(1000+tick, status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
+		case SC_DANCING_KNIFE:
+			if (--sce->val4 >= 0) {
+				skill->castend_nodamage_id(bl, bl, SHC_DANCING_KNIFE, sce->val1, tick, 1);
+				sc_timer_next(300 + tick, status->change_timer, bl->id, data);
 				return 0;
 			}
 			break;

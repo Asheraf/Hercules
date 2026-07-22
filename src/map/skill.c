@@ -5384,6 +5384,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_THIRD_PUNISH:
 		case DK_SERVANT_W_PHANTOM:
 		case DK_SERVANT_W_DEMOL:
+		case SHC_DANCING_KNIFE:
 		case IG_SHIELD_SHOOTING:
 		case IG_OVERSLASH:
 		case AG_FROZEN_SLASH:
@@ -7890,6 +7891,18 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 #endif
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id));
+			break;
+		case SHC_DANCING_KNIFE:
+			if ((flag & 1) != 0) {
+				skill->area_temp[1] = 0;
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL,
+				                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_LEVEL | SD_SPLASH,
+				                    skill->castend_damage_id);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+			}
 			break;
 		case IQ_FIRST_FAITH_POWER:
 			status_change_end(bl, SC_SECOND_JUDGE, INVALID_TIMER);
