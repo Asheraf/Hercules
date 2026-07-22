@@ -2237,6 +2237,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 150 + 650 * skill_lv + 5 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_ABYSS_SQUARE:
+					skillratio += -100 + 900 * skill_lv + 5 * st->spl;
+					if (sd != NULL)
+						skillratio += 50 * skill_lv * pc->checkskill(sd, ABC_MAGIC_SWORD_M);
+					RE_LVL_DMOD(100);
+					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
 					break;
@@ -4491,6 +4497,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 	if (skill_id == AG_CRYSTAL_IMPACT && sc != NULL && sc->data[SC_CLIMAX] != NULL && sc->data[SC_CLIMAX]->val1 == 2)
 		ad.div_ = 2;
 	if (skill_id == AG_CRIMSON_ARROW_ATK && sc != NULL && sc->data[SC_CLIMAX] != NULL)
+		ad.div_ = 2;
+	if (skill_id == ABC_ABYSS_SQUARE && mflag == 2)
 		ad.div_ = 2;
 
 	//Initialize variables that will be used afterwards
@@ -7808,6 +7816,17 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			pc->delabyssball(sd, 1);
 			skill->castend_damage_id(src, target, ABC_FROM_THE_ABYSS_ATK, sc->data[SC_ABYSSFORCEWEAPON]->val1, tick,
 			                         flag);
+			sd->auto_cast_current.type = ac_type;
+		}
+
+		if (damage > 0 && (wd.flag & (BF_NORMAL | BF_WEAPON)) == (BF_NORMAL | BF_WEAPON)
+		 && sc != NULL && sc->data[SC_ABYSSFORCEWEAPON] != NULL
+		 && pc->checkskill(sd, ABC_ABYSS_SQUARE) > 0 && rnd() % 100 < 20) {
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			skill->castend_pos2(src, target->x, target->y, ABC_ABYSS_SQUARE, pc->checkskill(sd, ABC_ABYSS_SQUARE), tick,
+			                    flag);
 			sd->auto_cast_current.type = ac_type;
 		}
 

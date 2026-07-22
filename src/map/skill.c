@@ -14023,6 +14023,10 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				}
 			}
 			break;
+		case ABC_ABYSS_SQUARE:
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
 		default:
 			if (skill->castend_pos2_unknown(src, &x, &y, &skill_id, &skill_lv, &tick, &flag))
 				return 1;
@@ -15864,6 +15868,15 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_CROSS_RAIN:
 		case UNT_PNEUMATICUS_PROCELLA:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
+			break;
+		case UNT_ABYSS_SQUARE:
+		{
+			int flag = 0;
+
+			if ((int)distance_bl(ss, &src->bl) <= src->range)
+				flag |= 2;
+			skill->attack(BF_MAGIC, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, flag);
+		}
 			break;
 		case UNT_ASTRAL_STRIKE:
 			skill->attack(BF_MAGIC, ss, &src->bl, bl, AG_ASTRAL_STRIKE_ATK, sg->skill_lv, tick, 0);
