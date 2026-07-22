@@ -3077,6 +3077,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SKE_STAR_CANNON:
+					skillratio += -100 + 150 + 650 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 5 * skill_lv * pc->checkskill(sd, SKE_SKY_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case SKE_STAR_BURST:
 					skillratio += -100 + 500 + 400 * skill_lv;
 					skillratio += 5 * st->pow;

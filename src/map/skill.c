@@ -4893,6 +4893,22 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 					}
 					FALLTHROUGH
 				// fall through ...
+				case SKE_STAR_CANNON:
+				{
+					int area = skill->get_unit_range(skl->skill_id, skl->skill_lv);
+					int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+
+					for (int i = 0, stars = skl->skill_lv / 4 + 1; i < stars; i++) {
+						int tmpx = skl->x - area + rnd() % (area * 2 + 1);
+						int tmpy = skl->y - area + rnd() % (area * 2 + 1);
+
+						map->foreachinarea(skill->area_sub, src->m, tmpx - splash, tmpy - splash,
+						                   tmpx + splash, tmpy + splash, BL_CHAR, src, skl->skill_id,
+						                   skl->skill_lv, tick, skl->flag | BCT_ENEMY | SD_SPLASH | 1,
+						                   skill->castend_damage_id);
+					}
+				}
+					break;
 				case SKE_TWINKLING_GALAXY:
 				{
 					int area = skill->get_unit_range(skl->skill_id, skl->skill_lv);
@@ -6576,6 +6592,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_TWINKLING_GALAXY_AREA, 0, 0);
 			}
 			break;
+		case SKE_STAR_CANNON:
 		case SKE_TWINKLING_GALAXY:
 		case SH_HOWLING_OF_CHUL_HO:
 			if ((flag & 1) != 0)
@@ -14667,6 +14684,36 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 				sc_start(src, src, type, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src,skill_id,skill_lv,x,y,0);
 			break;
+		case SKE_STAR_CANNON:
+		{
+			struct unit_data *ud = unit->bl2ud(src);
+			int interval = skill->get_unit_interval(skill_id, skill_lv);
+
+			for (int i = 0; ud != NULL && i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+				struct skill_unit_group *galaxy = ud->skillunit[i];
+
+				if (galaxy->skill_id != SKE_TWINKLING_GALAXY || galaxy->unit.count < 1 || galaxy->unit.data == NULL)
+					continue;
+				if ((int)distance_xy(x, y, galaxy->unit.data->bl.x, galaxy->unit.data->bl.y) > skill->get_unit_range(galaxy->skill_id, galaxy->skill_lv))
+					continue;
+				for (int j = 0; j < MAX_SKILLTIMERSKILL; j++) {
+					if (ud->skilltimerskill[j] == NULL || ud->skilltimerskill[j]->skill_id != SKE_TWINKLING_GALAXY)
+						continue;
+					timer->delete_(ud->skilltimerskill[j]->timer, skill->timerskill);
+					ers_free(skill->timer_ers, ud->skilltimerskill[j]);
+					ud->skilltimerskill[j] = NULL;
+				}
+				skill->del_unitgroup(galaxy);
+				if (interval > 0) {
+					for (int j = 0; j < skill->get_time(skill_id, skill_lv) / interval; j++)
+						skill->addtimerskill(src, tick + (int64)j * interval, 0, x, y, skill_id, skill_lv, 0, flag);
+				}
+				flag |= 1;
+				skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+				break;
+			}
+		}
+			break;
 		case SKE_STAR_BURST:
 			flag |= 1;
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
@@ -19374,6 +19421,27 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 		}
 			break;
 		case SKE_STAR_BURST:
+		{
+			struct unit_data *ud = unit->bl2ud(&sd->bl);
+			bool valid = false;
+
+			for (i = 0; ud != NULL && i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+				struct skill_unit_group *sg = ud->skillunit[i];
+
+				if (sg->skill_id == SKE_TWINKLING_GALAXY && sg->unit.count > 0 && sg->unit.data != NULL
+				 && (int)distance_xy(sd->bl.x, sd->bl.y, sg->unit.data->bl.x, sg->unit.data->bl.y)
+				    <= skill->get_unit_range(sg->skill_id, sg->skill_lv)) {
+					valid = true;
+					break;
+				}
+			}
+			if (valid == false) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_TWINKLING_GALAXY_AREA, 0, 0);
+				return 0;
+			}
+		}
+			break;
+		case SKE_STAR_CANNON:
 		{
 			struct unit_data *ud = unit->bl2ud(&sd->bl);
 			bool valid = false;
