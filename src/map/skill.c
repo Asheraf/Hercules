@@ -5889,6 +5889,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case BO_EXPLOSIVE_POWDER:
 		case BO_MAYHEMIC_THORNS:
 		case BO_MYSTERY_POWDER:
+		case BO_DUST_EXPLOSION:
 		case MT_POWERFUL_SWING:
 		case MT_ENERGY_CANNONADE:
 		case BO_ACIDIFIED_ZONE_WATER:
@@ -5958,6 +5959,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					sc_start(src, src, skill->get_sc_type(skill_id), 100, skill_lv, skill->get_time(skill_id, skill_lv),
 					         skill_id);
 				}
+				if (skill_id == BO_DUST_EXPLOSION)
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == MT_POWERFUL_SWING)
 					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				if (skill_id == MT_ENERGY_CANNONADE)
@@ -18590,6 +18593,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case BO_DUST_EXPLOSION:
+			if (sc == NULL || sc->data[SC_MYSTERY_POWDER] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case IG_GUARDIAN_SHIELD:
 		case IG_ULTIMATE_SACRIFICE:
 			if (sc == NULL || sc->data[SC_GUARD_STANCE] == NULL) {
@@ -19915,6 +19924,12 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 			}
 		}
 			break;
+		case BO_DUST_EXPLOSION:
+			if (sd->sc.data[SC_MYSTERY_POWDER] == NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
 		case ABC_CHAIN_REACTION_SHOT:
 		{
 			int ammo_index = sd->equip_index[EQI_AMMO];
@@ -20431,6 +20446,9 @@ static int skill_consume_requirement(struct map_session_data *sd, uint16 skill_i
 				if (sd->sc.count > 0 && sd->sc.data[SC_EARTHSCROLL] != NULL) // If Earth Spike Scroll is used while SC_EARTHSCROLL is active, 10 SP are consumed. [Kenpachi]
 					req.sp = 10;
 
+				break;
+			case BO_DUST_EXPLOSION:
+				status_change_end(&sd->bl, SC_MYSTERY_POWDER, INVALID_TIMER);
 				break;
 			default:
 				if (sd->auto_cast_current.type != AUTOCAST_NONE) { // Auto-cast skills don't consume SP or AP.
