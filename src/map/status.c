@@ -1855,6 +1855,11 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	if (sc->data[SC_DEADLY_DEFEASANCE] != NULL)
 		sd->special_state.no_magic_damage = 0;
+	if ((skill_lv = pc->checkskill(sd, CD_FIDUS_ANIMUS)) > 0) {
+		static const int holy_magic_attack[10] = { 1, 3, 4, 6, 7, 9, 10, 12, 13, 15 };
+
+		sd->magic_atk_ele[ELE_HOLY] += holy_magic_attack[cap_value(skill_lv, 1, 10) - 1];
+	}
 	if (sc->data[SC_CLIMAX_DES_HU] != NULL)
 		sd->magic_atk_ele[ELE_WIND] += 30;
 	if (sc->data[SC_CLIMAX_CRYIMP] != NULL) {
