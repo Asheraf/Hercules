@@ -6013,6 +6013,8 @@ static unsigned short status_calc_speed(struct block_list *bl, struct status_cha
 						val = max(val, sc->data[SC_BIND_TRAP]->val3);
 					if (sc->data[SC_CREATINGSTAR] != NULL)
 						val = max(val, 90);
+					if (sc->data[SC_SHIELDCHAINRUSH] != NULL)
+						val = max(val, 20);
 					if (sc->data[SC_SP_SHA] != NULL)
 						val = max(val, sc->data[SC_SP_SHA]->val2);
 

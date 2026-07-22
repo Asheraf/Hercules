@@ -3267,6 +3267,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 3 * skill_lv * pc->checkskill(sd, HN_SELFSTUDY_TATICS);
 					RE_LVL_DMOD(100);
 					break;
+				case HN_SHIELD_CHAIN_RUSH:
+					skillratio += -100 + 600 + 1300 * skill_lv + 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 3 * skill_lv * pc->checkskill(sd, HN_SELFSTUDY_TATICS);
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -4230,6 +4236,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		if (sc->data[SC_KAITE] != NULL && (flag & (BF_SHORT | BF_MAGIC)) == BF_SHORT)
 			damage <<= 2;
 #endif
+		if (sc->data[SC_SHIELDCHAINRUSH] != NULL)
+			damage += damage / 10;
 
 		if( sc->data[SC_LEXAETERNA] && skill_id != PF_SOULBURN
 #ifdef RENEWAL

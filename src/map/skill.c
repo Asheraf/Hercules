@@ -6011,6 +6011,18 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
 			break;
+		case HN_SHIELD_CHAIN_RUSH:
+			if ((flag & 1) != 0) {
+				if (skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag) > 0)
+					sc_start(src, bl, SC_SHIELDCHAINRUSH, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),
+				                    skill->splash_target(src), src, skill_id, skill_lv, tick,
+				                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				sc_start(src, src, SC_NO_SWITCH_WEAPON, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+			}
+			break;
 		case KN_BOWLINGBASH:
 			// skill->area_temp[0] holds the number of targets affected
 			if (flag & 1) {
