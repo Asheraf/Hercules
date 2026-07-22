@@ -2127,6 +2127,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case SS_FUUMASHOUAKU:
 		case SS_KAGEGARI:
 			sc_start(src, bl, SC_NIGHTMARE, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
