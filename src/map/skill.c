@@ -9286,6 +9286,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			}
 			break;
 		case SH_MARINE_FESTIVAL_OF_KI_SUL:
+		case SH_SANDY_FESTIVAL_OF_KI_SUL:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				int duration = skill->get_time(skill_id, skill_lv);
 

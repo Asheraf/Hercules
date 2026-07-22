@@ -3420,18 +3420,24 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 		st->sta = bst->sta;
 		if (sc != NULL && sc->data[SC_RELIGIO] != NULL)
 			st->sta = (uint16)cap_value((int64)st->sta + sc->data[SC_RELIGIO]->val2, 0, USHRT_MAX);
+		if (sc != NULL && sc->data[SC_SANDY_FESTIVAL] != NULL)
+			st->sta = (uint16)cap_value((int64)st->sta + sc->data[SC_SANDY_FESTIVAL]->val2, 0, USHRT_MAX);
 		flag |= SCB_RES;
 	}
 	if ((flag & SCB_WIS) != 0) {
 		st->wis = bst->wis;
 		if (sc != NULL && sc->data[SC_RELIGIO] != NULL)
 			st->wis = (uint16)cap_value((int64)st->wis + sc->data[SC_RELIGIO]->val2, 0, USHRT_MAX);
+		if (sc != NULL && sc->data[SC_SANDY_FESTIVAL] != NULL)
+			st->wis = (uint16)cap_value((int64)st->wis + sc->data[SC_SANDY_FESTIVAL]->val2, 0, USHRT_MAX);
 		flag |= SCB_MRES;
 	}
 	if ((flag & SCB_SPL) != 0) {
 		st->spl = bst->spl;
 		if (sc != NULL && sc->data[SC_RELIGIO] != NULL)
 			st->spl = (uint16)cap_value((int64)st->spl + sc->data[SC_RELIGIO]->val2, 0, USHRT_MAX);
+		if (sc != NULL && sc->data[SC_SANDY_FESTIVAL] != NULL)
+			st->spl = (uint16)cap_value((int64)st->spl + sc->data[SC_SANDY_FESTIVAL]->val2, 0, USHRT_MAX);
 		flag |= SCB_SMATK;
 	}
 	if ((flag & SCB_CON) != 0) {
