@@ -2992,6 +2992,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SH_HOWLING_OF_CHUL_HO:
+					skillratio += -100 + 600 + 1050 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL) {
+						skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						if (pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0) {
+							skillratio += 100 + 100 * skill_lv;
+							skillratio += 50 * pc->checkskill(sd, SH_MYSTICAL_CREATURE_MASTERY);
+						}
+					}
+					RE_LVL_DMOD(100);
+					break;
 				case SH_CHUL_HO_SONIC_CLAW:
 					skillratio += -100 + 1450 + 2650 * skill_lv;
 					skillratio += 5 * st->pow;

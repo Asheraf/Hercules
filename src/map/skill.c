@@ -2108,6 +2108,9 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			sc_start(src, bl, SC_HANDICAPSTATE_DEEPBLIND, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
 			break;
+		case SH_HOWLING_OF_CHUL_HO:
+			sc_start(src, bl, SC_HOGOGONG, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
 		case ABC_UNLUCKY_RUSH:
 			sc_start(src, bl, SC_HANDICAPSTATE_MISFORTUNE, 30 + 10 * skill_lv, skill_lv,
 			         skill->get_time(skill_id, skill_lv), skill_id);
@@ -6401,6 +6404,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SH_HOWLING_OF_CHUL_HO:
+			if ((flag & 1) != 0)
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 
 		case GC_CROSSRIPPERSLASHER:
 			if( sd && !(sc && sc->data[SC_ROLLINGCUTTER]) )
@@ -9224,6 +9231,20 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			skill->castend_damage_id(src, src, skill_id, skill_lv, tick, flag);
 			break;
 
+		case SH_HOWLING_OF_CHUL_HO:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_CHUL_HO) > 0)
+				range += 1;
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[0] = 0;
+			skill->area_temp[1] = bl->id;
+			skill->area_temp[2] = 0;
+			map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | 1, skill->castend_damage_id);
+		}
+			break;
 		case KN_BRANDISHSPEAR:
 		case ML_BRANDISH:
 			skill->brandishspear(src, bl, skill_id, skill_lv, tick, flag);
