@@ -7192,6 +7192,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case AG_ALL_BLOOM:
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
+		case CD_REPARATIO:
+			if (bl->type != BL_PC) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				break;
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			clif->skill_nodamage(NULL, bl, AL_HEAL, tstatus->max_hp, 1);
+			status->heal(bl, tstatus->max_hp, 0, STATUS_HEAL_DEFAULT);
+			break;
 		case HLIF_HEAL: // [orn]
 		case AL_HEAL:
 		/**
