@@ -2443,6 +2443,22 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 				sd->left_weapon.addsize[size] += attack_bonus[size][skill_index];
 		}
 	}
+	if ((skill_lv = pc->checkskill(sd, ABC_DAGGER_AND_BOW_M)) > 0
+		&& (sd->weapontype == W_DAGGER || sd->weapontype == W_BOW || sd->weapontype == W_DOUBLE_DD
+			|| sd->weapontype == W_DOUBLE_DS || sd->weapontype == W_DOUBLE_DA)) {
+		static const int attack_bonus[3][10] = {
+			{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+			{ 2, 3, 5, 6, 8, 9, 11, 12, 14, 15 },
+			{ 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 },
+		};
+		int skill_index = cap_value(skill_lv, 1, 10) - 1;
+
+		for (int size = SZ_SMALL; size <= SZ_BIG; size++) {
+			sd->right_weapon.addsize[size] += attack_bonus[size][skill_index];
+			if (battle_config.left_cardfix_to_right == 0)
+				sd->left_weapon.addsize[size] += attack_bonus[size][skill_index];
+		}
+	}
 
 	if (sc->count) {
 		if (sc->data[SC_CONCENTRATION]) { // Update the card-bonus data
