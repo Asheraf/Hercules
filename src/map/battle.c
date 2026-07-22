@@ -4266,6 +4266,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 50 * skill_lv * pc->checkskill(sd, CD_MACE_BOOK_M);
 					RE_LVL_DMOD(100);
 					break;
+				case IG_RADIANT_SPEAR:
+					skillratio += -100 + 3500 + 1150 * skill_lv + 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 50 * pc->checkskill(sd, IG_SPEAR_SWORD_M);
+					if (sc != NULL && sc->data[SC_SPEAR_SCAR] != NULL)
+						skillratio += 250 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
 				case DK_DRAGONIC_PIERCE:
 					skillratio += -100 + 900 + 730 * skill_lv + 7 * st->pow;
 					if (sc != NULL && sc->data[SC_DRAGONIC_AURA] != NULL)
@@ -6671,6 +6679,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		}
 	}
 
+	if (skill_id == SHC_ETERNAL_SLASH && sc != NULL && sc->data[SC_E_SLASH_COUNT] != NULL)
+		wd.div_ = sc->data[SC_E_SLASH_COUNT]->val1;
+
 	//Check for critical
 	if (flag.cri == 0 && (wd.type != BDT_MULTIHIT || skill_id == DK_SERVANTWEAPON_ATK || skill_id == DK_SERVANT_W_PHANTOM
 		|| skill_id == DK_SERVANT_W_DEMOL
@@ -6682,7 +6693,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| skill_id == CD_PETITIO || skill_id == SHC_SAVAGE_IMPACT
 		|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 		|| skill_id == MT_A_MACHINE || skill_id == MT_TRIPLE_LASER || skill_id == BO_MAYHEMIC_THORNS
-		|| skill_id == ABC_FRENZY_SHOT
+		|| skill_id == ABC_FRENZY_SHOT || skill_id == IG_RADIANT_SPEAR
 		|| skill_id == WH_HAWKRUSH || skill_id == WH_CRESCIVE_BOLT
 		|| (skill_id == NW_ONLY_ONE_BULLET && sd != NULL && sd->weapontype1 == W_RIFLE)
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
@@ -6709,7 +6720,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == IQ_OLEUM_SANCTUM || skill_id == IQ_MASSIVE_F_BLASTER
 			|| skill_id == IQ_EXPOSION_BLASTER || skill_id == IQ_FIRST_BRAND
 			|| skill_id == IQ_SECOND_FAITH || skill_id == IQ_THIRD_PUNISH
-			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
+			|| skill_id == IG_RADIANT_SPEAR || skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
 			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW
 			|| skill_id == WH_HAWKRUSH || skill_id == WH_HAWKBOOMERANG
@@ -7201,7 +7212,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY
 							|| skill_id == SKE_SKY_SUN || skill_id == SS_KAGEGISSEN
 							|| skill_id == NW_WILD_SHOT || skill_id == MT_TRIPLE_LASER
-							|| skill_id == BO_MAYHEMIC_THORNS)
+							|| skill_id == BO_MAYHEMIC_THORNS || skill_id == IG_RADIANT_SPEAR)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

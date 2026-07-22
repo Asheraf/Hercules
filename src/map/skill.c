@@ -5860,6 +5860,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SHC_DANCING_KNIFE:
 		case IG_SHIELD_SHOOTING:
 		case IG_OVERSLASH:
+		case IG_RADIANT_SPEAR:
 		case AG_FROZEN_SLASH:
 		case AG_SOUL_VC_STRIKE:
 		case IQ_FIRST_BRAND:
@@ -6112,6 +6113,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case SKE_SUNSET_BLAST:
 					case SH_CHUL_HO_BATTERING:
 					case SH_HYUN_ROK_SPIRIT_POWER:
+					case IG_RADIANT_SPEAR:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
@@ -18575,6 +18577,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case IG_GRAND_JUDGEMENT:
 		case IG_OVERSLASH:
+		case IG_RADIANT_SPEAR:
 			if (sc == NULL || sc->data[SC_ATTACK_STANCE] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
