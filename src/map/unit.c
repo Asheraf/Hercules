@@ -1903,6 +1903,13 @@ static int unit_skilluse_id2(struct block_list *src, int target_id, uint16 skill
 			}
 		}
 		break;
+	case TR_RETROSPECTION:
+		if (sd->skill_id_song == 0 || pc->checkskill(sd, sd->skill_id_song) == 0) {
+			clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			return 0;
+		}
+		sd->skill_id_old = skill_id;
+		break;
 	}
 
 	// moved here to prevent Suffragium from ending if skill fails

@@ -336,6 +336,7 @@ struct map_session_data {
 	time_t emotionlasttime; // to limit flood with emotion packets
 	uint16 skill_id_old,skill_lv_old;
 	uint16 skill_id_dance,skill_lv_dance;
+	uint16 skill_id_song, skill_lv_song;
 	short cook_mastery; // range: [0,1999] [Inkfish]
 	bool blockskill[MAX_SKILL_DB];
 	int cloneskill_id, reproduceskill_id;

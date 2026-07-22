@@ -7239,6 +7239,21 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 	dstsd = BL_CAST(BL_PC, bl);
 	dstmd = BL_CAST(BL_MOB, bl);
 
+	if (sd != NULL && (flag & 1) == 0) {
+		switch (skill_id) {
+			case TR_GEF_NOCTURN:
+			case TR_ROKI_CAPRICCIO:
+			case TR_AIN_RHAPSODY:
+			case TR_MUSICAL_INTERLUDE:
+			case TR_JAWAII_SERENADE:
+			case TR_NIPELHEIM_REQUIEM:
+			case TR_PRON_MARCH:
+				sd->skill_id_song = skill_id;
+				sd->skill_lv_song = skill_lv;
+				break;
+		}
+	}
+
 	if(bl->prev == NULL)
 		return 1;
 	if(status->isdead(src))
@@ -10065,6 +10080,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 			if(sd)
 				unit->skilluse_id(src,src->id,sd->skill_id_dance,sd->skill_lv_dance);
+			break;
+		case TR_RETROSPECTION:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			if (sd != NULL)
+				unit->skilluse_id(src, src->id, sd->skill_id_song, sd->skill_lv_song);
 			break;
 
 		case AS_SPLASHER:
@@ -18548,7 +18568,13 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP || skill_id == WH_SWIFTTRAP
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
-	if (add_ap <= 0 || sd->battle_status.max_ap == 0)
+	if (add_ap <= 0)
+		return;
+	if (sd->skill_id_old == TR_RETROSPECTION && skill_id == sd->skill_id_song) {
+		add_ap += add_ap * 50 / 100;
+		sd->skill_id_old = skill_id;
+	}
+	if (sd->battle_status.max_ap == 0)
 		return;
 
 	uint32 old_ap = sd->battle_status.ap;
@@ -18771,6 +18797,8 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 	req.sp = skill->dbs->db[idx].sp[skill_lv-1];
 	if((sd->skill_id_old == BD_ENCORE) && skill_id == sd->skill_id_dance)
 		req.sp /= 2;
+	if (sd->skill_id_old == TR_RETROSPECTION && skill_id == sd->skill_id_song)
+		req.sp -= req.sp * 30 / 100;
 	sp_rate = skill->dbs->db[idx].sp_rate[skill_lv-1];
 	if(sp_rate > 0)
 		req.sp += (st->sp * sp_rate)/100;
