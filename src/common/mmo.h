@@ -383,7 +383,7 @@ STATIC_ASSERT(MAX_ACHIEVEMENT_RANKS <= 255, "This value is limited by the client
 
 // Elemental System
 #ifndef MAX_ELEMENTALSKILL
-#define MAX_ELEMENTALSKILL 48
+#define MAX_ELEMENTALSKILL 49
 #endif
 #ifndef EL_SKILLBASE
 #define EL_SKILLBASE 8401

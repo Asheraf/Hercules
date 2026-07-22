@@ -103,3 +103,8 @@
 20816,8446,1,1	//EM_EL_COLD_FORCE,Cold Force
 20816,8447,1,2	//EM_EL_CRYSTAL_ARMOR,Crystal Armor
 20816,8448,1,4	//EM_EL_AGE_OF_ICE,Age Of Ice
+
+//================
+// EM_PROCELLA
+//================
+20818,8449,1,1	//EM_EL_GRACE_BREEZE,Grace Breeze
