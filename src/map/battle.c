@@ -3091,6 +3091,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += skillratio / 2;
 					RE_LVL_DMOD(100);
 					break;
+				case SS_ANKOKURYUUAKUMU:
+					skillratio += -100 + 17500 * skill_lv;
+					skillratio += 5 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case SS_ANTENPOU:
 					skillratio += -100 + 450 + 950 * skill_lv;
 					skillratio += 5 * st->spl;
@@ -5264,6 +5269,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == SS_FUUMASHOUAKU && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
+	if (skill_id == SS_ANKOKURYUUAKUMU && (mflag & SKILL_ALTDMG_FLAG) != 0)
+		s_ele = ELE_FIRE;
 	if (skill_id == TR_SOUNDBLEND && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == TR_METALIC_FURY && sd != NULL)

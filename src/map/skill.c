@@ -2129,6 +2129,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 		case SS_KAGEAKUMU:
 		case SS_HITOUAKUMU:
+		case SS_ANKOKURYUUAKUMU:
 			status_change_end(bl, SC_NIGHTMARE, INVALID_TIMER);
 			break;
 		case SS_ANTENPOU:
@@ -6759,6 +6760,15 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SS_ANKOKURYUUAKUMU:
+			if ((flag & 1) != 0) {
+				bool nightmare = tsc != NULL && tsc->data[SC_NIGHTMARE] != NULL;
+
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+				if (nightmare == true)
+					skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag | SKILL_ALTDMG_FLAG);
+			}
+			break;
 		case SS_ANTENPOU:
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -9671,6 +9681,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case SS_KAGEAKUMU:
 		case SS_HITOUAKUMU:
+		case SS_ANKOKURYUUAKUMU:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
