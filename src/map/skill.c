@@ -5425,6 +5425,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SHC_IMPACT_CRATER:
 		case SHC_FATAL_SHADOW_CROW:
 		case ABC_ABYSS_DAGGER:
+		case ABC_DEFT_STAB:
 		case ABC_UNLUCKY_RUSH:
 		case MT_RUSH_QUAKE:
 		case ABC_CHAIN_REACTION_SHOT:
@@ -5487,6 +5488,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, sflag | 8 | SD_ANIMATION);
 			} else {
 				switch ( skill_id ) {
+					case ABC_DEFT_STAB:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						break;
 					case ABC_CHAIN_REACTION_SHOT:
 						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						map->foreachinrange(skill->area_sub, bl,
