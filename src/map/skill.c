@@ -6544,6 +6544,38 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SKE_STAR_BURST:
+			if ((flag & 1) != 0) {
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				struct unit_data *ud = unit->bl2ud(src);
+				bool consumed = false;
+
+				for (int i = 0; ud != NULL && i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+					struct skill_unit_group *sg = ud->skillunit[i];
+
+					if (sg->skill_id != SKE_TWINKLING_GALAXY || sg->unit.count < 1 || sg->unit.data == NULL)
+						continue;
+					if ((int)distance_xy(bl->x, bl->y, sg->unit.data->bl.x, sg->unit.data->bl.y) > skill->get_unit_range(sg->skill_id, sg->skill_lv))
+						continue;
+					for (int j = 0; j < MAX_SKILLTIMERSKILL; j++) {
+						if (ud->skilltimerskill[j] == NULL || ud->skilltimerskill[j]->skill_id != sg->skill_id)
+							continue;
+						timer->delete_(ud->skilltimerskill[j]->timer, skill->timerskill);
+						ers_free(skill->timer_ers, ud->skilltimerskill[j]);
+						ud->skilltimerskill[j] = NULL;
+					}
+					skill->del_unitgroup(sg);
+					sc_start2(src, bl, SC_STAR_BURST, 100, skill_lv, src->id, skill->get_time2(skill_id, skill_lv),
+					          skill_id);
+					skill->castend_pos2(src, bl->x, bl->y, skill_id, skill_lv, tick, 0);
+					consumed = true;
+					break;
+				}
+				if (consumed == false && sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_TWINKLING_GALAXY_AREA, 0, 0);
+			}
+			break;
 		case SKE_TWINKLING_GALAXY:
 		case SH_HOWLING_OF_CHUL_HO:
 			if ((flag & 1) != 0)
@@ -11590,10 +11622,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 						sc_start4(src, bl, type, 100, skill_lv, 0, src->id, 0, skill->get_time2(skill_id, skill_lv), skill_id);
 						break;
 					case SC_SIREN:
-						sc_start2(src, bl, type, 100, skill_lv, src->id, skill->get_time2(skill_id, skill_lv), skill_id);
+						sc_start2(src, bl, SC_STAR_BURST, 100, skill_lv, src->id, skill->get_time2(skill_id, skill_lv),
+						          skill_id);
 						break;
 					default:
-						sc_start2(src, bl, type, 100, skill_lv, src->id, skill->get_time2(skill_id, skill_lv), skill_id);
+						sc_start2(src, bl, SC_STAR_BURST, 100, skill_lv, src->id, skill->get_time2(skill_id, skill_lv),
+						          skill_id);
 				}
 				PRAGMA_GCC46(GCC diagnostic pop)
 			} else {
@@ -14632,6 +14666,10 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			if ( skill_id == WM_SEVERE_RAINSTORM )
 				sc_start(src, src, type, 100, 0, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src,skill_id,skill_lv,x,y,0);
+			break;
+		case SKE_STAR_BURST:
+			flag |= 1;
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
 		case SKE_TWINKLING_GALAXY:
 		{
@@ -19331,6 +19369,27 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 			 || (tsd != NULL && (tsd->job & MAPID_BASEMASK) == MAPID_SUMMONER)
 			 || (tsc != NULL && tsc->data[SC_BLESSING_OF_M_C_DEBUFF] != NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_TOTARGET, 0, 0);
+				return 0;
+			}
+		}
+			break;
+		case SKE_STAR_BURST:
+		{
+			struct unit_data *ud = unit->bl2ud(&sd->bl);
+			bool valid = false;
+
+			for (i = 0; ud != NULL && i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+				struct skill_unit_group *sg = ud->skillunit[i];
+
+				if (sg->skill_id == SKE_TWINKLING_GALAXY && sg->unit.count > 0 && sg->unit.data != NULL
+				 && (int)distance_xy(sd->bl.x, sd->bl.y, sg->unit.data->bl.x, sg->unit.data->bl.y)
+				    <= skill->get_unit_range(sg->skill_id, sg->skill_lv)) {
+					valid = true;
+					break;
+				}
+			}
+			if (valid == false) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_TWINKLING_GALAXY_AREA, 0, 0);
 				return 0;
 			}
 		}

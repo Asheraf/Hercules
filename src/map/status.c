@@ -10542,6 +10542,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val4 = tick / 3000;
 				tick_time = 100;
 				break;
+			case SC_STAR_BURST:
+				tick_time = 300;
+				val4 = tick - tick_time;
+				break;
 			case SC_KI_SUL_RAMPAGE:
 				val4 = tick / 1000;
 				tick_time = 100;
@@ -13090,6 +13094,17 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 				break; //Not enough SP to continue.
 			sc_timer_next(sce->val2+tick, status->change_timer, bl->id, data);
 			return 0;
+		case SC_STAR_BURST:
+			if (sce->val4 >= 0) {
+				struct block_list *bsrc = map->id2bl(sce->val2);
+
+				if (bsrc != NULL && tid != INVALID_TIMER)
+					skill->unitsetting(bsrc, SKE_STAR_BURST, sce->val1, bl->x, bl->y, 0);
+				sc_timer_next(min(sce->val4, 300) + tick, status->change_timer, bl->id, data);
+				sce->val4 -= 300;
+				return 0;
+			}
+			break;
 		case SC_KI_SUL_RAMPAGE:
 			if (--sce->val4 >= 0) {
 				skill->castend_nodamage_id(bl, bl, SH_KI_SUL_RAMPAGE, sce->val1, tick, 1);
