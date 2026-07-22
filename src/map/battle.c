@@ -4557,6 +4557,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_PRIMAL_CLAW:
+					skillratio += -100 + 1250 + 1050 * (skill_lv - 1) + 5 * st->pow;
+					if (sc != NULL && (sc->data[SC_ALPHA_PHASE] != NULL || sc->data[SC_INSANE] != NULL
+						|| sc->data[SC_INSANE2] != NULL || sc->data[SC_INSANE3] != NULL))
+						skillratio += 800;
+					RE_LVL_DMOD(100);
+					break;
 				case KR_SHARPEN_GUST:
 					skillratio += -100 + 1000 + 80 * (skill_lv - 1) + 5 * st->dex;
 					if (sc != NULL && sc->data[SC_ENRAGE_RAPTOR] != NULL)
@@ -5580,7 +5587,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		return BF_LONG;
 	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_RUSH_QUAKE
 		|| skill_id == MT_RUSH_STRIKE || skill_id == ABC_UNLUCKY_RUSH || skill_id == DR_CRUEL_BITE
-		|| skill_id == KR_CLAW_WAVE)
+		|| skill_id == KR_CLAW_WAVE || skill_id == AT_PRIMAL_CLAW)
 		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);

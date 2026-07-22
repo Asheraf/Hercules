@@ -2953,6 +2953,12 @@ static int skill_counter_additional_effect(struct block_list *src, struct block_
 	}
 
 	switch(skill_id){
+		case AT_PRIMAL_CLAW:
+			if (skill->area_temp[3] == 0) {
+				skill->area_temp[3] = 1;
+				skill->update_pulse_of_madness(src);
+			}
+			break;
 		case MO_EXTREMITYFIST:
 			sc_start(src, src, SC_EXTREMITYFIST, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
@@ -6082,6 +6088,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_PRIMAL_CLAW:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -6245,6 +6252,29 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						} else if (sd != NULL) {
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 						}
+					}
+						break;
+					case AT_PRIMAL_CLAW:
+					{
+						enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+						if (Assert_chk(dir >= UNIT_DIR_FIRST && dir < UNIT_DIR_MAX)) {
+							map->freeblock_unlock();
+							return 1;
+						}
+
+						if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 2, true) != 0) {
+							if (sd != NULL)
+								clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+							map->freeblock_unlock();
+							return 1;
+						}
+
+						clif->blown(src);
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						sc_start4(src, src, SC_PRIMAL_CLAW, 100, skill_id, skill_lv, 0, 0,
+						          skill->get_time(skill_id, skill_lv), skill_id);
+						skill->area_temp[3] = 0;
 					}
 						break;
 					case CD_DIVINUS_FLOS:
@@ -6493,10 +6523,16 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						                    skill->splash_target(src), src, skill_id, skill_lv, tick,
 						                    flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
 					}
-				} else
-					map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),
-					                    skill->splash_target(src), src, skill_id, skill_lv, tick,
-					                    flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
+				} else {
+					int splash = skill->get_splash(skill_id, skill_lv);
+
+					if (skill_id == AT_PRIMAL_CLAW && sc != NULL && (sc->data[SC_ALPHA_PHASE] != NULL
+						|| sc->data[SC_INSANE2] != NULL || sc->data[SC_INSANE3] != NULL))
+						splash = 3;
+
+					map->foreachinrange(skill->area_sub, bl, splash, skill->splash_target(src), src, skill_id, skill_lv,
+					                    tick, flag|BCT_ENEMY|SD_SPLASH|1, skill->castend_damage_id);
+				}
 
 				if (skill_id == DK_DRAGONIC_AURA)
 					sc_start(src, src, SC_DRAGONIC_AURA, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
@@ -19210,6 +19246,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			}
 			break;
 		case AT_PULSE_OF_MADNESS:
+		case AT_PRIMAL_CLAW:
 			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;

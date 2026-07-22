@@ -12560,8 +12560,10 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			break;
 		case SC_WEREWOLF:
 		case SC_WERERAPTOR:
-			if (type == SC_WEREWOLF)
+			if (type == SC_WEREWOLF) {
 				status_change_end(bl, SC_BLOOD_HOWLING, INVALID_TIMER);
+				status_change_end(bl, SC_PRIMAL_CLAW, INVALID_TIMER);
+			}
 			if (type == SC_WERERAPTOR) {
 				status_change_end(bl, SC_ENRAGE_RAPTOR, INVALID_TIMER);
 				status_change_end(bl, SC_PREENING, INVALID_TIMER);
