@@ -2849,6 +2849,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					skillratio += skillratio * (20 * (sd != NULL ? pc->checkskill(sd, WH_ADVANCED_TRAP) : 5)) / 100;
 					break;
+				case WH_SOLIDTRAP:
+					skillratio += -100 + 850 * skill_lv + 5 * st->con;
+					RE_LVL_DMOD(100);
+					skillratio += skillratio * (20 * (sd != NULL ? pc->checkskill(sd, WH_ADVANCED_TRAP) : 5)) / 100;
+					break;
 				case RA_CLUSTERBOMB:
 					skillratio += 100 + 100 * skill_lv;
 					break;

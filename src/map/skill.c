@@ -13481,6 +13481,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case CD_PNEUMATICUS_PROCELLA:
 		case SJ_BOOKOFCREATINGSTAR:
 		case WH_DEEPBLINDTRAP:
+		case WH_SOLIDTRAP:
 			flag |= 1; // Set flag to 1 to prevent deleting ammo (it will be deleted on group-delete).
 			FALLTHROUGH
 		case GS_GROUNDDRIFT: //Ammo should be deleted right away.
@@ -14364,12 +14365,13 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 		case RA_FIRINGTRAP:
 		case RA_ICEBOUNDTRAP:
 		case WH_DEEPBLINDTRAP:
+		case WH_SOLIDTRAP:
 			{
 				struct skill_condition req = skill->get_requirement(sd,skill_id,skill_lv);
 				ARR_FIND(0, MAX_SKILL_ITEM_REQUIRE, i, req.itemid[i] && (req.itemid[i] == ITEMID_BOOBY_TRAP || req.itemid[i] == ITEMID_SPECIAL_ALLOY_TRAP));
 				if( i != MAX_SKILL_ITEM_REQUIRE && req.itemid[i] )
 					req_item = req.itemid[i];
-				if (skill_id == WH_DEEPBLINDTRAP)
+				if (skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP)
 					limit += 1000 * (sd != NULL ? pc->checkskill(sd, WH_ADVANCED_TRAP) : 5);
 				if (skill_id == RL_B_TRAP) // Target type should not change on GvG maps.
 					break;
@@ -15935,6 +15937,7 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		}
 			break;
 		case UNT_DEEPBLINDTRAP:
+		case UNT_SOLIDTRAP:
 			skill->attack(BF_WEAPON, ss, &src->bl, bl, sg->skill_id, sg->skill_lv, tick, 0);
 			break;
 		case UNT_ASTRAL_STRIKE:
@@ -16668,6 +16671,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			case RA_FIRINGTRAP:
 			case RA_ICEBOUNDTRAP:
 			case WH_DEEPBLINDTRAP:
+			case WH_SOLIDTRAP:
 			case RA_WUGDASH:
 			case RA_WUGRIDER:
 			case RA_WUGSTRIKE:
@@ -18296,7 +18300,7 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 		return;
 
 	int64 add_ap = skill->dbs->db[idx].give_ap[skill_lv - 1];
-	if (skill_id == WH_DEEPBLINDTRAP && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
+	if ((skill_id == WH_DEEPBLINDTRAP || skill_id == WH_SOLIDTRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
 	if (add_ap <= 0 || sd->battle_status.max_ap == 0)
 		return;
