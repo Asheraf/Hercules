@@ -1160,6 +1160,10 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 	nullpo_ret(src);
 
 	switch (skill_id) {
+		case SOA_TALISMAN_OF_PROTECTION:
+			hp = (500 + pc->checkskill(sd, SOA_TALISMAN_MASTERY) * 50) * skill_lv * status->get_lv(src) / 100;
+			hp += (status->get_lv(src) + status_get_int(src)) / 5 * 30 * status->get_status_data(src)->crt / 100;
+			break;
 		case CD_MEDIALE_VOTUM:
 			hp = (status->get_lv(src) + status_get_int(src)) / 5 * 30;
 			break;
@@ -1213,10 +1217,10 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 	if( ( (target && target->type == BL_MER) || !heal ) && skill_id != NPC_EVILLAND )
 		hp >>= 1;
 
-	if (sd && (skill2_lv = pc->skillheal_bonus(sd, skill_id)) != 0)
+	if (skill_id != SOA_TALISMAN_OF_PROTECTION && sd != NULL && (skill2_lv = pc->skillheal_bonus(sd, skill_id)) != 0)
 		hp += hp*skill2_lv/100;
 
-	if (tsd && (skill2_lv = pc->skillheal2_bonus(tsd, skill_id)) != 0)
+	if (skill_id != SOA_TALISMAN_OF_PROTECTION && tsd != NULL && (skill2_lv = pc->skillheal2_bonus(tsd, skill_id)) != 0)
 		hp += hp*skill2_lv/100;
 
 	sc = status->get_sc(src);
@@ -1263,7 +1267,7 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 	if (sc->data[SC_APPLEIDUN] != NULL)
 		hp += hp * sc->data[SC_APPLEIDUN]->val3 / 100;
 
-	if (sd != NULL && status_get_hplus(src) > 0)
+	if (skill_id != SOA_TALISMAN_OF_PROTECTION && sd != NULL && status_get_hplus(src) > 0)
 		hp = (int)cap_value((int64)hp + (int64)hp * status_get_hplus(src) / 100, INT_MIN, INT_MAX);
 	if (skill_id == CD_DILECTIO_HEAL) {
 		static const int recovery_rate[5] = { 110, 125, 130, 135, 140 };
@@ -7590,6 +7594,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
 					status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			}
+			break;
+		case SOA_TALISMAN_OF_PROTECTION:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start2(src, bl, type, 100, skill_lv, src->id, skill->get_time(skill_id, skill_lv),
+			                               skill_id));
 			break;
 		case EM_ELEMENTAL_BUSTER:
 			if (sd != NULL && sd->ed != NULL) {

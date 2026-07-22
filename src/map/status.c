@@ -10460,6 +10460,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = 3 * val1;
 				val3 = 10 * val1;
 				break;
+			case SC_TALISMAN_OF_PROTECTION:
+				val3 = skill->calc_heal(src, bl, SOA_TALISMAN_OF_PROTECTION, val1, true);
+				val4 = tick / 3000;
+				tick_time = 100;
+				break;
 			case SC_SPELL_ENCHANTING:
 				val1 = cap_value(val1, 1, 5);
 				val2 = 4 * val1;
@@ -12969,6 +12974,20 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 				break; //Not enough SP to continue.
 			sc_timer_next(sce->val2+tick, status->change_timer, bl->id, data);
 			return 0;
+		case SC_TALISMAN_OF_PROTECTION:
+			if (--sce->val4 >= 0) {
+				struct map_session_data *ssd = map->id2sd(sce->val2);
+
+			if (ssd == NULL || status->isdead(&ssd->bl) != 0 || ssd->bl.m != bl->m || sd == NULL
+					|| ssd->status.party_id != sd->status.party_id)
+					break;
+
+				status->heal(bl, sce->val3, 0, STATUS_HEAL_DEFAULT);
+				clif->skill_nodamage(NULL, bl, AL_HEAL, sce->val3, 1);
+				sc_timer_next(3000 + tick, status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
 
 		case SC_INTENSIVE_AIM:
 			if (sc->data[SC_INTENSIVE_AIM_COUNT] == NULL)
