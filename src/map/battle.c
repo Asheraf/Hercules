@@ -2866,12 +2866,18 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					}
 					RE_LVL_DMOD(100);
 					break;
+				case MT_AXE_STOMP:
+					skillratio += -100 + 450 + 1150 * skill_lv + 5 * st->pow;
+					RE_LVL_DMOD(100);
+					break;
 				case NC_POWERSWING:
 					skillratio = 300 + 100*skill_lv + ( status_get_str(src)+status_get_dex(src) ) * status->get_lv(src) / 100;
 					break;
 				case NC_AXETORNADO:
 					skillratio = 200 + 100 * skill_lv + st->vit;
 					RE_LVL_DMOD(100);
+					if (sc != NULL && sc->data[SC_AXE_STOMP] != NULL)
+						skillratio += 380;
 					if( st->rhw.ele == ELE_WIND )
 						skillratio = skillratio * 125 / 100;
 					if ( distance_bl(src, target) > 2 ) // Will deal 75% damage outside of 5x5 area.
@@ -5371,6 +5377,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case IQ_THIRD_FLAME_BOMB:
 				if (sd != NULL)
 					wd.div_ = cap_value(sd->spiritball / 5, 1, 3);
+				break;
+			case MT_AXE_STOMP:
+				if (sd != NULL && sd->weapontype == W_2HAXE)
+					wd.div_ = 3;
 				break;
 #ifndef RENEWAL
 			case MO_FINGEROFFENSIVE:

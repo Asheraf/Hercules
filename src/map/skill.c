@@ -8415,6 +8415,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case GS_SPREADATTACK:
 		case RK_STORMBLAST:
 		case NC_AXETORNADO:
+		case MT_AXE_STOMP:
 		case GC_COUNTERSLASH:
 		case SR_SKYNETBLOW:
 		case SR_RAMPAGEBLASTER:
@@ -8440,6 +8441,8 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 				}
 			}
+			if (skill_id == MT_AXE_STOMP)
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			if (skill_id == SJ_STAREMPEROR && sc != NULL && sc->data[SC_DIMENSION] != NULL) {
 				if (sd != NULL) {
 					pc->delspiritball(sd, sd->spiritball, 0);
@@ -16480,6 +16483,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case NC_MAGMA_ERUPTION:
 				case ALL_FULL_THROTTLE:
 				case NC_MAGMA_ERUPTION_DOTDAMAGE:
+				case MT_AXE_STOMP:
 					break;
 				default:
 				{
