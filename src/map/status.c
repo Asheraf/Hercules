@@ -11574,6 +11574,9 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 		// Cancels Normal Overthrust. [Skotlex]
 		status_change_end(bl, SC_OVERTHRUST, INVALID_TIMER);
 		break;
+	case SC_FERAL_CLAW:
+		status_change_end(bl, SC_PRIMAL_CLAW, INVALID_TIMER);
+		break;
 	case SC_MAGNIFICAT:
 		// Cancels Offertorium
 		status_change_end(bl, SC_OFFERTORIUM, INVALID_TIMER);

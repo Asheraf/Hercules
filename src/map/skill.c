@@ -2953,6 +2953,7 @@ static int skill_counter_additional_effect(struct block_list *src, struct block_
 	}
 
 	switch(skill_id){
+		case AT_FERAL_CLAW:
 		case AT_PRIMAL_CLAW:
 			if (skill->area_temp[3] == 0) {
 				skill->area_temp[3] = 1;
@@ -6088,6 +6089,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_FERAL_CLAW:
 		case AT_PRIMAL_CLAW:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
@@ -6253,6 +6255,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 						}
 					}
+						break;
+					case AT_FERAL_CLAW:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+						sc_start(src, src, SC_FERAL_CLAW, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+						skill->area_temp[3] = 0;
 						break;
 					case AT_PRIMAL_CLAW:
 					{
@@ -19241,6 +19248,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case IQ_THIRD_PUNISH:
 			if (sc == NULL || (sc->data[SC_FIRST_FAITH_POWER] == NULL && sc->data[SC_SECOND_JUDGE] == NULL
 				&& sc->data[SC_THIRD_EXOR_FLAME] == NULL)) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+				return 0;
+			}
+			break;
+		case AT_FERAL_CLAW:
+			if (sc == NULL || sc->data[SC_WEREWOLF] == NULL || sc->data[SC_PRIMAL_CLAW] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
 			}
