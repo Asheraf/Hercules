@@ -2829,6 +2829,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 500 * skill_lv + 5 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case WH_HAWKBOOMERANG:
+					skillratio += -100 + 600 * skill_lv + 10 * st->con;
+					if (sd != NULL)
+						skillratio += skillratio * pc->checkskill(sd, WH_NATUREFRIENDLY) / 10;
+					if (status_get_race(target) == RC_BRUTE || status_get_race(target) == RC_FISH)
+						skillratio += skillratio * 50 / 100;
+					RE_LVL_DMOD(100);
+					break;
 				case RA_CLUSTERBOMB:
 					skillratio += 100 + 100 * skill_lv;
 					break;
@@ -5763,7 +5771,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| skill_id == CD_EFFLIGO || skill_id == CD_PETITIO
 			|| skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_ETERNAL_SLASH
 			|| skill_id == SHC_IMPACT_CRATER || skill_id == SHC_FATAL_SHADOW_CROW
-			|| skill_id == WH_HAWKRUSH
+			|| skill_id == WH_HAWKRUSH || skill_id == WH_HAWKBOOMERANG
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -5822,6 +5830,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				break;
 			case SHC_SAVAGE_IMPACT:
 			case SHC_ETERNAL_SLASH:
+			case WH_HAWKBOOMERANG:
 				cri /= 2;
 				break;
 			case SHC_IMPACT_CRATER:
@@ -6219,7 +6228,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == SHC_ETERNAL_SLASH || skill_id == SHC_IMPACT_CRATER
 							|| skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_A_MACHINE
 							|| skill_id == ABC_FRENZY_SHOT || skill_id == WH_HAWKRUSH
-							|| skill_id == WH_GALESTORM)
+							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
