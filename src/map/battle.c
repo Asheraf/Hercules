@@ -3077,6 +3077,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_FUUMAKOUCHIKU:
+					skillratio += -100 + 900 + 1750 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (sd != NULL)
+						skillratio += 100 * skill_lv * pc->checkskill(sd, SS_FUUMASHOUAKU);
+					RE_LVL_DMOD(100);
+					break;
 				case SS_FUUMASHOUAKU:
 					skillratio += -100 + 850 + 350 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -5181,6 +5188,8 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 		s_ele = status_get_attack_sc_element(src,status->get_sc(src));
 	else if( s_ele == -3 ) //Use random element
 		s_ele = rnd()%ELE_MAX;
+	if (skill_id == SS_FUUMAKOUCHIKU && sd != NULL)
+		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == SS_FUUMASHOUAKU && sd != NULL)
 		s_ele = sd->bonus.arrow_ele;
 	if (skill_id == TR_SOUNDBLEND && sd != NULL)

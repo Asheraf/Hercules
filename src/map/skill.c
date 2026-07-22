@@ -14861,6 +14861,13 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
 			break;
+		case SS_FUUMAKOUCHIKU:
+			skill->area_temp[1] = 0;
+			map->foreachinpath(skill->attack_area, src->m, src->x, src->y, x, y,
+			                   skill->get_splash(skill_id, skill_lv), skill->get_maxcount(skill_id, skill_lv),
+			                   BL_CHAR | BL_SKILL, skill->get_type(skill_id, skill_lv),
+			                   src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
+			break;
 		case SS_KAGEGARI:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
@@ -21633,6 +21640,20 @@ static int skill_attack_area(struct block_list *bl, va_list ap)
 
 	if (skill->area_temp[1] == bl->id) //This is the target of the skill, do a full attack and skip target checks.
 		return skill->attack(atk_type,src,dsrc,bl,skill_id,skill_lv,tick,flag);
+
+	if (skill_id == SS_FUUMAKOUCHIKU && bl->type == BL_SKILL) {
+		struct skill_unit *su = BL_UCAST(BL_SKILL, bl);
+
+		if (su->group == NULL)
+			return 0;
+		if (su->group->skill_id == SS_FUUMASHOUAKU) {
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(SS_FUUMAKOUCHIKU, skill_lv), BL_CHAR,
+			                    src, SS_FUUMAKOUCHIKU, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | SKILL_ALTDMG_FLAG | 1, skill->castend_damage_id);
+			skill->delunit(su);
+			return 1;
+		}
+	}
 
 	if( battle->check_target(dsrc,bl,type) <= 0
 	 || !status->check_skilluse(NULL, bl, skill_id, 2))
