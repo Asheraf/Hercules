@@ -5093,6 +5093,22 @@ static void skill_castend_type(enum cast_enum type, struct block_list *src, stru
  *
  *
  *------------------------------------------*/
+/**
+ * Reports whether a cell is unsuitable for a Mirage to move onto: anything
+ * standing there blocks it, except another Mirage of the same caster.
+ */
+static int skill_shimiru_check_cell(struct block_list *target, va_list ap)
+{
+	if (target != NULL && target->type == BL_SKILL) {
+		const struct skill_unit *su = BL_UCCAST(BL_SKILL, target);
+
+		if (su->group != NULL && su->group->skill_id == SS_SHINKIROU)
+			return 1;
+		return 0;
+	}
+	return 1;
+}
+
 static int skill_castend_damage_id(struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag)
 {
 	GUARD_MAP_LOCK
@@ -6538,6 +6554,57 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SH_CHUL_HO_SONIC_CLAW:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
+		case SS_SHIMIRU:
+		{
+			struct unit_data *ud = unit->bl2ud(src);
+
+			if (check_distance_bl(src, bl, 0) == 0) {
+				enum unit_dir dir = map->calc_dir(src, bl->x, bl->y);
+				int dx = 0, dy = 0;
+
+				if (dir > UNIT_DIR_NORTH && dir < UNIT_DIR_SOUTH)
+					dx = -1;
+				else if (dir > UNIT_DIR_SOUTH)
+					dx = 1;
+				if (dir > UNIT_DIR_WEST && dir < UNIT_DIR_EAST)
+					dy = -1;
+				else if (dir == UNIT_DIR_NORTHEAST || dir < UNIT_DIR_WEST)
+					dy = 1;
+				if (battle->check_target(src, bl, BCT_ENEMY) > 0
+				 && unit->move_pos(src, bl->x + dx, bl->y + dy, 2, true) == 0) {
+					unit->set_dir(bl, unit_get_opposite_dir(dir));
+					clif->blown(src);
+				} else {
+					if (sd != NULL)
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_NO_SPACE_BEHIND_THE_TARGET, 0, 0);
+					break;
+				}
+			}
+			for (int i = 0; ud != NULL && i < MAX_SKILLUNITGROUP && ud->skillunit[i] != NULL; i++) {
+				struct skill_unit_group *sg = ud->skillunit[i];
+
+				if (sg->skill_id != SS_SHINKIROU || sg->unit.count < 1 || sg->unit.data == NULL)
+					continue;
+				if ((int)distance_xy(bl->x, bl->y, sg->unit.data->bl.x, sg->unit.data->bl.y) >
+				    skill->get_splash(skill_id, skill_lv))
+					continue;
+
+				int dx = src->x - sg->unit.data->bl.x;
+				int dy = src->y - sg->unit.data->bl.y;
+
+				for (int tries = 0; tries < 1000; tries++) {
+					if (map->foreachincell(skill->shimiru_check_cell, src->m,
+					                       sg->unit.data->bl.x + dx, sg->unit.data->bl.y + dy, BL_CHAR | BL_SKILL) == 0)
+						break;
+					dx += rnd() % 3 - 1;
+					dy += rnd() % 3 - 1;
+				}
+				skill->unit_move_unit_group(sg, src->m, dx, dy);
+			}
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			sc_start(src, src, SC_SHADOW_CLOCK, 100, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		}
 			break;
 		case SKE_ALL_IN_THE_SKY:
 		{
@@ -28841,6 +28908,7 @@ void skill_defaults(void)
 	skill->get_any_item_index = skill_get_any_item_index;
 	skill->give_ap = skill_give_ap;
 	skill->sh_communed = skill_sh_communed;
+	skill->shimiru_check_cell = skill_shimiru_check_cell;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;

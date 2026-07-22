@@ -2652,6 +2652,7 @@ struct skill_interface {
 	int (*get_any_item_index) (struct map_session_data *sd, int skill_id, int skill_lv);
 	void (*give_ap) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 	bool (*sh_communed) (struct block_list *src, uint16 communion_id);
+	int (*shimiru_check_cell) (struct block_list *target, va_list ap);
 	int (*consume_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, short type);
 	struct skill_condition (*get_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 	int (*check_pc_partner) (struct map_session_data *sd, uint16 skill_id, uint16* skill_lv, int range, int cast_flag);
