@@ -5510,6 +5510,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case BO_ACIDIFIED_ZONE_FIRE:
 		case ABC_CHAIN_REACTION_SHOT:
 		case ABC_FROM_THE_ABYSS_ATK:
+		case TR_METALIC_FURY:
 		case TR_ROSEBLOSSOM_ATK:
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
@@ -18602,6 +18603,8 @@ static void skill_give_ap(struct map_session_data *sd, uint16 skill_id, uint16 s
 		|| skill_id == WH_FLAMETRAP) && pc->checkskill(sd, WH_ADVANCED_TRAP) >= 3)
 		add_ap++;
 	if (skill_id == TR_RHYTHMSHOOTING)
+		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
+	if (skill_id == TR_METALIC_FURY)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
 	if (skill_id == TR_ROSEBLOSSOM)
 		add_ap += add_ap * (10 * pc->checkskill(sd, TR_STAGE_MANNER)) / 100;
