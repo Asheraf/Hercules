@@ -5731,6 +5731,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_OLEUM_SANCTUM:
 		case IQ_MASSIVE_F_BLASTER:
 		case IQ_EXPOSION_BLASTER:
+		case HN_HELLS_DRIVE:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -9457,6 +9458,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			map->foreachinrange(skill->attack_area, src,
 			                    skill->get_splash(skill_id, skill_lv), skill->splash_target(src),
 			                    BF_MAGIC, src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
+			break;
+		case HN_HELLS_DRIVE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
 			break;
 
 		case HVAN_EXPLOSION: // [orn]

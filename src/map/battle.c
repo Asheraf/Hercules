@@ -2250,6 +2250,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sd != NULL)
 						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
 					break;
+				case HN_HELLS_DRIVE:
+					skillratio += -100 + 1700 + 900 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, HN_SELFSTUDY_SOCERY) * 4 * skill_lv;
+					skillratio += 3 * st->spl;
+					RE_LVL_DMOD(100);
+					if (sd != NULL)
+						skillratio += skillratio * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
+					break;
 				case ABC_ABYSS_STRIKE:
 					skillratio += -100 + 2650 * skill_lv + 10 * st->spl;
 					if (tst->race == RC_DEMON || tst->race == RC_ANGEL)
