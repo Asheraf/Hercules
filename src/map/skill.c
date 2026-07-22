@@ -1784,6 +1784,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 
 		case AS_SONICBLOW:
+		case HN_MEGA_SONIC_BLOW:
 			sc_start(src, bl, SC_STUN, (2 * skill_lv + 10), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
 
@@ -5202,6 +5203,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_CHAIN_REACTION_SHOT_ATK:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 		break;
+		case HN_MEGA_SONIC_BLOW:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case NW_ONLY_ONE_BULLET:
 		case NW_MAGAZINE_FOR_ONE:
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);

@@ -3622,6 +3622,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -100 + 350 + 825 * skill_lv + 15 * st->con;
 					RE_LVL_DMOD(100);
 					break;
+				case HN_MEGA_SONIC_BLOW:
+					skillratio += -100 + 900 + 750 * skill_lv;
+					if (sd != NULL)
+						skillratio += pc->checkskill(sd, HN_SELFSTUDY_TATICS) * 5 * skill_lv;
+					skillratio += 5 * st->pow;
+					if (status_get_hp(target) < status_get_max_hp(target) / 2)
+						skillratio *= 2;
+					RE_LVL_DMOD(100);
+					break;
 				case ABC_DEFT_STAB:
 					skillratio += -100 + 700 + 550 * skill_lv + 7 * st->pow;
 					RE_LVL_DMOD(100);
@@ -6230,7 +6239,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 		|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 		&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
-		|| skill_id == SH_HOGOGONG_STRIKE
+		|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6252,7 +6261,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			|| (skill_id == NW_MAGAZINE_FOR_ONE && sd != NULL && sd->weapontype1 == W_REVOLVER)
 			|| (skill_id == SH_CHUL_HO_SONIC_CLAW && sd != NULL
 			&& skill->sh_communed(src, SH_COMMUNE_WITH_CHUL_HO))
-			|| skill_id == SH_HOGOGONG_STRIKE
+			|| skill_id == SH_HOGOGONG_STRIKE || skill_id == HN_MEGA_SONIC_BLOW
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6716,7 +6725,8 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == WH_GALESTORM || skill_id == WH_HAWKBOOMERANG
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
-							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE)
+							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
+							|| skill_id == HN_MEGA_SONIC_BLOW)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}
