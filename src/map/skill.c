@@ -9697,6 +9697,25 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case SS_FOUR_CHARM:
+		{
+			sc_type charm = SC_NONE;
+
+			if (sd != NULL) {
+				switch (sd->charm_type) {
+					case CHARM_TYPE_FIRE:  charm = SC_FIRE_CHARM_POWER;   break;
+					case CHARM_TYPE_WATER: charm = SC_WATER_CHARM_POWER;  break;
+					case CHARM_TYPE_LAND:  charm = SC_GROUND_CHARM_POWER; break;
+					case CHARM_TYPE_WIND:  charm = SC_WIND_CHARM_POWER;   break;
+					default: break;
+				}
+			}
+			if (charm != SC_NONE)
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, charm, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+		}
+			break;
 		case SS_KAGENOMAI:
 			skill->mirage_cast(src, NULL, skill_id, skill_lv, 0, 0, tick, flag);
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -19155,6 +19174,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case KO_KAIHOU:
 		case KO_ZENKAI:
 			if (sd->charm_type == CHARM_TYPE_NONE || sd->charm_count <= 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+				return 0;
+			}
+			break;
+		case SS_FOUR_CHARM:
+			if (sd->charm_type == CHARM_TYPE_NONE || sd->charm_count < MAX_SPIRITCHARM) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
 				return 0;
 			}

@@ -3108,6 +3108,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					if (sd != NULL)
 						skillratio += 15 * skill_lv * pc->checkskill(sd, SS_ANTENPOU);
+					if (sc != NULL && sc->data[SC_GROUND_CHARM_POWER] != NULL)
+						skillratio += 5500;
 					RE_LVL_DMOD(100);
 					break;
 				case SS_RAIDENPOU:
@@ -3115,6 +3117,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					if (sd != NULL)
 						skillratio += 70 * skill_lv * pc->checkskill(sd, SS_ANTENPOU);
+					if (sc != NULL && sc->data[SC_WIND_CHARM_POWER] != NULL)
+						skillratio += 8500;
 					RE_LVL_DMOD(100);
 					break;
 				case SS_REIKETSUHOU:
@@ -3122,6 +3126,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					if (sd != NULL)
 						skillratio += 40 * skill_lv * pc->checkskill(sd, SS_ANTENPOU);
+					if (sc != NULL && sc->data[SC_WATER_CHARM_POWER] != NULL)
+						skillratio += 7000;
 					RE_LVL_DMOD(100);
 					break;
 				case SS_SEKIENHOU:
@@ -3129,6 +3135,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 5 * st->spl;
 					if (sd != NULL)
 						skillratio += 70 * skill_lv * pc->checkskill(sd, SS_ANTENPOU);
+					if (sc != NULL && sc->data[SC_FIRE_CHARM_POWER] != NULL)
+						skillratio += 8500;
 					RE_LVL_DMOD(100);
 					break;
 				case SS_KUNAIKUSSETSU:
