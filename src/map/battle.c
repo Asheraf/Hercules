@@ -3077,6 +3077,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SS_KAGEAKUMU:
+					skillratio += -100 + 22500;
+					skillratio += 5 * st->pow;
+					if (tsc != NULL && tsc->data[SC_NIGHTMARE] != NULL)
+						skillratio += skillratio / 2;
+					RE_LVL_DMOD(100);
+					break;
+				case SS_HITOUAKUMU:
+					skillratio += -100 + 18000;
+					skillratio += 5 * st->pow;
+					if (tsc != NULL && tsc->data[SC_NIGHTMARE] != NULL)
+						skillratio += skillratio / 2;
+					RE_LVL_DMOD(100);
+					break;
 				case SS_ANTENPOU:
 					skillratio += -100 + 450 + 950 * skill_lv;
 					skillratio += 5 * st->spl;
