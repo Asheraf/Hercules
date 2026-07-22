@@ -6749,6 +6749,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			if ((flag & 1) != 0)
 				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SS_REIKETSUHOU:
+			if ((flag & 1) != 0)
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			break;
 		case SS_KUNAIWAIKYOKU:
 		case SS_KAGENOMAI:
 		case SS_KAGEGARI:
@@ -14879,6 +14883,20 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
 			sc_start(src, src, SC_SHINKIROU_CALL, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+			break;
+		case SS_REIKETSUHOU:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			skill->mirage_cast(src, NULL, SS_ANTENPOU, skill_lv, 0, 0, tick, flag);
+			if (map->getcell(src->m, src, x, y, CELL_CHKLANDPROTECTOR) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+		}
 			break;
 		case SS_KUNAIKUSSETSU:
 			map->foreachinrange(skill->detonator, src, skill->get_splash(skill_id, skill_lv), BL_SKILL, src, skill_lv);
