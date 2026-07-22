@@ -460,6 +460,7 @@ enum mob_id {
 	MOBID_MAGICDECOY_WIND  = 2046, ///<  MAGICDECOY_WIND / Magic Decoy
 	MOBID_ABR_BATTLE_WARIOR = 20834, ///< ABR_BATTLE_WARIOR / ABR Battle Warrior
 	MOBID_ABR_DUAL_CANNON  = 20835, ///< ABR_DUAL_CANNON / ABR Dual Cannon
+	MOBID_ABR_MOTHER_NET   = 20836, ///< ABR_MOTHER_NET / ABR Mother Net
 
 	// Mora
 	MOBID_POM_SPIDER       = 2132, ///<       POM_SPIDER / Pom Spider

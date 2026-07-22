@@ -12077,11 +12077,23 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case MT_SUMMON_ABR_BATTLE_WARIOR:
 		case MT_SUMMON_ABR_DUAL_CANNON:
+		case MT_SUMMON_ABR_MOTHER_NET:
 			if (sd != NULL) {
 				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
-				int mob_id = (skill_id == MT_SUMMON_ABR_BATTLE_WARIOR)
-					? MOBID_ABR_BATTLE_WARIOR : MOBID_ABR_DUAL_CANNON;
+				int mob_id;
+
+				switch (skill_id) {
+					case MT_SUMMON_ABR_BATTLE_WARIOR:
+						mob_id = MOBID_ABR_BATTLE_WARIOR;
+						break;
+					case MT_SUMMON_ABR_DUAL_CANNON:
+						mob_id = MOBID_ABR_DUAL_CANNON;
+						break;
+					default:
+						mob_id = MOBID_ABR_MOTHER_NET;
+						break;
+				}
 				struct mob_data *summon_md = mob->once_spawn_sub(src, src->m, src->x, src->y, DEFAULT_MOB_JNAME,
 				                                                mob_id, "", SZ_SMALL, AI_ABR, 0);
 				if (summon_md != NULL) {
@@ -12093,6 +12105,30 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					                                    mob->timer_delete, summon_md->bl.id, 0);
 					mob->spawn(summon_md);
 				}
+			}
+			break;
+		case ABR_NET_REPAIR:
+			if ((flag & 1) != 0) {
+				int heal = (int)cap_value((int64)tstatus->max_hp * 10 / 100, 0, INT_MAX);
+
+				clif->skill_nodamage(NULL, bl, AL_HEAL, heal, 1);
+				status->heal(bl, heal, 0, STATUS_HEAL_DEFAULT);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+				                    src, skill_id, skill_lv, tick, flag | BCT_PARTY | BCT_GUILD | SD_SPLASH | 1, skill->castend_nodamage_id);
+			}
+			break;
+		case ABR_NET_SUPPORT:
+			if ((flag & 1) != 0) {
+				int sp = (int)cap_value((int64)tstatus->max_sp * 3 / 100, 0, INT_MAX);
+
+				clif->skill_nodamage(NULL, bl, MG_SRECOVERY, sp, 1);
+				status->heal(bl, 0, sp, STATUS_HEAL_DEFAULT);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+				                    src, skill_id, skill_lv, tick, flag | BCT_PARTY | BCT_GUILD | SD_SPLASH | 1, skill->castend_nodamage_id);
 			}
 			break;
 		case EL_CIRCLE_OF_FIRE:
@@ -16238,7 +16274,8 @@ static int skill_check_condition_mob_master_sub(struct block_list *bl, va_list a
 	if( md->master_id != src_id
 	 || md->special_state.ai != (unsigned int)(skill_id == AM_SPHEREMINE?AI_SPHERE:skill_id == KO_ZANZOU?AI_ZANZOU:
 	    skill_id == MT_SUMMON_ABR_BATTLE_WARIOR
-	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON?AI_ABR:skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
+	    || skill_id == MT_SUMMON_ABR_DUAL_CANNON || skill_id == MT_SUMMON_ABR_MOTHER_NET?AI_ABR:
+	    skill_id == MH_SUMMON_LEGION?AI_ATTACK:AI_FLORA))
 		return 0; //Non alchemist summoned mobs have nothing to do here.
 	if(md->class_==mob_class)
 		(*c)++;
@@ -16547,6 +16584,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				case MT_D_MACHINE:
 				case MT_SUMMON_ABR_BATTLE_WARIOR:
 				case MT_SUMMON_ABR_DUAL_CANNON:
+				case MT_SUMMON_ABR_MOTHER_NET:
 				case MT_M_MACHINE:
 				case MT_A_MACHINE:
 					break;
@@ -17948,6 +17986,21 @@ static int skill_check_condition_castend(struct map_session_data *sd, uint16 ski
 
 					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
 					                  MOBID_ABR_DUAL_CANNON, skill_id, &c);
+					if (c >= maxcount) {
+						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
+						return 0;
+					}
+				}
+			}
+			break;
+		case MT_SUMMON_ABR_MOTHER_NET: {
+				int maxcount = skill->get_maxcount(skill_id, skill_lv);
+
+				if ((battle_config.land_skill_limit & BL_PC) != 0 && maxcount > 0) {
+					int c = 0;
+
+					map->foreachinmap(skill->check_condition_mob_master_sub, sd->bl.m, BL_MOB, sd->bl.id,
+					                  MOBID_ABR_MOTHER_NET, skill_id, &c);
 					if (c >= maxcount) {
 						clif->skill_fail(sd, skill_id, USESKILL_FAIL_SUMMON, 0, 0);
 						return 0;
