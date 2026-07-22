@@ -5741,6 +5741,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case IQ_EXPOSION_BLASTER:
 		case HN_HELLS_DRIVE:
 		case HN_GROUND_GRAVITATION:
+		case SKE_NOON_BLAST:
 			if (flag&1) { //Recursive invocation
 				// skill->area_temp[0] holds number of targets in area
 				// skill->area_temp[1] holds the id of the original target
@@ -5924,6 +5925,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 					case IQ_THIRD_FLAME_BOMB:
 					case IQ_THIRD_CONSECRATION:
 					case IG_GRAND_JUDGEMENT:
+					case SKE_NOON_BLAST:
 						clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 						break;
 					case SR_TIGERCANNON:
@@ -18483,6 +18485,12 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 			break;
 		case SKE_RISING_SUN:
 			if (sc != NULL && sc->data[SC_SUNSET_SUN] != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case SKE_NOON_BLAST:
+			if (sc == NULL || (sc->data[SC_RISING_SUN] == NULL && sc->data[SC_NOON_SUN] == NULL)) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
 				return 0;
 			}
