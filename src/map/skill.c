@@ -5482,6 +5482,18 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case ABC_ABYSS_FLAME:
+			if ((flag & 1) != 0) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				clif->skill_damage(src, bl, tick, status_get_amotion(src), 0, -30000, 1, skill_id, skill_lv, BDT_SKILL);
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+			} else {
+				map->foreachinrange(skill->area_sub, src, skill->get_splash(skill_id, skill_lv), BL_CHAR | BL_SKILL,
+				                    src, skill_id, skill_lv, tick,
+				                    (flag | BCT_ENEMY | SD_SPLASH | 1) & ~BCT_SELF, skill->castend_damage_id);
+				skill->castend_damage_id(src, bl, ABC_ABYSS_FLAME_ATK, skill_lv, tick, flag);
+			}
+			break;
 		case SKE_STAR_LIGHT_KICK:
 		{
 			enum unit_dir dir = UNIT_DIR_NORTHEAST;
@@ -5922,6 +5934,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case ABC_CHAIN_REACTION_SHOT:
 		case ABC_CHASING_BREAK:
 		case ABC_CHASING_SHOT:
+		case ABC_ABYSS_FLAME_ATK:
 		case ABC_FROM_THE_ABYSS_ATK:
 		case TR_METALIC_FURY:
 		case TR_ROSEBLOSSOM_ATK:
@@ -6055,6 +6068,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 						                    BL_CHAR | BL_SKILL,
 						                    src, ABC_CHAIN_REACTION_SHOT_ATK, skill_lv, tick + 200 + status_get_amotion(src),
 						                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+						break;
+					case ABC_ABYSS_FLAME_ATK:
+						clif->skill_damage(src, bl, tick, status_get_amotion(src), 0, -30000, 1, skill_id, skill_lv,
+						                   BDT_SKILL);
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case ABC_CHASING_BREAK:
 					{

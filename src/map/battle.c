@@ -2421,6 +2421,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 50 * skill_lv * pc->checkskill(sd, ABC_MAGIC_SWORD_M);
 					RE_LVL_DMOD(100);
 					break;
+				case ABC_ABYSS_FLAME:
+					skillratio += -100 + 820 * skill_lv + 10 * st->spl;
+					if (skill_lv == 3)
+						skillratio += 180;
+					if (sd != NULL)
+						skillratio += 30 * skill_lv * pc->checkskill(sd, ABC_MAGIC_SWORD_M);
+					RE_LVL_DMOD(100);
+					break;
 				case HN_JACK_FROST_NOVA:
 					if ((flag & SKILL_ALTDMG_FLAG) != 0) {
 						skillratio += -100 + 200 * skill_lv + 2 * st->spl;
@@ -2444,6 +2452,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += skillratio * 2 * pc->checkskill(sd, HN_SELFSTUDY_SOCERY) / 100;
 					if (sc != NULL && sc->data[SC_RULEBREAK] != NULL)
 						skillratio += skillratio * 40 / 100;
+					break;
+				case ABC_ABYSS_FLAME_ATK:
+					skillratio += -100 + 500 * skill_lv + 10 * st->spl;
+					if (sd != NULL)
+						skillratio += 15 * skill_lv * pc->checkskill(sd, ABC_MAGIC_SWORD_M);
+					RE_LVL_DMOD(100);
 					break;
 				case AG_DESTRUCTIVE_HURRICANE_CLIMAX:
 					skillratio += -100 + 12500;
