@@ -2166,6 +2166,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 3, 0, SHRT_MAX);
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 3, 0, SHRT_MAX);
 	}
+	if ((skill_lv = pc->checkskill(sd, HN_SELFSTUDY_TATICS)) > 0)
+		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, SOA_TALISMAN_MASTERY)) > 0)
 		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, NW_P_F_I)) > 0 && sd->weapontype >= W_REVOLVER && sd->weapontype <= W_GRENADE)
