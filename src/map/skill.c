@@ -7694,6 +7694,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case AG_CLIMAX:
 		case IQ_POWERFUL_FAITH:
 		case IQ_FIRM_FAITH:
+		case IQ_SINCERE_FAITH:
 #ifdef RENEWAL
 		case BD_ADAPTATION:
 		case HP_BASILICA: // 2018.11 rebalance - Basilica changed to a self buff

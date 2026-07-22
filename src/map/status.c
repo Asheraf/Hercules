@@ -1850,6 +1850,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->subele[ELE_WATER] += 30;
 		sd->magic_atk_ele[ELE_WATER] += 30;
 	}
+	if (sc->data[SC_SINCERE_FAITH] != NULL)
+		sd->bonus.perfect_hit += sc->data[SC_SINCERE_FAITH]->val3;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;
@@ -5978,6 +5980,8 @@ static short status_calc_fix_aspd(struct block_list *bl, struct status_change *s
 		aspd -= sc->data[SC_HEAT_BARREL]->val1 * 10;
 	if (sc->data[SC_SOULSHADOW] != NULL)
 		aspd -= 10 * sc->data[SC_SOULSHADOW]->val2;
+	if (sc->data[SC_SINCERE_FAITH] != NULL)
+		aspd -= 10 * sc->data[SC_SINCERE_FAITH]->val2;
 
 	if (sc->data[SC_OVERED_BOOST]) // should be final and unmodifiable by any means
 		aspd = (200 - sc->data[SC_OVERED_BOOST]->val3) * 10;
@@ -10216,6 +10220,15 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val1 = cap_value(val1, 1, 5);
 				val2 = 2 * val1;
 				val3 = 8 * val1;
+				break;
+			}
+			case SC_SINCERE_FAITH:
+			{
+				status_change_end(bl, SC_POWERFUL_FAITH, INVALID_TIMER);
+				status_change_end(bl, SC_FIRM_FAITH, INVALID_TIMER);
+				val1 = cap_value(val1, 1, 5);
+				val2 = (1 + val1) / 2;
+				val3 = 4 * val1;
 				break;
 			}
 
