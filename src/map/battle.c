@@ -3077,6 +3077,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 							skillratio += skillratio * 50 / 100;
 					}
 					break;
+				case SKE_ALL_IN_THE_SKY:
+					skillratio += -100 + 250 + 1200 * skill_lv;
+					skillratio += 5 * st->pow;
+					break;
 				case SKE_STAR_CANNON:
 					skillratio += -100 + 150 + 650 * skill_lv;
 					skillratio += 5 * st->pow;
@@ -6097,6 +6101,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
 					wd.div_ = -2;
 				break;
+			case SKE_ALL_IN_THE_SKY:
+				if (status_get_race(target) == RC_DEMIHUMAN || status_get_race(target) == RC_DEMON)
+					wd.div_ = 3;
+				break;
 			case ABC_FRENZY_SHOT:
 				if (rnd() % 100 < 5 * skill_lv)
 					wd.div_ = 3;
@@ -6436,6 +6444,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 		&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 		|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 		&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
+		|| skill_id == SKE_ALL_IN_THE_SKY
 		|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL))
 		&& sstatus->cri != 0 &&
 		(skill_id == 0 ||
@@ -6462,6 +6471,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			&& (sc->data[SC_NOON_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
 			|| (skill_id == SKE_SUNSET_BLAST && sc != NULL
 			&& (sc->data[SC_SUNSET_SUN] != NULL || sc->data[SC_SKY_ENCHANT] != NULL))
+			|| skill_id == SKE_ALL_IN_THE_SKY
 			|| (skill_id == WH_GALESTORM && sc != NULL && sc->data[SC_CALAMITYGALE] != NULL)))
 	{
 		short cri = sstatus->cri;
@@ -6527,6 +6537,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				cri /= 2;
 				break;
 			case NW_ONLY_ONE_BULLET:
+			case SKE_ALL_IN_THE_SKY:
 				cri /= 2;
 				break;
 			case SHC_IMPACT_CRATER:
@@ -6928,8 +6939,9 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 							|| skill_id == WH_CRESCIVE_BOLT || skill_id == NW_ONLY_ONE_BULLET
 							|| skill_id == NW_SPIRAL_SHOOTING || skill_id == NW_MAGAZINE_FOR_ONE
 							|| skill_id == SH_CHUL_HO_SONIC_CLAW || skill_id == SH_HOGOGONG_STRIKE
-							|| skill_id == HN_MEGA_SONIC_BLOW || skill_id == SKE_NOON_BLAST
-							|| skill_id == SKE_SUNSET_BLAST)
+							|| skill_id == HN_MEGA_SONIC_BLOW
+							|| skill_id == SKE_NOON_BLAST
+							|| skill_id == SKE_SUNSET_BLAST || skill_id == SKE_ALL_IN_THE_SKY)
 							crit_atk_rate /= 2;
 						ATK_ADDRATE(crit_atk_rate);
 					}

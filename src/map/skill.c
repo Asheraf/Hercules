@@ -6539,6 +6539,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
+		case SKE_ALL_IN_THE_SKY:
+		{
+			struct map_session_data *tsd = BL_CAST(BL_PC, bl);
+
+			if (tsd != NULL && tsd->battle_status.ap > 0) {
+				tsd->battle_status.ap = 0;
+				clif->updatestatus(tsd, SP_AP);
+			}
+			if (unit->move_pos(src, bl->x, bl->y, 2, true) == 0)
+				clif->snap(src, src->x, src->y);
+			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+		}
+			break;
 		case SKE_RISING_SUN:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
