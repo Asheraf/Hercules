@@ -1887,6 +1887,16 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 		sd->magic_atk_ele[ELE_HOLY] += holy_magic_attack[cap_value(skill_lv, 1, 10) - 1];
 	}
+	if ((skill_lv = pc->checkskill(sd, EM_MAGIC_BOOK_M)) > 0 && sd->weapontype == W_BOOK) {
+		static const int magic_attack[10] = { 2, 3, 5, 6, 8, 9, 11, 12, 14, 15 };
+		int skill_index = cap_value(skill_lv, 1, 10) - 1;
+
+		sd->magic_atk_ele[ELE_WATER] += magic_attack[skill_index];
+		sd->magic_atk_ele[ELE_WIND] += magic_attack[skill_index];
+		sd->magic_atk_ele[ELE_EARTH] += magic_attack[skill_index];
+		sd->magic_atk_ele[ELE_FIRE] += magic_attack[skill_index];
+		sd->magic_atk_ele[ELE_POISON] += magic_attack[skill_index];
+	}
 	if (sc->data[SC_CLIMAX_DES_HU] != NULL)
 		sd->magic_atk_ele[ELE_WIND] += 30;
 	if (sc->data[SC_CLIMAX_CRYIMP] != NULL) {
