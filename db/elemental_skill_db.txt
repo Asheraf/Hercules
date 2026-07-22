@@ -94,3 +94,4 @@
 // EM_ARDOR
 //================
 20817,8443,1,1	//EM_EL_FLAMETECHNIC,Flame Technic
+20817,8444,1,2	//EM_EL_FLAMEARMOR,Flame Armor
