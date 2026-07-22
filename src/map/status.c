@@ -1076,6 +1076,9 @@ static int status_check_skilluse(struct block_list *src, struct block_list *targ
 				return 0; // Can't use Weapon endow skills on Mercenary (only Master)
 			if( skill_id == AM_POTIONPITCHER && ( target->type == BL_MER || target->type == BL_ELEM) )
 				return 0; // Can't use Potion Pitcher on Mercenaries
+			if (tsc != NULL && tsc->data[SC_ELEMENTAL_VEIL] != NULL
+			 && (st->mode & (MD_BOSS | MD_DETECTOR)) == 0)
+				return 0;
 			FALLTHROUGH
 		case BL_NUL:
 		case BL_PET:
@@ -4070,13 +4073,16 @@ static int status_check_visibility(struct block_list *src, struct block_list *ta
 			 && (BL_UCCAST(BL_PC, target)->special_state.perfect_hiding || !(st->mode&MD_DETECTOR)))
 				return 0;
 			break;
+		case BL_ELEM:
+			if (tsc->data[SC_ELEMENTAL_VEIL] != NULL && (st->mode & (MD_BOSS | MD_DETECTOR)) == 0)
+				return 0;
+			break;
 		case BL_NUL:
 		case BL_HOM:
 		case BL_SKILL:
 		case BL_NPC:
 		case BL_CHAT:
 		case BL_MER:
-		case BL_ELEM:
 		case BL_MOB:
 		case BL_ITEM:
 		case BL_PET:

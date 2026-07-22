@@ -7514,6 +7514,17 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				flag |= 1;
 			}
 			break;
+		case EM_ELEMENTAL_VEIL:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			if (sd != NULL) {
+				if (sd->ed != NULL && sd->ed->elemental.class_ >= ELEID_EM_DILUVIO
+				 && sd->ed->elemental.class_ <= ELEID_EM_SERPENS)
+					sc_start(src, &sd->ed->bl, SC_ELEMENTAL_VEIL, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+					         skill_id);
+				else
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+			}
+			break;
 		case BO_THE_WHOLE_PROTECTION:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {
 				static const unsigned int equip[] = { EQP_WEAPON, EQP_SHIELD, EQP_ARMOR, EQP_HEAD_TOP };

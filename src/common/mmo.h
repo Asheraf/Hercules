@@ -252,7 +252,7 @@
 #endif
 #ifndef MAX_SKILL_TREE
 // Update this max as necessary. 87 is the value needed for Elemental Master.
-#define MAX_SKILL_TREE 89
+#define MAX_SKILL_TREE 90
 #endif
 #ifndef DEFAULT_WALK_SPEED
 #define DEFAULT_WALK_SPEED 150
