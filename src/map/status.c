@@ -3414,6 +3414,8 @@ static void status_calc_bl_main(struct block_list *bl, e_scb_flag flag)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ABYSS_SLAYER]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_ATTACK_STANCE] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_ATTACK_STANCE]->val3, 0, SHRT_MAX);
+		if (sc != NULL && sc->data[SC_SPELL_ENCHANTING] != NULL)
+			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_SPELL_ENCHANTING]->val2, 0, SHRT_MAX);
 		if (sc != NULL && sc->data[SC_JAWAII_SERENADE] != NULL)
 			st->smatk = (int32)cap_value((int64)st->smatk + sc->data[SC_JAWAII_SERENADE]->val2, 0, SHRT_MAX);
 	}
@@ -10409,6 +10411,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				status_percent_heal(bl, 100, 100);
 				val2 = 10 + 2 * val1;
 				val3 = 100 + 20 * val1;
+				break;
+			case SC_SPELL_ENCHANTING:
+				val1 = cap_value(val1, 1, 5);
+				val2 = 4 * val1;
 				break;
 			case SC_JAWAII_SERENADE:
 				val2 = 3 * val1;
