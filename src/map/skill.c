@@ -9285,6 +9285,35 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				                      flag | BCT_PARTY | 1, skill->castend_nodamage_id);
 			}
 			break;
+		case SH_KI_SUL_RAMPAGE:
+			if ((flag & 2) != 0) {
+				struct map_session_data *tsd = BL_CAST(BL_PC, bl);
+
+				if (src == bl || tsd == NULL)
+					break;
+
+				uint32 old_ap = tsd->battle_status.ap;
+				int ap = ((flag & 4) != 0) ? 4 : 2;
+
+				tsd->battle_status.ap = (uint32)cap_value((int64)tsd->battle_status.ap + ap, 0, tsd->battle_status.max_ap);
+				if (old_ap != tsd->battle_status.ap)
+					clif->updatestatus(tsd, SP_AP);
+			} else if ((flag & 1) != 0) {
+				int range = skill->get_splash(skill_id, skill_lv);
+
+				if (sd != NULL && pc->checkskill(sd, SH_COMMUNE_WITH_KI_SUL) > 0) {
+					range += 2;
+					flag |= 4; // the wider pulse also restores more AP
+				}
+				clif->skill_nodamage(src, bl, skill_id, 0, 1);
+				map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, bl, skill_id, skill_lv, tick,
+				                    flag | BCT_PARTY | 2, skill->castend_nodamage_id);
+			} else {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				                     sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv),
+				                              skill_id));
+			}
+			break;
 		case SH_MARINE_FESTIVAL_OF_KI_SUL:
 		case SH_SANDY_FESTIVAL_OF_KI_SUL:
 			if (sd == NULL || sd->status.party_id == 0 || (flag & 1) != 0) {

@@ -881,6 +881,7 @@ static int status_check_skilluse(struct block_list *src, struct block_list *targ
 
 		if (
 			(sc->data[SC_TRICKDEAD] && skill_id != NV_TRICKDEAD)
+			|| (sc->data[SC_KI_SUL_RAMPAGE] != NULL && skill_id != 0)
 			|| (sc->data[SC_AUTOCOUNTER] && !flag && skill_id)
 			|| (sc->data[SC_GOSPEL] && sc->data[SC_GOSPEL]->val4 == BCT_SELF && skill_id != PA_GOSPEL)
 			|| (sc->data[SC_SUHIDE] && skill_id != SU_HIDE)
@@ -10507,6 +10508,10 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val4 = tick / 3000;
 				tick_time = 100;
 				break;
+			case SC_KI_SUL_RAMPAGE:
+				val4 = tick / 1000;
+				tick_time = 100;
+				break;
 			case SC_TALISMAN_OF_WARRIOR:
 			case SC_TALISMAN_OF_MAGICIAN:
 				val2 = 2 * val1;
@@ -13028,6 +13033,13 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 				break; //Not enough SP to continue.
 			sc_timer_next(sce->val2+tick, status->change_timer, bl->id, data);
 			return 0;
+		case SC_KI_SUL_RAMPAGE:
+			if (--sce->val4 >= 0) {
+				skill->castend_nodamage_id(bl, bl, SH_KI_SUL_RAMPAGE, sce->val1, tick, 1);
+				sc_timer_next(1000 + tick, status->change_timer, bl->id, data);
+				return 0;
+			}
+			break;
 		case SC_TALISMAN_OF_PROTECTION:
 			if (--sce->val4 >= 0) {
 				struct map_session_data *ssd = map->id2sd(sce->val2);

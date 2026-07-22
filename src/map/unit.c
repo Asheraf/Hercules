@@ -514,6 +514,7 @@ static int unit_walk_toxy_timer(int tid, int64 tick, int id, intptr_t data)
 	ud->walk_count++; // walked cell counter, to be used for walk-triggered skills. [Skotlex]
 	status_change_end(bl, SC_ROLLINGCUTTER, INVALID_TIMER); //If you move, you lose your counters. [malufett]
 	status_change_end(bl, SC_CRESCIVEBOLT, INVALID_TIMER);
+	status_change_end(bl, SC_KI_SUL_RAMPAGE, INVALID_TIMER);
 
 	if (bl->x != x || bl->y != y || ud->walktimer != INVALID_TIMER)
 		return 1; // map->moveblock has altered the object beyond what we expected (moved/warped it)
@@ -1043,8 +1044,10 @@ static int unit_move_pos(struct block_list *bl, short dst_x, short dst_y, int ea
 	map->foreachinmovearea(clif->outsight, bl, AREA_SIZE, dx, dy, receiver_type, bl);
 
 	map->moveblock(bl, dst_x, dst_y, timer->gettick());
-	if (dx != 0 || dy != 0)
+	if (dx != 0 || dy != 0) {
 		status_change_end(bl, SC_CRESCIVEBOLT, INVALID_TIMER);
+		status_change_end(bl, SC_KI_SUL_RAMPAGE, INVALID_TIMER);
+	}
 
 	ud->walktimer = -2; // arbitrary non-INVALID_TIMER value to make the clif code send walking packets
 	map->foreachinmovearea(clif->insight, bl, AREA_SIZE, -dx, -dy, receiver_type, bl);
@@ -1154,6 +1157,7 @@ static int unit_push(struct block_list *bl, enum unit_dir dir, int count, bool u
 		if (sd != NULL) {
 			if (sd->sc.data[SC_INTENSIVE_AIM_COUNT] != NULL)
 				status_change_end(bl, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
+			status_change_end(bl, SC_KI_SUL_RAMPAGE, INVALID_TIMER);
 			npc->handle_touch_events(sd, bl->x, bl->y, false);
 		}
 	}
