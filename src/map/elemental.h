@@ -45,6 +45,7 @@ enum elemental_id {
 	ELEID_EL_TERA_S   = 2123, ///<   EL_TERA_S / Tera
 	ELEID_EL_TERA_M   = 2124, ///<   EL_TERA_M / Tera
 	ELEID_EL_TERA_L   = 2125, ///<   EL_TERA_L / Tera
+	ELEID_EM_ARDOR    = 20817, ///< EM_ARDOR / Ardor
 };
 
 /**
@@ -59,7 +60,7 @@ enum elemental_id {
 #define EL_SKILLMODE_PASIVE 0x1
 #define EL_SKILLMODE_ASSIST 0x2
 #define EL_SKILLMODE_AGGRESSIVE 0x4
-#define MAX_ELEMENTAL_CLASS 12
+#define MAX_ELEMENTAL_CLASS 13
 #define EL_CLASS_BASE ELEID_EL_AGNI_S
 #define EL_CLASS_MAX (EL_CLASS_BASE+MAX_ELEMENTAL_CLASS-1)
 

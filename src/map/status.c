@@ -1910,6 +1910,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->subele[ELE_UNDEAD] += sc->data[SC_HOLY_S]->val2;
 		sd->magic_atk_ele[ELE_HOLY] += sc->data[SC_HOLY_S]->val2;
 	}
+	if (sc->data[SC_SUMMON_ELEMENTAL_ARDOR] != NULL)
+		sd->magic_atk_ele[ELE_FIRE] += 10;
 
 	//param_bonus now holds card bonuses.
 	if(bstatus->rhw.range < 1) bstatus->rhw.range = 1;

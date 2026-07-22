@@ -2125,6 +2125,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case EM_CONFLAGRATION:
 					skillratio += -100 + 700 + 1100 * skill_lv + 5 * st->spl;
+					if (sc != NULL && sc->data[SC_SUMMON_ELEMENTAL_ARDOR] != NULL)
+						skillratio += 200 * skill_lv + 2 * st->spl;
 					RE_LVL_DMOD(100);
 					break;
 				case EM_TERRA_DRIVE:

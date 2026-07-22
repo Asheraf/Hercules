@@ -128,6 +128,7 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 	case ELEID_EL_AGNI_S:
 	case ELEID_EL_AGNI_M:
 	case ELEID_EL_AGNI_L:
+	case ELEID_EM_ARDOR:
 		//ATK + (Summon Agni Skill Level x 20) / HIT + (Summon Agni Skill Level x 10)
 		ele.atk += summon_level * 20;
 		ele.atk2 += summon_level * 20;
@@ -163,6 +164,16 @@ static int elemental_create(struct map_session_data *sd, int class_, unsigned in
 		ele.atk += 25 * skill_level;
 		ele.atk2 += 25 * skill_level;
 		ele.matk += 25 * skill_level;
+	}
+	if ((skill_level=pc->checkskill(sd, EM_ELEMENTAL_SPIRIT_M)) > 0 && db->class_ == ELEID_EM_ARDOR) {
+		ele.hp = ele.max_hp += 10000 + 3000 * skill_level;
+		ele.sp = ele.max_sp += 100 * skill_level;
+		ele.atk += 100 + 20 * skill_level;
+		ele.atk2 += 100 + 20 * skill_level;
+		ele.matk += 20 * skill_level;
+		ele.def += 20 * skill_level;
+		ele.mdef += 4 * skill_level;
+		ele.flee += 10 * skill_level;
 	}
 
 	ele.life_time = lifetime;
@@ -245,6 +256,12 @@ static int elemental_delete(struct elemental_data *ed, int reply)
 
 	if( !sd )
 		return unit->free(&ed->bl, 0);
+
+	switch (ed->elemental.class_) {
+		case ELEID_EM_ARDOR:
+			status_change_end(&sd->bl, SC_SUMMON_ELEMENTAL_ARDOR, INVALID_TIMER);
+			break;
+	}
 
 	sd->ed = NULL;
 	sd->status.ele_id = 0;
