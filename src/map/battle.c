@@ -3085,6 +3085,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 100;
 					RE_LVL_DMOD(100);
 					break;
+				case NW_BASIC_GRENADE:
+					skillratio += -100 + 1500 + 2100 * skill_lv + 5 * st->con;
+					if (sd != NULL)
+						skillratio += 50 * pc->checkskill(sd, NW_GRENADE_MASTERY);
+					RE_LVL_DMOD(100);
+					break;
 				case MT_RUSH_QUAKE:
 					skillratio += -100 + 3600 * skill_lv + 10 * st->pow;
 					if (tst->race == RC_FORMLESS || tst->race == RC_INSECT)
@@ -5891,6 +5897,22 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 	switch (skill_id) {
 		case GS_GROUNDDRIFT:
 			s_ele = s_ele_ = wflag; //element comes in flag.
+			break;
+		case NW_BASIC_GRENADE:
+			if (sc != NULL) {
+				if (sc->data[SC_GRENADE_FRAGMENT_1] != NULL)
+					s_ele = s_ele_ = ELE_WATER;
+				else if (sc->data[SC_GRENADE_FRAGMENT_2] != NULL)
+					s_ele = s_ele_ = ELE_WIND;
+				else if (sc->data[SC_GRENADE_FRAGMENT_3] != NULL)
+					s_ele = s_ele_ = ELE_EARTH;
+				else if (sc->data[SC_GRENADE_FRAGMENT_4] != NULL)
+					s_ele = s_ele_ = ELE_FIRE;
+				else if (sc->data[SC_GRENADE_FRAGMENT_5] != NULL)
+					s_ele = s_ele_ = ELE_DARK;
+				else if (sc->data[SC_GRENADE_FRAGMENT_6] != NULL)
+					s_ele = s_ele_ = ELE_HOLY;
+			}
 			break;
 		case LK_SPIRALPIERCE:
 			if (!sd) n_ele = false; //forced neutral for monsters

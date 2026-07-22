@@ -14690,6 +14690,11 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			if (sc != NULL && sc->data[SC_INTENSIVE_AIM_COUNT] != NULL)
 				status_change_end(src, SC_INTENSIVE_AIM_COUNT, INVALID_TIMER);
 			break;
+		case NW_BASIC_GRENADE:
+			r = skill->get_splash(skill_id, skill_lv);
+			map->foreachinarea(skill->area_sub, src->m, x - r, y - r, x + r, y + r, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			break;
 		case BO_ACIDIFIED_ZONE_WATER:
 		case BO_ACIDIFIED_ZONE_GROUND:
 		case BO_ACIDIFIED_ZONE_WIND:
