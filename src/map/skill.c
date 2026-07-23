@@ -7261,11 +7261,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		}
 			break;
 		case AT_ROARING_PIERCER:
+			if (sc != NULL && sc->data[SC_THUNDERING_ROD_MAX] != NULL) {
+				skill->castend_damage_id(src, bl, AT_ROARING_PIERCER_S, skill_lv, tick, flag);
+				break;
+			}
+			skill->add_thundering_charge(src, skill_id, skill_lv, 1);
+		FALLTHROUGH
+		case AT_ROARING_PIERCER_S:
 		{
 			int splash = skill->get_splash(skill_id, skill_lv);
 			int range = skill->get_range(skill_id, skill_lv) + 2;
 
-			skill->add_thundering_charge(src, skill_id, skill_lv, 1);
+			if (skill_id == AT_ROARING_PIERCER_S) {
+				status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
+				status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
+			}
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->area_temp[1] = bl->id;
 			map->foreachinpath(skill->attack_area, src->m, src->x, src->y, bl->x, bl->y, splash, range,

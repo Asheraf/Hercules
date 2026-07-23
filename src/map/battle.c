@@ -4557,6 +4557,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_ROARING_PIERCER_S:
+					skillratio += -100 + 11250 + 750 * (skill_lv - 1);
+					skillratio += 9 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_ROARING_PIERCER:
 					skillratio += -100 + 7050 + 700 * (skill_lv - 1);
 					if (sc != NULL && sc->data[SC_TRUTH_OF_WIND] != NULL)
