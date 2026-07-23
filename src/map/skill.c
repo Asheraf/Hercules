@@ -5185,6 +5185,39 @@ static int skill_shimiru_check_cell(struct block_list *target, va_list ap)
 }
 
 /**
+ * Drags one enemy into the Gravity Hole and pins it there.
+ *
+ * The pull stops one cell short of the caster, and the hole only takes
+ * hold of as many enemies as the skill level allows.
+ */
+static int skill_gravity_hole_sub(struct block_list *bl, va_list ap)
+{
+	struct block_list *src = va_arg(ap, struct block_list *);
+	uint16 skill_id = va_arg(ap, int);
+	uint16 skill_lv = va_arg(ap, int);
+	int64 tick = va_arg(ap, int64);
+	int flag = va_arg(ap, int);
+	int max_targets = va_arg(ap, int);
+
+	nullpo_ret(bl);
+	nullpo_ret(src);
+
+	if (skill->area_temp[2] >= max_targets)
+		return 0;
+	if (battle->check_target(src, bl, BCT_ENEMY) <= 0)
+		return 0;
+	if (skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag | SD_ANIMATION) <= 0)
+		return 0;
+
+	sc_start(src, bl, SC_STOP, 100, 1, skill->get_time(skill_id, skill_lv), skill_id);
+	int dist = distance_xy(src->x, src->y, bl->x, bl->y) - 1;
+	if (dist > 0)
+		skill->blown(src, bl, dist, map->calc_dir(src, bl->x, bl->y), 0);
+	skill->area_temp[2]++;
+	return 1;
+}
+
+/**
  * Builds up the thundering rod charge the Alitea storm skills share.
  *
  * The charge caps at six, at which point the rod is fully drawn and the
@@ -10393,6 +10426,14 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR,
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
+			break;
+		case AT_GRAVITY_HOLE:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[0] = 0;
+			skill->area_temp[1] = 0;
+			skill->area_temp[2] = 0;
+			map->foreachinrange(skill->gravity_hole_sub, src, skill->get_splash(skill_id, skill_lv), BL_CHAR,
+			                    src, skill_id, skill_lv, tick, flag, 5 + skill_lv);
 			break;
 		case AT_SOLID_STOMP:
 		{
@@ -19413,7 +19454,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		return 0;
 	}
 	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND || skill_id == DR_TRUTH_OF_EARTH
-	  || skill_id == AT_CHILLING_BLAST || skill_id == AT_FURIOS_STORM || skill_id == AT_SOLID_STOMP) && sc != NULL
+	  || skill_id == AT_CHILLING_BLAST || skill_id == AT_FURIOS_STORM || skill_id == AT_SOLID_STOMP
+	  || skill_id == AT_GRAVITY_HOLE) && sc != NULL
 		&& (sc->data[SC_WEREWOLF] != NULL || sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
@@ -30437,6 +30479,7 @@ void skill_defaults(void)
 	skill->shimiru_check_cell = skill_shimiru_check_cell;
 	skill->mirage_cast = skill_mirage_cast;
 	skill->add_thundering_charge = skill_add_thundering_charge;
+	skill->gravity_hole_sub = skill_gravity_hole_sub;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;
