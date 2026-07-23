@@ -52,6 +52,17 @@ struct pet_data;
  * SC configuration type
  * @see db/sc_config.conf for more information
  **/
+/**
+ * Player states a status can impose, as named by the States block.
+ */
+enum sc_state_flag {
+	SCS_NONE   = 0x0,
+	SCS_NOCAST = 0x1, ///< cannot use skills
+	SCS_NOMOVE = 0x2, ///< cannot walk
+	SCS_NOCHAT = 0x4, ///< cannot talk
+	SCS_NOATTACK = 0x8, ///< cannot attack
+};
+
 typedef enum sc_conf_type {
 	SC_NO_REM_DEATH     = 0x001,
 	SC_NO_SAVE          = 0x002,
@@ -1632,6 +1643,7 @@ BEGIN_ZEROED_BLOCK; /* Everything within this block will be memset to 0 when sta
 	VECTOR_DECL(sc_type) FailTable[SC_MAX]; // status -> statuses that block it
 	VECTOR_DECL(sc_type) EndOnStartTable[SC_MAX]; // status -> statuses it cancels when it starts
 	VECTOR_DECL(sc_type) EndOnEndTable[SC_MAX];   // status -> statuses it cancels when it ends
+	int StateTable[SC_MAX];               // status -> player states it imposes
 	bool DisplayType[SC_MAX];
 	/* */
 	int atkmods[3][MAX_SINGLE_WEAPON_TYPE];//ATK weapon modification for size (size_fix.txt)
@@ -1809,6 +1821,8 @@ struct status_interface {
 	bool (*read_scdb_libconfig_sub_skill) (struct config_setting_t *it, int type, const char *source);
 	bool (*read_scdb_libconfig_sub_fail) (struct config_setting_t *it, int type, const char *source);
 	bool (*read_scdb_libconfig_sub_endlist) (struct config_setting_t *it, int type, const char *source, bool on_start);
+	bool (*read_scdb_libconfig_sub_state) (struct config_setting_t *it, int type, const char *source);
+	bool (*has_state) (struct block_list *bl, enum sc_state_flag state);
 	void (*read_job_db) (void);
 	void (*read_job_db_sub) (int idx, const char *name, struct config_setting_t *jdb);
 	void (*read_unit_params_db) (void);

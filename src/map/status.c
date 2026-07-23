@@ -934,26 +934,18 @@ static int status_check_skilluse(struct block_list *src, struct block_list *targ
 
 		if (skill_id != 0 /* Do not block item-casted skills.*/ && (src->type != BL_PC || sd->auto_cast_current.type != AUTOCAST_ITEM)) {
 			//Skills blocked through status changes...
+			if (flag == 0 && status->has_state(src, SCS_NOCAST) != 0)
+				return 0;
+
 			if (!flag && ( //Blocked only from using the skill (stuff like autospell may still go through
 				(sc->data[SC_ENSEMBLEFATIGUE] != NULL && skill_id != CG_SPECIALSINGER) ||
-				sc->data[SC_SILENCE] ||
-				sc->data[SC_STEELBODY] ||
-				sc->data[SC_BERSERK] ||
-				sc->data[SC_OBLIVIONCURSE] ||
-				sc->data[SC_WHITEIMPRISON] ||
-				sc->data[SC__INVISIBILITY] ||
 				(sc->data[SC_COLD] && src->type != BL_MOB) ||
-				sc->data[SC__IGNORANCE] ||
-				sc->data[SC_DEEP_SLEEP] ||
-				sc->data[SC_SATURDAY_NIGHT_FEVER] ||
-				sc->data[SC_CURSEDCIRCLE_TARGET] ||
 				(sc->data[SC_MARIONETTE_MASTER] && skill_id != CG_MARIONETTE) || //Only skill you can use is marionette again to cancel it
 				(sc->data[SC_MARIONETTE] && skill_id == CG_MARIONETTE) || //Cannot use marionette if you are being buffed by another
 				(sc->data[SC_STASIS] && skill->block_check(src, SC_STASIS, skill_id)) ||
 				(sc->data[SC_KG_KAGEHUMI] && skill->block_check(src, SC_KG_KAGEHUMI, skill_id)) ||
 				(sc->data[SC_NOVAEXPLOSING] && skill->block_check(src, SC_NOVAEXPLOSING, skill_id)) ||
-				(sc->data[SC_GRAVITYCONTROL] && skill->block_check(src, SC_GRAVITYCONTROL, skill_id)) ||
-				sc->data[SC_ALL_RIDING] != NULL // New mounts can't attack nor use skills in the client; this check makes it cheat-safe. [Ind]
+				(sc->data[SC_GRAVITYCONTROL] && skill->block_check(src, SC_GRAVITYCONTROL, skill_id))
 				))
 				return 0;
 
@@ -14653,6 +14645,7 @@ static bool status_read_scdb_libconfig(void)
 		VECTOR_CLEAR(status->dbs->EndOnStartTable[type]);
 		VECTOR_CLEAR(status->dbs->EndOnEndTable[type]);
 	}
+	memset(status->dbs->StateTable, 0, sizeof(status->dbs->StateTable));
 
 	int i = 0;
 	int count = 0;
@@ -14718,10 +14711,69 @@ static bool status_read_scdb_libconfig_sub(struct config_setting_t *it, int idx,
 	if (eoe != NULL)
 		status->read_scdb_libconfig_sub_endlist(eoe, status_id, source, false);
 
+	struct config_setting_t *states = libconfig->setting_get_member(it, "States");
+	if (states != NULL)
+		status->read_scdb_libconfig_sub_state(states, status_id, source);
+
 	if (libconfig->setting_lookup_bool(it, "HasVisualEffect", &i32) == CONFIG_TRUE && i32 != 0)
 		status->dbs->IconChangeTable[status_id].relevant_bl_types |= BL_SCEFFECT;
 
 	return true;
+}
+
+/**
+ * Reads the player states a status imposes while it is active.
+ */
+static bool status_read_scdb_libconfig_sub_state(struct config_setting_t *it, int type, const char *source)
+{
+	nullpo_retr(false, it);
+	nullpo_retr(false, source);
+	Assert_retr(false, type > SC_NONE && type < SC_MAX);
+
+	static const struct {
+		const char *name;
+		enum sc_state_flag value;
+	} states[] = {
+		{ "NoCast", SCS_NOCAST },
+		{ "NoMove", SCS_NOMOVE },
+		{ "NoChat", SCS_NOCHAT },
+		{ "NoAttack", SCS_NOATTACK },
+	};
+
+	int i = 0;
+	struct config_setting_t *t = NULL;
+	while ((t = libconfig->setting_get_elem(it, i++)) != NULL) {
+		const char *name = config_setting_name(t);
+		int j;
+
+		ARR_FIND(0, ARRAYLENGTH(states), j, strcmpi(name, states[j].name) == 0);
+		if (j == ARRAYLENGTH(states)) {
+			ShowWarning("status_read_scdb_libconfig_sub_state: unknown state (%s) for status effect (%d) in \"%s\".\n",
+			            name, type, source);
+			continue;
+		}
+		if (libconfig->setting_get_bool_real(t) == true)
+			status->dbs->StateTable[type] |= states[j].value;
+		else
+			status->dbs->StateTable[type] &= ~states[j].value;
+	}
+	return true;
+}
+
+/**
+ * Whether any status the unit carries imposes the given player state.
+ */
+static bool status_has_state(struct block_list *bl, enum sc_state_flag state)
+{
+	struct status_change *sc = status->get_sc(bl);
+
+	if (sc == NULL)
+		return false;
+	for (int type = SC_NONE + 1; type < SC_MAX; type++) {
+		if ((status->dbs->StateTable[type] & state) != 0 && sc->data[type] != NULL)
+			return true;
+	}
+	return false;
 }
 
 /**
@@ -15484,6 +15536,8 @@ void status_defaults(void)
 	status->read_scdb_libconfig_sub_skill = status_read_scdb_libconfig_sub_skill;
 	status->read_scdb_libconfig_sub_fail = status_read_scdb_libconfig_sub_fail;
 	status->read_scdb_libconfig_sub_endlist = status_read_scdb_libconfig_sub_endlist;
+	status->read_scdb_libconfig_sub_state = status_read_scdb_libconfig_sub_state;
+	status->has_state = status_has_state;
 	status->read_job_db = status_read_job_db;
 	status->read_job_db_sub = status_read_job_db_sub;
 	status->read_unit_params_db = status_read_unit_params_db;
