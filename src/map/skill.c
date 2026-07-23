@@ -6094,6 +6094,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_GLACIER_MONOLITH:
 		case AT_TEMPEST_FLAP:
 		case AT_PINION_SHOT:
 		case AT_SAVAGE_LUNGE:
@@ -15751,6 +15752,15 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   BL_CHAR | BL_SKILL, skill->get_type(skill_id, skill_lv),
 			                   src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
 			break;
+		case AT_GLACIER_MONOLITH:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+			skill->unitsetting(src, skill_id, skill_lv, x, y, 0);
+		}
+			break;
 		case SS_KAGEGARI:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
@@ -17505,6 +17515,12 @@ static int skill_unit_onplace(struct skill_unit *src, struct block_list *bl, int
 		case UNT_BOOKOFCREATINGSTAR:
 			if (sce == NULL)
 				sc_start4(ss, bl, type, 100, sg->skill_lv, ss->id, src->bl.id, 0, sg->limit, skill_id);
+			break;
+
+		case UNT_GLACIAL_MONOLITH:
+			if (bl->id == ss->id)
+				sc_start4(ss, bl, type, 100, sg->skill_lv, src->bl.x, src->bl.y, src->bl.m, sg->interval + 100,
+				          skill_id);
 			break;
 
 		case UNT_GD_LEADERSHIP:
