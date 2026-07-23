@@ -2708,6 +2708,7 @@ struct skill_interface {
 	int (*magic_reflect) (struct block_list* src, struct block_list* bl, int type);
 	int (*onskillusage) (struct map_session_data *sd, struct block_list *bl, uint16 skill_id, int64 tick);
 	int (*bind_trap) (struct block_list *bl, va_list ap);
+	int (*terra_wave_cancel_sub) (struct block_list *bl, va_list ap);
 	int (*cell_overlap) (struct block_list *bl, va_list ap);
 	int (*timerskill) (int tid, int64 tick, int id, intptr_t data);
 	void (*trap_do_splash) (struct block_list *bl, uint16 skill_id, uint16 skill_lv, int bl_flag, int64 tick);

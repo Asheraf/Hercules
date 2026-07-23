@@ -4557,6 +4557,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_TERRA_WAVE:
+					skillratio += -100 + 12000 + 300 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL)
+						skillratio += 15 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_FURIOS_STORM:
 					skillratio += -100 + 7800 + 400 * (skill_lv - 1);
 					skillratio += 20 * st->spl;

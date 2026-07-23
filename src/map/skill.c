@@ -4982,6 +4982,21 @@ static int skill_timerskill(int tid, int64 tick, int id, intptr_t data)
 					                   skl->flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 				}
 					break;
+				case AT_TERRA_WAVE:
+				{
+					int splash = skill->get_splash(skl->skill_id, skl->skill_lv);
+					const int cancel_radius = 1;
+
+					map->foreachinarea(skill->terra_wave_cancel_sub, src->m, skl->x - cancel_radius,
+					                   skl->y - cancel_radius, skl->x + cancel_radius, skl->y + cancel_radius,
+					                   BL_SKILL);
+					clif->skill_poseffect(src, skl->skill_id, skl->skill_lv, skl->x, skl->y, tick);
+					map->foreachinarea(skill->area_sub, src->m, skl->x - splash, skl->y - splash, skl->x + splash,
+					                   skl->y + splash,
+					                   BL_CHAR, src, skl->skill_id, skl->skill_lv, tick,
+					                   skl->flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+				}
+					break;
 				case WL_EARTHSTRAIN:
 					skill->unitsetting(src,skl->skill_id,skl->skill_lv,skl->x,skl->y,(skl->type<<16)|skl->flag);
 					break;
@@ -15892,6 +15907,53 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   BL_CHAR | BL_SKILL, skill->get_type(skill_id, skill_lv),
 			                   src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
 			break;
+		case AT_TERRA_WAVE:
+		{
+			const int segment_count = 4;
+			const int segment_step = 3;
+
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dy = -1; dy <= 1; dy++) {
+					if (map->getcell(src->m, src, x + dx, y + dy, CELL_CHKNOPASS) != 0) {
+						if (sd != NULL)
+							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+						return 0;
+					}
+				}
+			}
+
+			enum unit_dir dir = map->calc_dir(src, x, y);
+			int cx = x;
+			int cy = y;
+			int placed = 0;
+
+			for (int dist = 0; dist <= segment_step * (segment_count - 1) && placed < segment_count; dist++) {
+				if (dist > 0) {
+					cx += dirx[dir];
+					cy += diry[dir];
+				}
+				if (map->getcell(src->m, src, cx, cy, CELL_CHKNOPASS) != 0)
+					break;
+				if (dist % segment_step != 0)
+					continue;
+				placed++;
+				skill->addtimerskill(src, tick + 150 * placed, 0, cx, cy, skill_id, skill_lv, 0, flag & ~SD_ANIMATION);
+			}
+			if (sd != NULL) {
+				int stacks = 2;
+				int ground_bloom_lv = pc->checkskill(sd, KR_EARTH_BUD);
+
+				if (ground_bloom_lv > 0) {
+					if (sd->sc.data[SC_GROUND_GROW] != NULL)
+						stacks += sd->sc.data[SC_GROUND_GROW]->val3;
+					if (stacks < 13)
+						sc_start4(src, src, SC_GROUND_GROW, 100, 0, 0, stacks, 0, 10000, skill_id);
+					else
+						skill->castend_nodamage_id(src, src, KR_GROUND_BLOOM, ground_bloom_lv, tick, 0);
+				}
+			}
+		}
+			break;
 		case AT_GLACIER_NOVA:
 		{
 			struct status_change *ssc = status->get_sc(src);
@@ -23086,6 +23148,28 @@ static int skill_bind_trap(struct block_list *bl, va_list ap) {
 	su->group->unit_id = UNT_USED_TRAPS;
 	su->group->limit = DIFF_TICK32(timer->gettick(), su->group->tick) + 500;
 	return 1;
+}
+
+static int skill_terra_wave_cancel_sub(struct block_list *bl, va_list ap)
+{
+	(void)ap;
+	nullpo_ret(bl);
+
+	if (bl->type != BL_SKILL)
+		return 0;
+
+	struct skill_unit *su = BL_UCAST(BL_SKILL, bl);
+
+	if (su == NULL || su->group == NULL)
+		return 0;
+
+	uint16 unit_skill = su->group->skill_id;
+
+	if ((skill->get_inf(unit_skill) & INF_GROUND_SKILL) == 0
+	 || (skill->get_inf2(unit_skill) & INF2_TRAP) != 0)
+		return 0;
+
+	return skill->del_unitgroup(su->group);
 }
 
 /*==========================================
@@ -30349,6 +30433,7 @@ void skill_defaults(void)
 	skill->magic_reflect = skill_magic_reflect;
 	skill->onskillusage = skill_onskillusage;
 	skill->bind_trap = skill_bind_trap;
+	skill->terra_wave_cancel_sub = skill_terra_wave_cancel_sub;
 	skill->cell_overlap = skill_cell_overlap;
 	skill->timerskill = skill_timerskill;
 	skill->trap_do_splash = skill_trap_do_splash;
