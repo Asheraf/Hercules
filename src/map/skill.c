@@ -7194,14 +7194,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		}
 			break;
 		case AT_QUILL_SPEAR:
+			if ((flag & 1) == 0 && sc != NULL && sc->data[SC_APEX_PHASE] != NULL) {
+				skill->castend_damage_id(src, bl, AT_QUILL_SPEAR_S, skill_lv, tick, flag);
+				break;
+			}
+			FALLTHROUGH
+		case AT_QUILL_SPEAR_S:
 		{
-			int width = (sc != NULL && sc->data[SC_APEX_PHASE] != NULL) ? 2 : 1;
+			int width = (skill_id == AT_QUILL_SPEAR_S) ? 2 : 1;
 			enum unit_dir dir = map->calc_dir(src, bl->x, bl->y);
 			int start_x = bl->x - dirx[dir] * 3;
 			int start_y = bl->y - diry[dir] * 3;
 
 			if ((flag & 1) != 0) {
-				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick,
+				              (skill_id == AT_QUILL_SPEAR_S) ? (flag | SD_ANIMATION) : flag);
 				break;
 			}
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
@@ -19826,6 +19833,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case AT_QUILL_SPEAR_S:
 		case AT_QUILL_SPEAR:
 		case AT_PINION_SHOT:
 		case AT_FLIP_FLAP:
