@@ -15752,6 +15752,24 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 			                   BL_CHAR | BL_SKILL, skill->get_type(skill_id, skill_lv),
 			                   src, src, skill_id, skill_lv, tick, flag, BCT_ENEMY);
 			break;
+		case AT_GLACIER_NOVA:
+		{
+			struct status_change *ssc = status->get_sc(src);
+			struct status_change_entry *shield = (ssc != NULL) ? ssc->data[SC_GLACIER_SHEILD] : NULL;
+
+			if (shield == NULL || src->m != shield->val4)
+				break;
+
+			x = shield->val2;
+			y = shield->val3;
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			clif->skill_poseffect(src, skill_id, skill_lv, x, y, tick);
+			map->foreachinarea(skill->area_sub, src->m, x - range, y - range, x + range, y + range, BL_CHAR,
+			                   src, skill_id, skill_lv, tick, flag | BCT_ENEMY | 1, skill->castend_damage_id);
+		}
+			break;
+
 		case AT_GLACIER_MONOLITH:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
