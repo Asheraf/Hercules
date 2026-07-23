@@ -2083,6 +2083,16 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->bonus.long_attack_def_rate += 3 * sc->data[SC_SOLID_STOMP]->val1;
 		sd->magic_atk_ele[ELE_EARTH] += 15;
 	}
+	if (sc->data[SC_NATURE_HARMONY] != NULL) {
+		int bonus = 30 * sc->data[SC_NATURE_HARMONY]->val1;
+
+		sd->magic_atk_ele[ELE_WATER] += bonus;
+		sd->magic_atk_ele[ELE_WIND] += bonus;
+		sd->magic_atk_ele[ELE_EARTH] += bonus;
+		sd->subele[ELE_WATER] -= 30;
+		sd->subele[ELE_WIND] -= 30;
+		sd->subele[ELE_EARTH] -= 30;
+	}
 
 	// ----- HP MAX CALCULATION -----
 

@@ -10427,6 +10427,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_NATURE_HARMONY:
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, SC_NATURE_HARMONY, 100, skill_lv,
+			                              skill->get_time(skill_id, skill_lv), skill_id));
+			break;
 		case AT_GRAVITY_HOLE:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->area_temp[0] = 0;
