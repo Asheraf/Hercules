@@ -10407,145 +10407,10 @@ static void status_change_start_display(struct map_session_data *sd, enum sc_typ
  */
 static int status_get_val_flag(enum sc_type type)
 {
-	int val_flag = 0;
+	int val_flag = status->dbs->ValFlagTable[type];
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch (type) {
-		case SC_CLAN_INFO:
-			val_flag |= 1 | 2;
-			break;
-		case SC_FIGHTINGSPIRIT:
-			val_flag |= 1 | 2;
-			break;
-		case SC_VENOMIMPRESS:
-			val_flag |= 1 | 2;
-			break;
-		case SC_POISONINGWEAPON:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_WEAPONBLOCKING:
-			val_flag |= 1 | 2;
-			break;
-		case SC_ROLLINGCUTTER:
-			val_flag |= 1;
-			break;
-		case SC_CLOAKINGEXCEED:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_HALLUCINATIONWALK:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_SUMMON1:
-		case SC_SUMMON2:
-		case SC_SUMMON3:
-		case SC_SUMMON4:
-		case SC_SUMMON5:
-			val_flag |= 1;
-			break;
-		case SC__SHADOWFORM:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC__INVISIBILITY:
-			val_flag |= 1 | 2;
-			break;
-		case SC__ENERVATION:
-			val_flag |= 1 | 2;
-			break;
-		case SC__GROOMY:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC__LAZINESS:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC__UNLUCKY:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC__WEAKNESS:
-			val_flag |= 1 | 2;
-			break;
-		case SC_PROPERTYWALK:
-			val_flag |= 1 | 2;
-			break;
-		case SC_FORCEOFVANGUARD:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_PRESTIGE:
-			val_flag |= 1 | 2;
-			break;
-		case SC_BANDING:
-			val_flag |= 1;
-			break;
-		case SC_SHIELDSPELL_DEF:
-		case SC_SHIELDSPELL_MDEF:
-		case SC_SHIELDSPELL_REF:
-			val_flag |= 1 | 2;
-			break;
-		case SC_SPELLFIST:
-		case SC_CURSEDCIRCLE_ATKER:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_CRESCENTELBOW:
-			val_flag |= 1 | 2;
-			break;
-		case SC_LIGHTNINGWALK:
-			val_flag |= 1;
-			break;
-		case SC_PYROTECHNIC_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_HEATER_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_AQUAPLAY_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_COOLER_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_CHILLY_AIR_OPTION:
-			val_flag |= 1 | 2;
-			break;
-		case SC_GUST_OPTION:
-			val_flag |= 1 | 2;
-			break;
-		case SC_BLAST_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_WILD_STORM_OPTION:
-			val_flag |= 1 | 2;
-			break;
-		case SC_PETROLOGY_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_CURSED_SOIL_OPTION:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_UPHEAVAL_OPTION:
-			val_flag |= 1 | 2;
-			break;
-		case SC_CIRCLE_OF_FIRE_OPTION:
-			val_flag |= 1 | 2;
-			break;
-		case SC_WATER_BARRIER:
-			val_flag |= 1 | 2 | 4;
-			break;
-		case SC_KYOUGAKU:
-			val_flag |= 1;
-			break;
-		case SC_CASH_PLUSEXP:
-		case SC_CASH_PLUSONLYJOBEXP:
-		case SC_MONSTER_TRANSFORM:
-		case SC_ACTIVE_MONSTER_TRANSFORM:
-		case SC_CASH_RECEIVEITEM:
-		case SC_OVERLAPEXPUP:
-			val_flag |= 1;
-			break;
-		case SC_DAILYSENDMAILCNT:
-			val_flag |= 1 | 2;
-			break;
-		case SC_MADOGEAR:
-			val_flag |= 1;
-			break;
 	}
 	PRAGMA_GCC46(GCC diagnostic pop)
 	return val_flag;
@@ -14646,6 +14511,7 @@ static bool status_read_scdb_libconfig(void)
 		VECTOR_CLEAR(status->dbs->EndOnEndTable[type]);
 	}
 	memset(status->dbs->StateTable, 0, sizeof(status->dbs->StateTable));
+	memset(status->dbs->ValFlagTable, 0, sizeof(status->dbs->ValFlagTable));
 
 	int i = 0;
 	int count = 0;
@@ -14869,6 +14735,16 @@ static bool status_read_scdb_libconfig_sub_flag(struct config_setting_t *it, int
 			{ "NoMagicBlocked", SC_NO_MAGIC_BLOCK },
 			{ "NoSaveInfinite", SC_NO_SAVE_INFINITE },
 		};
+
+		if (strcmpi(flag, "SendVal1") == 0 || strcmpi(flag, "SendVal2") == 0
+		 || strcmpi(flag, "SendVal3") == 0) {
+			int bit = 1 << (flag[7] - '1');
+			if (on == true)
+				status->dbs->ValFlagTable[type] |= bit;
+			else
+				status->dbs->ValFlagTable[type] &= ~bit;
+			continue;
+		}
 
 		ARR_FIND(0, ARRAYLENGTH(flags), j, strcmpi(flag, flags[j].name) == 0);
 		if (j != ARRAYLENGTH(flags)) {

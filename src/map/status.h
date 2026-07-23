@@ -1645,6 +1645,7 @@ BEGIN_ZEROED_BLOCK; /* Everything within this block will be memset to 0 when sta
 	VECTOR_DECL(sc_type) EndOnStartTable[SC_MAX]; // status -> statuses it cancels when it starts
 	VECTOR_DECL(sc_type) EndOnEndTable[SC_MAX];   // status -> statuses it cancels when it ends
 	int StateTable[SC_MAX];               // status -> player states it imposes
+	int ValFlagTable[SC_MAX];             // status -> which vals to send with its icon
 	bool DisplayType[SC_MAX];
 	/* */
 	int atkmods[3][MAX_SINGLE_WEAPON_TYPE];//ATK weapon modification for size (size_fix.txt)
