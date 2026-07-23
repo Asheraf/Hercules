@@ -10353,11 +10353,26 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    skill->castend_damage_id);
 			break;
 		case AT_ROARING_CHARGE:
+		case AT_ROARING_CHARGE_S:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
+			struct status_change *ssc = status->get_sc(src);
+
+			if (skill_id == AT_ROARING_CHARGE && ssc != NULL && ssc->data[SC_THUNDERING_ROD_MAX] != NULL) {
+				skill_id = AT_ROARING_CHARGE_S;
+				if (sd != NULL)
+					skill->give_ap(sd, skill_id, skill_lv);
+			}
 
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
-			skill->add_thundering_charge(src, skill_id, skill_lv, skill_lv + 1);
+			if (skill_id == AT_ROARING_CHARGE_S) {
+				status_change_end(src, SC_THUNDERING_ROD, INVALID_TIMER);
+				status_change_end(src, SC_THUNDERING_ROD_MAX, INVALID_TIMER);
+				sc_start4(src, src, SC_THUNDERING_ROD_MAX, 100, skill_id, skill_lv, 0, 0,
+				          skill->get_time(skill_id, skill_lv), skill_id);
+			} else {
+				skill->add_thundering_charge(src, skill_id, skill_lv, skill_lv + 1);
+			}
 			skill->area_temp[1] = 0;
 			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
