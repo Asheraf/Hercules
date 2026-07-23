@@ -10294,6 +10294,26 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_GLACIER_STOMP:
+		{
+			struct status_change *ssc = status->get_sc(src);
+			struct status_change_entry *shield = (ssc != NULL) ? ssc->data[SC_GLACIER_SHEILD] : NULL;
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			if (shield == NULL || src->m != shield->val4
+			 || unit->move_pos(src, shield->val2, shield->val3, 2, true) != 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			clif->fixpos(src);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			skill->castend_pos2(src, 0, 0, AT_GLACIER_NOVA, 1, tick, 0);
+		}
+			break;
 		case SS_ANTENPOU:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
