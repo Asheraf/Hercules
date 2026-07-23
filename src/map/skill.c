@@ -10288,6 +10288,28 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case AT_AERO_SYNC:
+		{
+			int flip_lv = (sd != NULL) ? pc->checkskill(sd, AT_FLIP_FLAP) : 0;
+
+			if (sd == NULL || dstsd == NULL || sd->status.party_id == 0
+			 || sd->status.party_id != dstsd->status.party_id || flip_lv <= 0) {
+				if (sd != NULL)
+					clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			enum unit_dir dir = map->calc_dir(bl, src->x, src->y);
+
+			if (unit->move_pos(src, bl->x + dirx[dir], bl->y + diry[dir], 2, true) != 0) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
+				break;
+			}
+			clif->blown(src);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+			                     sc_start(src, bl, SC_FLIP_FLAP_TARGET, 100, flip_lv,
+			                              skill->get_time(AT_FLIP_FLAP, flip_lv), skill_id));
+		}
+			break;
 		case AT_ZEPHYR_LINK:
 		case AT_FLIP_FLAP:
 		case AT_APEX_PHASE:
@@ -19834,6 +19856,13 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		case SKE_SKY_SUN:
 			if (sc == NULL || sc->data[SC_SKY_ENCHANT] == NULL) {
 				clif->skill_fail(sd, skill_id, USESKILL_FAIL_CONDITION, 0, 0);
+				return 0;
+			}
+			break;
+		case AT_AERO_SYNC:
+			if (sc == NULL || sc->data[SC_WERERAPTOR] == NULL || sc->data[SC_FLIP_FLAP] == NULL
+			 || sc->data[SC_FLIP_FLAP_TARGET] != NULL) {
+				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				return 0;
 			}
 			break;
