@@ -6094,6 +6094,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		case SKE_SUNSET_BLAST:
 		case SH_CHUL_HO_BATTERING:
 		case SH_HYUN_ROK_SPIRIT_POWER:
+		case AT_TEMPEST_FLAP:
 		case AT_PINION_SHOT:
 		case AT_SAVAGE_LUNGE:
 		case AT_ALPHA_CLAW:
@@ -6263,6 +6264,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 							clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 						}
 					}
+						break;
+					case AT_TEMPEST_FLAP:
+						clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 						break;
 					case AT_PINION_SHOT:
 					{
@@ -19833,6 +19837,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case AT_TEMPEST_FLAP:
 		case AT_QUILL_SPEAR_S:
 		case AT_QUILL_SPEAR:
 		case AT_PINION_SHOT:

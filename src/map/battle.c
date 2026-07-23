@@ -4557,6 +4557,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_TEMPEST_FLAP:
+					skillratio += -100 + 1400 * skill_lv;
+					skillratio += 10 * st->con;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_QUILL_SPEAR_S:
 				case AT_QUILL_SPEAR:
 					skillratio += -100 + 2100 * skill_lv;
@@ -5632,8 +5637,7 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 	if (skill_id == SHC_SAVAGE_IMPACT || skill_id == SHC_FATAL_SHADOW_CROW || skill_id == MT_RUSH_QUAKE
 		|| skill_id == MT_RUSH_STRIKE || skill_id == ABC_UNLUCKY_RUSH || skill_id == DR_CRUEL_BITE
 		|| skill_id == KR_CLAW_WAVE || skill_id == AT_PRIMAL_CLAW || skill_id == AT_FERAL_CLAW
-		|| skill_id == AT_ALPHA_CLAW || skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG
-		|| skill_id == AT_QUILL_SPEAR_S)
+		|| skill_id == AT_ALPHA_CLAW || skill_id == AT_SAVAGE_LUNGE || skill_id == AT_FRENZY_FANG)
 		return BF_SHORT;
 	if (skill_id == DK_HACKANDSLASHER || skill_id == DK_HACKANDSLASHER_ATK) {
 		struct map_session_data *sd = BL_CAST(BL_PC, src);
@@ -6754,6 +6758,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case NC_POWERSWING:
 				if (sc != NULL && sc->data[SC_ABR_BATTLE_WARIOR] != NULL)
 					wd.div_ = -2;
+				break;
+			case AT_TEMPEST_FLAP:
+				if (sc != NULL && sc->data[SC_APEX_PHASE] != NULL)
+					wd.div_ = 3;
 				break;
 			case AT_FRENZY_FANG:
 				if (sc != NULL) {
