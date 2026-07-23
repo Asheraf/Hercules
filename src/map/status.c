@@ -2189,6 +2189,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		sd->patk_rate = 0;
 	if ((skill_lv = pc->checkskill(sd, AT_SIXTH_SENSE)) > 0)
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 2, 0, SHRT_MAX);
+	if ((skill_lv = pc->checkskill(sd, AT_NATURE_AID)) > 0)
+		bstatus->smatk = (int32)cap_value((int64)bstatus->smatk + skill_lv * 4, 0, SHRT_MAX);
 	if ((skill_lv = pc->checkskill(sd, TR_STAGE_MANNER)) > 0 && (sd->weapontype == W_BOW || sd->weapontype == W_MUSICAL
 		|| sd->weapontype == W_WHIP)) {
 		bstatus->patk = (int32)cap_value((int64)bstatus->patk + skill_lv * 3, 0, SHRT_MAX);
