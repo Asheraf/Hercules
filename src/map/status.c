@@ -7508,6 +7508,12 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 		if( !total_tick ) return 0;
 	}
 
+	// A status the database marks as blocking this one stops it from starting
+	for (int fi = 0; fi < VECTOR_LENGTH(status->dbs->FailTable[type]); fi++) {
+		if (sc->data[VECTOR_INDEX(status->dbs->FailTable[type], fi)] != NULL)
+			return 0;
+	}
+
 	undead_flag = battle->check_undead(st->race, st->def_ele);
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
@@ -14640,6 +14646,9 @@ static bool status_read_scdb_libconfig(void)
 		return false;
 	}
 
+	for (int type = SC_NONE + 1; type < SC_MAX; type++)
+		VECTOR_CLEAR(status->dbs->FailTable[type]);
+
 	int i = 0;
 	int count = 0;
 	struct config_setting_t *it = NULL;
@@ -14692,9 +14701,41 @@ static bool status_read_scdb_libconfig_sub(struct config_setting_t *it, int idx,
 	if (sk != NULL)
 		status->read_scdb_libconfig_sub_skill(sk, status_id, source);
 
+	struct config_setting_t *fail = libconfig->setting_get_member(it, "Fail");
+	if (fail != NULL)
+		status->read_scdb_libconfig_sub_fail(fail, status_id, source);
+
 	if (libconfig->setting_lookup_bool(it, "HasVisualEffect", &i32) == CONFIG_TRUE && i32 != 0)
 		status->dbs->IconChangeTable[status_id].relevant_bl_types |= BL_SCEFFECT;
 
+	return true;
+}
+
+/**
+ * Reads the statuses that stop this one from starting.
+ */
+static bool status_read_scdb_libconfig_sub_fail(struct config_setting_t *it, int type, const char *source)
+{
+	nullpo_retr(false, it);
+	nullpo_retr(false, source);
+	Assert_retr(false, type > SC_NONE && type < SC_MAX);
+
+	int i = 0;
+	struct config_setting_t *t = NULL;
+	while ((t = libconfig->setting_get_elem(it, i++)) != NULL) {
+		const char *name = config_setting_name(t);
+		int blocker;
+
+		if (script->get_constant(name, &blocker) == false || blocker <= SC_NONE || blocker >= SC_MAX) {
+			ShowWarning("status_read_scdb_libconfig_sub_fail: unknown status (%s) for status effect (%d) in \"%s\".\n",
+			            name, type, source);
+			continue;
+		}
+		if (libconfig->setting_get_bool_real(t) == false)
+			continue;
+		VECTOR_ENSURE(status->dbs->FailTable[type], 1, 1);
+		VECTOR_PUSH(status->dbs->FailTable[type], (sc_type)blocker);
+	}
 	return true;
 }
 
@@ -15203,6 +15244,9 @@ static void do_final_status(void)
 
 	status->unit_params_destroy_entry(&status->dummy_unit_params);
 	status->unit_params_clear_db();
+
+	for (int i = 0; i < SC_MAX; i++)
+		VECTOR_CLEAR(status->dbs->FailTable[i]);
 }
 
 /*=====================================
@@ -15387,6 +15431,7 @@ void status_defaults(void)
 	status->read_scdb_libconfig_sub_flag_additional = status_read_scdb_libconfig_sub_flag_additional;
 	status->read_scdb_libconfig_sub_calcflag_additional = status_read_scdb_libconfig_sub_calcflag_additional;
 	status->read_scdb_libconfig_sub_skill = status_read_scdb_libconfig_sub_skill;
+	status->read_scdb_libconfig_sub_fail = status_read_scdb_libconfig_sub_fail;
 	status->read_job_db = status_read_job_db;
 	status->read_job_db_sub = status_read_job_db_sub;
 	status->read_unit_params_db = status_read_unit_params_db;
