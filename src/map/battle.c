@@ -2228,6 +2228,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += skillratio * status->get_lv(&ed->master->bl) / 100;
 				}
 					break;
+				case EM_EL_DEADLY_POISON:
+				{
+					struct elemental_data *ed = BL_CAST(BL_ELEM, src);
+
+					skillratio += 600;
+					if (ed != NULL && ed->master != NULL)
+						skillratio += skillratio * status->get_lv(&ed->master->bl) / 100;
+				}
+					break;
 				case MH_ERASER_CUTTER:
 					skillratio += 400 + 100 * skill_lv + (skill_lv%2 > 0 ? 0 : 300);
 					break;

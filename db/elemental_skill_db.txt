@@ -123,3 +123,4 @@
 //================
 20820,8455,1,1	//EM_EL_DEEP_POISONING,Deep Poisoning
 20820,8456,1,2	//EM_EL_POISON_SHIELD,Poison Shield
+20820,8457,1,4	//EM_EL_DEADLY_POISON,Deadly Poison
