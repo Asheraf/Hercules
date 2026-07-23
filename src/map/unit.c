@@ -1252,6 +1252,9 @@ static int unit_can_move(struct block_list *bl)
 	))
 		return 0; //Can't move
 
+	if (status->has_state(bl, SCS_NOMOVE) != 0)
+		return 0;
+
 	// Status changes that block movement
 	if (sc) {
 		if( sc->count
