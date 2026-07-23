@@ -2656,6 +2656,7 @@ struct skill_interface {
 	int (*shimiru_check_cell) (struct block_list *target, va_list ap);
 	bool (*mirage_cast) (struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int16 x,
 	                     int16 y, int64 tick, int flag);
+	void (*add_thundering_charge) (struct block_list *src, uint16 skill_id, uint16 skill_lv, int charge);
 	int (*consume_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv, short type);
 	struct skill_condition (*get_requirement) (struct map_session_data *sd, uint16 skill_id, uint16 skill_lv);
 	int (*check_pc_partner) (struct map_session_data *sd, uint16 skill_id, uint16* skill_lv, int range, int cast_flag);

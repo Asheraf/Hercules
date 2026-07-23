@@ -5170,6 +5170,41 @@ static int skill_shimiru_check_cell(struct block_list *target, va_list ap)
 }
 
 /**
+ * Builds up the thundering rod charge the Alitea storm skills share.
+ *
+ * The charge caps at six, at which point the rod is fully drawn and the
+ * overcharged version of the storm skills takes over.
+ */
+static void skill_add_thundering_charge(struct block_list *src, uint16 skill_id, uint16 skill_lv, int charge)
+{
+	struct status_change *sc;
+	enum sc_type type;
+	int duration;
+
+	nullpo_retv(src);
+
+	if (charge <= 0)
+		return;
+
+	sc = status->get_sc(src);
+	if (sc == NULL)
+		return;
+
+	type = skill->get_sc_type(skill_id);
+	if (type == SC_NONE)
+		return;
+
+	duration = skill->get_time(skill_id, skill_lv);
+	if (sc->data[type] != NULL)
+		charge += sc->data[type]->val3;
+	charge = min(6, charge);
+
+	sc_start4(src, src, type, 100, skill_id, skill_lv, charge, 0, duration, skill_id);
+	if (charge == 6)
+		sc_start(src, src, SC_THUNDERING_ROD_MAX, 100, 1, duration, skill_id);
+}
+
+/**
  * Repeats a Shinkiro skill from every Mirage the caster has placed.
  *
  * The copies deal reduced damage, which the damage formulas key off
@@ -7223,6 +7258,19 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			map->foreachinpath(skill->area_sub, src->m, start_x, start_y, bl->x, bl->y, width, 7,
 			                   skill->splash_target(src), src, skill_id, skill_lv, tick,
 			                   flag | BCT_ENEMY | SD_PREAMBLE | SD_SPLASH | 1, skill->castend_damage_id);
+		}
+			break;
+		case AT_ROARING_PIERCER:
+		{
+			int splash = skill->get_splash(skill_id, skill_lv);
+			int range = skill->get_range(skill_id, skill_lv) + 2;
+
+			skill->add_thundering_charge(src, skill_id, skill_lv, 1);
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = bl->id;
+			map->foreachinpath(skill->attack_area, src->m, src->x, src->y, bl->x, bl->y, splash, range,
+			                   skill->splash_target(src), skill->get_type(skill_id, skill_lv), src, src,
+			                   skill_id, skill_lv, tick, flag, BCT_ENEMY);
 		}
 			break;
 		case AT_GLACIER_SHARD:
@@ -30204,6 +30252,7 @@ void skill_defaults(void)
 	skill->sh_communed = skill_sh_communed;
 	skill->shimiru_check_cell = skill_shimiru_check_cell;
 	skill->mirage_cast = skill_mirage_cast;
+	skill->add_thundering_charge = skill_add_thundering_charge;
 	skill->consume_requirement = skill_consume_requirement;
 	skill->get_requirement = skill_get_requirement;
 	skill->check_pc_partner = skill_check_pc_partner;
