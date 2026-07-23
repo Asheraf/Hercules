@@ -7275,6 +7275,33 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			                   flag | BCT_ENEMY | SD_PREAMBLE | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case AT_TERRA_HARVEST:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			if ((flag & 1) != 0) {
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+				break;
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			if (sd != NULL) {
+				int stacks = 2;
+				int ground_bloom_lv = pc->checkskill(sd, KR_EARTH_BUD);
+
+				if (ground_bloom_lv > 0) {
+					if (sd->sc.data[SC_GROUND_GROW] != NULL)
+						stacks += sd->sc.data[SC_GROUND_GROW]->val3;
+					if (stacks < 13)
+						sc_start4(src, src, SC_GROUND_GROW, 100, 0, 0, stacks, 0, 10000, skill_id);
+					else
+						skill->castend_nodamage_id(src, src, KR_GROUND_BLOOM, ground_bloom_lv, tick, 0);
+				}
+			}
+			skill->area_temp[1] = bl->id;
+			map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+		}
+			break;
 		case AT_ROARING_PIERCER:
 			if (sc != NULL && sc->data[SC_THUNDERING_ROD_MAX] != NULL) {
 				skill->castend_damage_id(src, bl, AT_ROARING_PIERCER_S, skill_lv, tick, flag);
