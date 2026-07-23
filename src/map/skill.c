@@ -10294,6 +10294,17 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_CHILLING_BLAST:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			skill->castend_pos2(src, 0, 0, AT_GLACIER_NOVA, 1, tick, 0);
+		}
+			break;
 		case AT_GLACIER_STOMP:
 		{
 			struct status_change *ssc = status->get_sc(src);
@@ -19191,7 +19202,8 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
 	}
-	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND || skill_id == DR_TRUTH_OF_EARTH) && sc != NULL
+	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND || skill_id == DR_TRUTH_OF_EARTH
+	  || skill_id == AT_CHILLING_BLAST) && sc != NULL
 		&& (sc->data[SC_WEREWOLF] != NULL || sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;
