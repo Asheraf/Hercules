@@ -7193,6 +7193,26 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
 		}
 			break;
+		case AT_QUILL_SPEAR:
+		{
+			int width = (sc != NULL && sc->data[SC_APEX_PHASE] != NULL) ? 2 : 1;
+			enum unit_dir dir = map->calc_dir(src, bl->x, bl->y);
+			int start_x = bl->x - dirx[dir] * 3;
+			int start_y = bl->y - diry[dir] * 3;
+
+			if ((flag & 1) != 0) {
+				skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
+				break;
+			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[0] = 0;
+			skill->area_temp[1] = bl->id;
+			skill->area_temp[2] = 0;
+			map->foreachinpath(skill->area_sub, src->m, start_x, start_y, bl->x, bl->y, width, 7,
+			                   skill->splash_target(src), src, skill_id, skill_lv, tick,
+			                   flag | BCT_ENEMY | SD_PREAMBLE | SD_SPLASH | 1, skill->castend_damage_id);
+		}
+			break;
 		case AT_FRENZY_FANG:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
@@ -19806,6 +19826,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 				return 0;
 			}
 			break;
+		case AT_QUILL_SPEAR:
 		case AT_PINION_SHOT:
 		case AT_FLIP_FLAP:
 		case AT_APEX_PHASE:
