@@ -14738,6 +14738,7 @@ static bool status_read_scdb_libconfig_sub_state(struct config_setting_t *it, in
 		{ "NoMove", SCS_NOMOVE },
 		{ "NoChat", SCS_NOCHAT },
 		{ "NoAttack", SCS_NOATTACK },
+		{ "NoConsumeItem", SCS_NOCONSUMEITEM },
 	};
 
 	int i = 0;

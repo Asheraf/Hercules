@@ -56,11 +56,12 @@ struct pet_data;
  * Player states a status can impose, as named by the States block.
  */
 enum sc_state_flag {
-	SCS_NONE   = 0x0,
-	SCS_NOCAST = 0x1, ///< cannot use skills
-	SCS_NOMOVE = 0x2, ///< cannot walk
-	SCS_NOCHAT = 0x4, ///< cannot talk
-	SCS_NOATTACK = 0x8, ///< cannot attack
+	SCS_NONE          = 0x0,
+	SCS_NOCAST        = 0x1, ///< cannot use skills
+	SCS_NOMOVE        = 0x2, ///< cannot walk
+	SCS_NOCHAT        = 0x4, ///< cannot talk
+	SCS_NOATTACK      = 0x8, ///< cannot attack
+	SCS_NOCONSUMEITEM = 0x10, ///< cannot use consumable items
 };
 
 typedef enum sc_conf_type {

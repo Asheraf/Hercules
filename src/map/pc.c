@@ -5452,21 +5452,12 @@ static int pc_useitem(struct map_session_data *sd, int n)
 	if (nameid != ITEMID_NAUTHIZ && sd->sc.opt1 > 0 && sd->sc.opt1 != OPT1_STONEWAIT && sd->sc.opt1 != OPT1_BURNING)
 		return 0;
 
+	if (status->has_state(&sd->bl, SCS_NOCONSUMEITEM) != 0)
+		return 0;
+
 	// Statuses that don't let the player use items
 	if (sd->sc.count && (
-		sd->sc.data[SC_BERSERK] ||
 		(sd->sc.data[SC_GRAVITATION] && sd->sc.data[SC_GRAVITATION]->val3 == BCT_SELF) ||
-		sd->sc.data[SC_TRICKDEAD] ||
-		sd->sc.data[SC_HIDING] ||
-		sd->sc.data[SC__SHADOWFORM] ||
-		sd->sc.data[SC__INVISIBILITY] ||
-		sd->sc.data[SC__MANHOLE] ||
-		sd->sc.data[SC_KG_KAGEHUMI] ||
-		sd->sc.data[SC_WHITEIMPRISON] ||
-		sd->sc.data[SC_DEEP_SLEEP] ||
-		sd->sc.data[SC_SATURDAY_NIGHT_FEVER] ||
-		sd->sc.data[SC_COLD] ||
-		sd->sc.data[SC_SUHIDE] ||
 		pc_ismuted(&sd->sc, MANNER_NOITEM)
 	    ))
 		return 0;
