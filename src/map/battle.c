@@ -4557,6 +4557,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_GLACIER_SHARD:
+					skillratio += -100 + 5500 + 300 * (skill_lv - 1);
+					if (sc != NULL && sc->data[SC_TRUTH_OF_ICE] != NULL)
+						skillratio += 12 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_GLACIER_NOVA:
 					skillratio += -100 + 15000;
 					skillratio += 15 * st->spl;

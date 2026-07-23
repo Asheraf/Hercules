@@ -7225,6 +7225,21 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			                   flag | BCT_ENEMY | SD_PREAMBLE | SD_SPLASH | 1, skill->castend_damage_id);
 		}
 			break;
+		case AT_GLACIER_SHARD:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			if ((flag & 1) != 0) {
+				clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+				skill->attack(BF_MAGIC, src, src, bl, skill_id, skill_lv, tick, flag);
+				break;
+			}
+			skill->area_temp[1] = bl->id;
+			map->foreachinrange(skill->area_sub, bl, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			skill->castend_pos2(src, 0, 0, AT_GLACIER_NOVA, 1, tick, 0);
+		}
+			break;
 		case AT_FRENZY_FANG:
 			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 			skill->attack(BF_WEAPON, src, src, bl, skill_id, skill_lv, tick, flag);
