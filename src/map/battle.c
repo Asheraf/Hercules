@@ -5925,6 +5925,7 @@ static struct Damage battle_calc_magic_attack(struct block_list *src, struct blo
 			else if (sc->data[SC_COLD_FORCE_OPTION] != NULL) s_ele = sc->data[SC_COLD_FORCE_OPTION]->val3;
 			else if (sc->data[SC_GRACE_BREEZE_OPTION] != NULL) s_ele = sc->data[SC_GRACE_BREEZE_OPTION]->val3;
 			else if (sc->data[SC_EARTH_CARE_OPTION] != NULL) s_ele = sc->data[SC_EARTH_CARE_OPTION]->val3;
+			else if (sc->data[SC_DEEP_POISONING_OPTION] != NULL) s_ele = sc->data[SC_DEEP_POISONING_OPTION]->val3;
 		}
 	}
 
@@ -9569,6 +9570,24 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 			sd->auto_cast_current.type = AUTOCAST_TEMP;
 			if (status->charge(src, 0, skill->get_sp(WZ_EARTHSPIKE, skill_lv)) != 0) {
 				skill->castend_damage_id(src, target, WZ_EARTHSPIKE, skill_lv, tick, flag);
+				if (DIFF_TICK(sd->ud.canact_tick, tick + delay) < 0) {
+					sd->ud.canact_tick = max(tick + delay, sd->ud.canact_tick);
+					if (battle_config.display_status_timers != 0)
+						clif->status_change(src, status->get_sc_icon(SC_POSTDELAY),
+						                    status->get_sc_relevant_bl_types(SC_POSTDELAY), 1, delay, 0, 0, 0);
+				}
+			}
+			sd->auto_cast_current.type = ac_type;
+		}
+
+		if (sc != NULL && sc->data[SC_DEEP_POISONING_OPTION] != NULL && rnd()%100 < 7) {
+			uint16 skill_lv = max(1, pc->checkskill(sd, SO_POISON_BUSTER));
+			enum autocast_type ac_type = sd->auto_cast_current.type;
+			int delay = skill->delay_fix(src, SO_POISON_BUSTER, skill_lv);
+
+			sd->auto_cast_current.type = AUTOCAST_TEMP;
+			if (status->charge(src, 0, skill->get_sp(SO_POISON_BUSTER, skill_lv)) != 0) {
+				skill->castend_damage_id(src, target, SO_POISON_BUSTER, skill_lv, tick, flag);
 				if (DIFF_TICK(sd->ud.canact_tick, tick + delay) < 0) {
 					sd->ud.canact_tick = max(tick + delay, sd->ud.canact_tick);
 					if (battle_config.display_status_timers != 0)

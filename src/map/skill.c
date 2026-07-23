@@ -14656,6 +14656,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case EM_EL_EYES_OF_STORM:
 		case EM_EL_EARTH_CARE:
 		case EM_EL_STRONG_PROTECTION:
+		case EM_EL_DEEP_POISONING:
 		{
 			struct elemental_data *ele = BL_CAST(BL_ELEM, src);
 			if( ele ) {
