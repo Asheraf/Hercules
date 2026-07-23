@@ -10394,6 +10394,33 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_SOLID_STOMP:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+			int64 heal = (int64)status_get_max_hp(src) * skill_lv / 100;
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			sc_start(src, src, SC_SOLID_STOMP, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			if (heal > 0)
+				status->heal(src, heal, 0, STATUS_HEAL_DEFAULT);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+			if (sd != NULL) {
+				int stacks = 4;
+				int ground_bloom_lv = pc->checkskill(sd, KR_EARTH_BUD);
+
+				if (ground_bloom_lv > 0) {
+					if (sd->sc.data[SC_GROUND_GROW] != NULL)
+						stacks += sd->sc.data[SC_GROUND_GROW]->val3;
+					if (stacks < 13)
+						sc_start4(src, src, SC_GROUND_GROW, 100, 0, 0, stacks, 0, 10000, skill_id);
+					else
+						skill->castend_nodamage_id(src, src, KR_GROUND_BLOOM, ground_bloom_lv, tick, 0);
+				}
+			}
+		}
+			break;
 		case AT_FURIOS_STORM:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
@@ -19386,7 +19413,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		return 0;
 	}
 	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND || skill_id == DR_TRUTH_OF_EARTH
-	  || skill_id == AT_CHILLING_BLAST || skill_id == AT_FURIOS_STORM) && sc != NULL
+	  || skill_id == AT_CHILLING_BLAST || skill_id == AT_FURIOS_STORM || skill_id == AT_SOLID_STOMP) && sc != NULL
 		&& (sc->data[SC_WEREWOLF] != NULL || sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;

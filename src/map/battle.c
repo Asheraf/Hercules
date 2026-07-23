@@ -4557,6 +4557,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_SOLID_STOMP:
+					skillratio += -100 + 10400 + 800 * (skill_lv - 1);
+					skillratio += 20 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_TERRA_HARVEST:
 					skillratio += -100 + 18000 + 500 * (skill_lv - 1);
 					if (sc != NULL && sc->data[SC_TRUTH_OF_EARTH] != NULL)
