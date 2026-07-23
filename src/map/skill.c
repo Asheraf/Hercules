@@ -10352,6 +10352,16 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_FURIOS_STORM:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+		}
+			break;
 		case AT_ROARING_CHARGE:
 		case AT_ROARING_CHARGE_S:
 		{
@@ -19287,7 +19297,7 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 		return 0;
 	}
 	if ((skill_id == DR_TRUTH_OF_ICE || skill_id == DR_TRUTH_OF_WIND || skill_id == DR_TRUTH_OF_EARTH
-	  || skill_id == AT_CHILLING_BLAST) && sc != NULL
+	  || skill_id == AT_CHILLING_BLAST || skill_id == AT_FURIOS_STORM) && sc != NULL
 		&& (sc->data[SC_WEREWOLF] != NULL || sc->data[SC_WERERAPTOR] != NULL)) {
 		clif->skill_fail(sd, skill_id, USESKILL_FAIL, 0, 0);
 		return 0;

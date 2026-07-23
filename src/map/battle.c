@@ -4557,6 +4557,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 320;
 					RE_LVL_DMOD(100);
 					break;
+				case AT_FURIOS_STORM:
+					skillratio += -100 + 7800 + 400 * (skill_lv - 1);
+					skillratio += 20 * st->spl;
+					RE_LVL_DMOD(100);
+					break;
 				case AT_ROARING_CHARGE_S:
 					skillratio += -100 + 11500 + 500 * (skill_lv - 1);
 					skillratio += 7 * st->spl;
