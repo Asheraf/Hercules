@@ -10873,6 +10873,9 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 	nullpo_retr(true, st);
 	nullpo_retr(true, sc);
 
+	for (int ei = 0; ei < VECTOR_LENGTH(status->dbs->EndOnStartTable[type]); ei++)
+		status_change_end(bl, VECTOR_INDEX(status->dbs->EndOnStartTable[type], ei), INVALID_TIMER);
+
 	PRAGMA_GCC46(GCC diagnostic push)
 	PRAGMA_GCC46(GCC diagnostic ignored "-Wswitch-enum")
 	switch (type) {
@@ -10941,10 +10944,6 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 	case SC_OVERTHRUSTMAX:
 		// Cancels Normal Overthrust. [Skotlex]
 		status_change_end(bl, SC_OVERTHRUST, INVALID_TIMER);
-		break;
-	case SC_KYRIE:
-		// Cancels Assumptio (Non-Renewal version)
-		status_change_end(bl, SC_ASSUMPTIO, INVALID_TIMER);
 		break;
 	case SC_MAGNIFICAT:
 		// Cancels Offertorium
@@ -11457,6 +11456,9 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 		return 0;
 
 	st = status->get_status_data(bl);
+
+	for (int ei = 0; ei < VECTOR_LENGTH(status->dbs->EndOnEndTable[type]); ei++)
+		status_change_end(bl, VECTOR_INDEX(status->dbs->EndOnEndTable[type], ei), INVALID_TIMER);
 
 	if( sd && sce->infinite_duration && !sd->state.loggingout )
 		chrif->del_scdata_single(sd->status.account_id,sd->status.char_id,type);
@@ -14646,8 +14648,11 @@ static bool status_read_scdb_libconfig(void)
 		return false;
 	}
 
-	for (int type = SC_NONE + 1; type < SC_MAX; type++)
+	for (int type = SC_NONE + 1; type < SC_MAX; type++) {
 		VECTOR_CLEAR(status->dbs->FailTable[type]);
+		VECTOR_CLEAR(status->dbs->EndOnStartTable[type]);
+		VECTOR_CLEAR(status->dbs->EndOnEndTable[type]);
+	}
 
 	int i = 0;
 	int count = 0;
@@ -14705,9 +14710,51 @@ static bool status_read_scdb_libconfig_sub(struct config_setting_t *it, int idx,
 	if (fail != NULL)
 		status->read_scdb_libconfig_sub_fail(fail, status_id, source);
 
+	struct config_setting_t *eos = libconfig->setting_get_member(it, "EndOnStart");
+	if (eos != NULL)
+		status->read_scdb_libconfig_sub_endlist(eos, status_id, source, true);
+
+	struct config_setting_t *eoe = libconfig->setting_get_member(it, "EndOnEnd");
+	if (eoe != NULL)
+		status->read_scdb_libconfig_sub_endlist(eoe, status_id, source, false);
+
 	if (libconfig->setting_lookup_bool(it, "HasVisualEffect", &i32) == CONFIG_TRUE && i32 != 0)
 		status->dbs->IconChangeTable[status_id].relevant_bl_types |= BL_SCEFFECT;
 
+	return true;
+}
+
+/**
+ * Reads a list of statuses to cancel, either as this one starts or as it ends.
+ */
+static bool status_read_scdb_libconfig_sub_endlist(struct config_setting_t *it, int type, const char *source,
+	bool on_start)
+{
+	nullpo_retr(false, it);
+	nullpo_retr(false, source);
+	Assert_retr(false, type > SC_NONE && type < SC_MAX);
+
+	int i = 0;
+	struct config_setting_t *t = NULL;
+	while ((t = libconfig->setting_get_elem(it, i++)) != NULL) {
+		const char *name = config_setting_name(t);
+		int other;
+
+		if (script->get_constant(name, &other) == false || other <= SC_NONE || other >= SC_MAX) {
+			ShowWarning("status_read_scdb_libconfig_sub_endlist: unknown status (%s) for status effect (%d) in \"%s\".\n",
+			            name, type, source);
+			continue;
+		}
+		if (libconfig->setting_get_bool_real(t) == false)
+			continue;
+		if (on_start == true) {
+			VECTOR_ENSURE(status->dbs->EndOnStartTable[type], 1, 1);
+			VECTOR_PUSH(status->dbs->EndOnStartTable[type], (sc_type)other);
+		} else {
+			VECTOR_ENSURE(status->dbs->EndOnEndTable[type], 1, 1);
+			VECTOR_PUSH(status->dbs->EndOnEndTable[type], (sc_type)other);
+		}
+	}
 	return true;
 }
 
@@ -15245,8 +15292,11 @@ static void do_final_status(void)
 	status->unit_params_destroy_entry(&status->dummy_unit_params);
 	status->unit_params_clear_db();
 
-	for (int i = 0; i < SC_MAX; i++)
+	for (int i = 0; i < SC_MAX; i++) {
 		VECTOR_CLEAR(status->dbs->FailTable[i]);
+		VECTOR_CLEAR(status->dbs->EndOnStartTable[i]);
+		VECTOR_CLEAR(status->dbs->EndOnEndTable[i]);
+	}
 }
 
 /*=====================================
@@ -15432,6 +15482,7 @@ void status_defaults(void)
 	status->read_scdb_libconfig_sub_calcflag_additional = status_read_scdb_libconfig_sub_calcflag_additional;
 	status->read_scdb_libconfig_sub_skill = status_read_scdb_libconfig_sub_skill;
 	status->read_scdb_libconfig_sub_fail = status_read_scdb_libconfig_sub_fail;
+	status->read_scdb_libconfig_sub_endlist = status_read_scdb_libconfig_sub_endlist;
 	status->read_job_db = status_read_job_db;
 	status->read_job_db_sub = status_read_job_db_sub;
 	status->read_unit_params_db = status_read_unit_params_db;
