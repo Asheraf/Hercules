@@ -53,18 +53,19 @@ struct pet_data;
  * @see db/sc_config.conf for more information
  **/
 typedef enum sc_conf_type {
-	SC_NO_REM_DEATH  = 0x001,
-	SC_NO_SAVE       = 0x002,
-	SC_NO_DISPELL    = 0x004,
-	SC_NO_CLEARANCE  = 0x008,
-	SC_BUFF          = 0x010,
-	SC_DEBUFF        = 0x020,
-	SC_MADO_NO_RESET = 0x040,
-	SC_NO_CLEAR      = 0x080,
-	SC_VISIBLE       = 0x100,
-	SC_NO_BOSS       = 0x200,
-	SC_BB_NO_RESET   = 0x400,
-	SC_NO_MAGIC_BLOCK = 0x800
+	SC_NO_REM_DEATH     = 0x001,
+	SC_NO_SAVE          = 0x002,
+	SC_NO_DISPELL       = 0x004,
+	SC_NO_CLEARANCE     = 0x008,
+	SC_BUFF             = 0x010,
+	SC_DEBUFF           = 0x020,
+	SC_MADO_NO_RESET    = 0x040,
+	SC_NO_CLEAR         = 0x080,
+	SC_VISIBLE          = 0x100,
+	SC_NO_BOSS          = 0x200,
+	SC_BB_NO_RESET      = 0x400,
+	SC_NO_MAGIC_BLOCK   = 0x800,
+	SC_NO_SAVE_INFINITE = 0x1000
 } sc_conf_type;
 
 /**

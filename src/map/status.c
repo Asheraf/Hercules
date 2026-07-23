@@ -10239,7 +10239,7 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 	} else {
 		sce->timer = INVALID_TIMER; //Infinite duration
 		sce->infinite_duration = true;
-		if( sd )
+		if (sd != NULL && (status->dbs->sc_conf[type] & SC_NO_SAVE_INFINITE) == 0)
 			chrif->save_scdata_single(sd->status.account_id,sd->status.char_id,type,sce);
 	}
 
@@ -14814,6 +14814,7 @@ static bool status_read_scdb_libconfig_sub_flag(struct config_setting_t *it, int
 			{ "NoBoss", SC_NO_BOSS },
 			{ "NoBBReset", SC_BB_NO_RESET },
 			{ "NoMagicBlocked", SC_NO_MAGIC_BLOCK },
+			{ "NoSaveInfinite", SC_NO_SAVE_INFINITE },
 		};
 
 		ARR_FIND(0, ARRAYLENGTH(flags), j, strcmpi(flag, flags[j].name) == 0);
