@@ -407,6 +407,7 @@ static int elemental_clean_single_effect(struct elemental_data *ed, uint16 skill
 			case SC_EARTH_CARE_OPTION:
 			case SC_STRONG_PROTECTION_OPTION:
 			case SC_DEEP_POISONING_OPTION:
+			case SC_POISON_SHIELD_OPTION:
 				if( bl ) status_change_end(bl,type,INVALID_TIMER); // Master
 				status_change_end(&ed->bl,type-1,INVALID_TIMER); // Elemental Spirit
 				break;
@@ -460,6 +461,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&ed->bl, SC_EARTH_CARE, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_STRONG_PROTECTION, INVALID_TIMER);
 	status_change_end(&ed->bl, SC_DEEP_POISONING, INVALID_TIMER);
+	status_change_end(&ed->bl, SC_POISON_SHIELD, INVALID_TIMER);
 
 	if( (sd = ed->master) == NULL )
 		return 0;
@@ -498,6 +500,7 @@ static int elemental_clean_effect(struct elemental_data *ed)
 	status_change_end(&sd->bl, SC_EARTH_CARE_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_STRONG_PROTECTION_OPTION, INVALID_TIMER);
 	status_change_end(&sd->bl, SC_DEEP_POISONING_OPTION, INVALID_TIMER);
+	status_change_end(&sd->bl, SC_POISON_SHIELD_OPTION, INVALID_TIMER);
 
 	return 1;
 }
