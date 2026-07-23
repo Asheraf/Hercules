@@ -10352,6 +10352,17 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1,
 			                    skill->castend_damage_id);
 			break;
+		case AT_ROARING_CHARGE:
+		{
+			int range = skill->get_splash(skill_id, skill_lv);
+
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->add_thundering_charge(src, skill_id, skill_lv, skill_lv + 1);
+			skill->area_temp[1] = 0;
+			map->foreachinrange(skill->area_sub, src, range, BL_CHAR, src, skill_id, skill_lv, tick,
+			                    flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+		}
+			break;
 		case AT_CHILLING_BLAST:
 		{
 			int range = skill->get_splash(skill_id, skill_lv);
