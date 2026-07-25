@@ -116,6 +116,6 @@
 #define MAP_ZONE_BG_NAME "Battlegrounds"
 #define MAP_ZONE_CVC_NAME "CvC"
 #define MAP_ZONE_PK_NAME "PK Mode"
-#define MAP_ZONE_MAPFLAG_LENGTH 65
+#define MAP_ZONE_MAPFLAG_LENGTH 80
 
 #endif /* MAP_MAPDEFINES_H */
