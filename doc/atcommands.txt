@@ -447,7 +447,8 @@ Base Level: 13 (3.323%) | Job Level: 10 (0.000%)
 
 @stats
 
-Displays the stats of the attached player in your chat bar, including AP.
+Displays the stats of the attached player in your chat bar, including 4th-job
+trait stats and AP.
 
 ---------------------------------------
 
@@ -870,8 +871,15 @@ Changes base or job level by the specified amount.
 @int <+/- amount>
 @dex <+/- amount>
 @luk <+/- amount>
+@pow <+/- amount>
+@sta <+/- amount>
+@wis <+/- amount>
+@spl <+/- amount>
+@con <+/- amount>
+@crt <+/- amount>
 
-Changes the specified stat of your character.
+Changes the specified stat of your character. POW, STA, WIS, SPL, CON, and CRT
+are 4th-job trait stats.
 
 ---------------------------------------
 
@@ -889,8 +897,9 @@ Gives your character all skills in their current skill tree.
 
 @stpoint <+/- amount>
 @skpoint <+/- amount>
+@tpoint <+/- amount>
 
-Changes unused status or skill points by the specified amount.
+Changes unused status, skill, or trait points by the specified amount.
 
 ---------------------------------------
 

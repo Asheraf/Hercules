@@ -2640,6 +2640,35 @@ ACMD(statuspoint)
 }
 
 /*==========================================
+ * @tpoint
+ *------------------------------------------*/
+ACMD(traitpoint)
+{
+	int point;
+
+	if (*message == '\0' || sscanf(message, "%d", &point) != 1 || point == 0) {
+		clif->message(fd, "Please enter a number (usage: @tpoint <number of points>).");
+		return false;
+	}
+
+	int new_trait_point = (int)cap_value((int64)sd->status.trait_point + point, 0, INT_MAX);
+
+	if (new_trait_point != sd->status.trait_point) {
+		sd->status.trait_point = new_trait_point;
+		clif->updatestatus(sd, SP_TSTATUSPOINT);
+		clif->message(fd, "Number of trait points changed.");
+	} else {
+		if (point < 0)
+			clif->message(fd, msg_fd(fd, MSGTBL_UNABLE_TO_DECREASE_VALUE)); // Unable to decrease the number/value.
+		else
+			clif->message(fd, msg_fd(fd, MSGTBL_IMPOSSIBLE_TO_INCREASE_VALUE)); // Unable to increase the number/value.
+		return false;
+	}
+
+	return true;
+}
+
+/*==========================================
  * @ap
  *------------------------------------------*/
 ACMD(ap)
@@ -2727,52 +2756,47 @@ ACMD(zeny)
  *------------------------------------------*/
 ACMD(param)
 {
-	int i, value = 0, new_value, max;
-	const char* param[] = { "str", "agi", "vit", "int", "dex", "luk" };
-	short* stats[6];
-	//we don't use direct initialization because it isn't part of the c standard.
+	const char *params[] = { "str", "agi", "vit", "int", "dex", "luk", "pow", "sta", "wis", "spl", "con", "crt" };
+	const int stats[] = { SP_STR, SP_AGI, SP_VIT, SP_INT, SP_DEX, SP_LUK, SP_POW, SP_STA, SP_WIS, SP_SPL, SP_CON, SP_CRT };
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
-	if (!*message || sscanf(message, "%d", &value) < 1 || value == 0) {
+	int value;
+
+	if (*message == '\0' || sscanf(message, "%d", &value) != 1 || value == 0) {
 		clif->message(fd, msg_fd(fd, MSGTBL_ENTER_PARAM_ADJUSTMENT)); // Please enter a valid value (usage: @str/@agi/@vit/@int/@dex/@luk <+/-adjustment>).
 		return false;
 	}
 
-	ARR_FIND( 0, ARRAYLENGTH(param), i, strcmpi(info->command, param[i]) == 0 );
+	int index;
 
-	if( i == ARRAYLENGTH(param) || i > MAX_STATUS_TYPE) { // normally impossible...
+	ARR_FIND(0, ARRAYLENGTH(params), index, strcmpi(info->command, params[index]) == 0);
+
+	if (index == ARRAYLENGTH(params)) { // normally impossible...
 		clif->message(fd, msg_fd(fd, MSGTBL_ENTER_PARAM_ADJUSTMENT)); // Please enter a valid value (usage: @str/@agi/@vit/@int/@dex/@luk <+/-adjustment>).
 		return false;
 	}
 
-	stats[0] = &sd->status.str;
-	stats[1] = &sd->status.agi;
-	stats[2] = &sd->status.vit;
-	stats[3] = &sd->status.int_;
-	stats[4] = &sd->status.dex;
-	stats[5] = &sd->status.luk;
+	int max;
 
-	if( battle_config.atcommand_max_stat_bypass )
+	if (battle_config.atcommand_max_stat_bypass != 0)
 		max = SHRT_MAX;
+	else if (stats[index] >= SP_POW && stats[index] <= SP_CRT)
+		max = battle_config.max_trait_parameter;
 	else
 		max = pc_maxstats(sd);
 
-	if(value < 0 && *stats[i] <= -value) {
-		new_value = 1;
-	} else if(max - *stats[i] < value) {
-		new_value = max;
-	} else {
-		new_value = *stats[i] + value;
-	}
+	int current = pc->getstat(sd, stats[index]);
+	int minimum = stats[index] >= SP_POW && stats[index] <= SP_CRT ? 0 : 1;
+	int new_value = (int)cap_value((int64)current + value, minimum, max);
 
-	if (new_value != *stats[i]) {
-		*stats[i] = new_value;
-		clif->updatestatus(sd, SP_STR + i);
-		clif->updatestatus(sd, SP_USTR + i);
+	if (new_value != current) {
+		pc->setstat(sd, stats[index], new_value);
+		clif->updatestatus(sd, stats[index]);
+		clif->updatestatus(sd, stats[index] >= SP_POW && stats[index] <= SP_CRT
+			? SP_UPOW + stats[index] - SP_POW : SP_USTR + stats[index] - SP_STR);
 		status_calc_pc(sd, SCO_FORCE);
 		clif->message(fd, msg_fd(fd, MSGTBL_STAT_CHANGED)); // Stat changed.
-		achievement->validate_stats(sd, SP_STR + i, new_value); // Achievements [Smokexyz/Hercules]
 	} else {
 		if (value < 0)
 			clif->message(fd, msg_fd(fd, MSGTBL_UNABLE_TO_DECREASE_VALUE)); // Unable to decrease the number/value.
@@ -2789,40 +2813,28 @@ ACMD(param)
  *------------------------------------------*/
 ACMD(stat_all)
 {
-	int index, count, value, max, new_value;
-	short* stats[6];
-	//we don't use direct initialization because it isn't part of the c standard.
+	const int stats[] = { SP_STR, SP_AGI, SP_VIT, SP_INT, SP_DEX, SP_LUK };
+	int value;
+	int max;
 
-	stats[0] = &sd->status.str;
-	stats[1] = &sd->status.agi;
-	stats[2] = &sd->status.vit;
-	stats[3] = &sd->status.int_;
-	stats[4] = &sd->status.dex;
-	stats[5] = &sd->status.luk;
-
-	if (!*message || sscanf(message, "%d", &value) < 1 || value == 0) {
+	if (*message == '\0' || sscanf(message, "%d", &value) != 1 || value == 0) {
 		value = pc_maxstats(sd);
 		max = pc_maxstats(sd);
-	} else {
-		if( battle_config.atcommand_max_stat_bypass )
-			max = SHRT_MAX;
-		else
-			max = pc_maxstats(sd);
-	}
+	} else if (battle_config.atcommand_max_stat_bypass != 0)
+		max = SHRT_MAX;
+	else
+		max = pc_maxstats(sd);
 
-	count = 0;
-	for (index = 0; index < ARRAYLENGTH(stats); index++) {
-		if (value > 0 && *stats[index] > max - value)
-			new_value = max;
-		else if (value < 0 && *stats[index] <= -value)
-			new_value = 1;
-		else
-			new_value = *stats[index] +value;
+	int count = 0;
 
-		if (new_value != (int)*stats[index]) {
-			*stats[index] = new_value;
-			clif->updatestatus(sd, SP_STR + index);
-			clif->updatestatus(sd, SP_USTR + index);
+	for (int index = 0; index < ARRAYLENGTH(stats); index++) {
+		int current = pc->getstat(sd, stats[index]);
+		int new_value = (int)cap_value((int64)current + value, 1, max);
+
+		if (new_value != current) {
+			pc->setstat(sd, stats[index], new_value);
+			clif->updatestatus(sd, stats[index]);
+			clif->updatestatus(sd, SP_USTR + stats[index] - SP_STR);
 			count++;
 		}
 	}
@@ -4051,7 +4063,7 @@ ACMD(reloadstatusdb)
 	return true;
 }
 /*==========================================
- * @reloadpcdb - reloads exp_group_db.conf skill_tree.txt attr_fix.txt statpoint.txt
+ * @reloadpcdb - reloads exp_group_db.conf skill_tree.txt attr_fix.conf statpoint.conf
  *------------------------------------------*/
 ACMD(reloadpcdb)
 {
@@ -9083,8 +9095,15 @@ ACMD(stats)
 		{ "Int - %3d", 0 },
 		{ "Dex - %3d", 0 },
 		{ "Luk - %3d", 0 },
+		{ "Pow - %3d", 0 },
+		{ "Sta - %3d", 0 },
+		{ "Wis - %3d", 0 },
+		{ "Spl - %3d", 0 },
+		{ "Con - %3d", 0 },
+		{ "Crt - %3d", 0 },
 		{ "Zeny - %d", 0 },
 		{ "Free SK Points - %d", 0 },
+		{ "Free Trait Points - %d", 0 },
 		{ "JobChangeLvl (2nd) - %d", 0 },
 		{ "JobChangeLvl (3rd) - %d", 0 },
 		{ NULL, 0 }
@@ -9109,10 +9128,17 @@ ACMD(stats)
 	output_table[11].value = sd->status.int_;
 	output_table[12].value = sd->status.dex;
 	output_table[13].value = sd->status.luk;
-	output_table[14].value = sd->status.zeny;
-	output_table[15].value = sd->status.skill_point;
-	output_table[16].value = sd->change_level_2nd;
-	output_table[17].value = sd->change_level_3rd;
+	output_table[14].value = sd->status.pow;
+	output_table[15].value = sd->status.sta;
+	output_table[16].value = sd->status.wis;
+	output_table[17].value = sd->status.spl;
+	output_table[18].value = sd->status.con;
+	output_table[19].value = sd->status.crt;
+	output_table[20].value = sd->status.zeny;
+	output_table[21].value = sd->status.skill_point;
+	output_table[22].value = sd->status.trait_point;
+	output_table[23].value = sd->change_level_2nd;
+	output_table[24].value = sd->change_level_3rd;
 
 	sprintf(job_jobname, "Job - %s %s", pc->job_name(sd->status.class_), "(level %d)");
 	sprintf(output, msg_fd(fd, MSGTBL_TARGET_STATS), sd->status.name); // '%s' stats:
@@ -10758,6 +10784,8 @@ static void atcommand_basecommands(void)
 		ACMD_DEF(gat),
 		ACMD_DEF(displaystatus),
 		ACMD_DEF2("stpoint", statuspoint),
+		ACMD_DEF2("tpoint", traitpoint),
+		ACMD_DEF2("traitpoint", traitpoint),
 		ACMD_DEF2("skpoint", skillpoint),
 		ACMD_DEF(ap),
 		ACMD_DEF(zeny),
@@ -10767,6 +10795,12 @@ static void atcommand_basecommands(void)
 		ACMD_DEF2("int", param),
 		ACMD_DEF2("dex", param),
 		ACMD_DEF2("luk", param),
+		ACMD_DEF2("pow", param),
+		ACMD_DEF2("sta", param),
+		ACMD_DEF2("wis", param),
+		ACMD_DEF2("spl", param),
+		ACMD_DEF2("con", param),
+		ACMD_DEF2("crt", param),
 		ACMD_DEF2("glvl", guildlevelup),
 		ACMD_DEF(makeegg),
 		ACMD_DEF(hatch),
