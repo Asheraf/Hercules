@@ -4076,8 +4076,10 @@ static void clif_changelook(struct block_list *bl, enum look type, int val)
 					vd->cloth_color = 0;
 				if ((sd->sc.option & OPTION_SUMMER2) != 0 && battle_config.summer2_ignorepalette == true)
 					vd->cloth_color = 0;
+#if PACKETVER < 20231220
 				if (vd->body_style != 0 && (sd->sc.option & OPTION_COSTUME) != 0)
 					vd->body_style = 0;
+#endif
 			break;
 			case LOOK_HAIR:
 				vd->hair_style = val;
@@ -4138,8 +4140,10 @@ static void clif_changelook(struct block_list *bl, enum look type, int val)
 		#endif
 			break;
 			case LOOK_BODY2:
+#if PACKETVER < 20231220
 				if (sd != NULL && (sd->sc.option&OPTION_COSTUME) != OPTION_NOTHING)
 					val = 0;
+#endif
 				vd->body_style = val;
 			break;
 			case LOOK_MAX:
@@ -24649,9 +24653,13 @@ static void clif_parse_cz_req_style_change2(int fd, struct map_session_data *sd)
 	if (p->BottomAccessory > 0)
 		stylist->request_style_change(sd, LOOK_HEAD_BOTTOM, p->BottomAccessory, true);
 	if (p->BodyStyle > 0) {
+#if PACKETVER >= 20231220
+		stylist->request_style_change(sd, LOOK_BODY2, p->BodyStyle, false);
+#else
 		if (pc->has_second_costume(sd)) {
 			stylist->request_style_change(sd, LOOK_BODY2, p->BodyStyle, false);
 		}
+#endif
 	}
 	clif->style_change_response(sd, STYLIST_SHOP_SUCCESS);
 	return;

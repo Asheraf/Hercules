@@ -7424,8 +7424,10 @@ static void status_set_viewdata(struct block_list *bl, int class_)
 				if ((sd->sc.option & OPTION_SUMMER2) != 0 && battle_config.summer2_ignorepalette == true)
 					sd->vd.cloth_color = 0;
 			}
+#if PACKETVER < 20231220
 			if (sd->vd.body_style != 0 && (sd->sc.option & OPTION_COSTUME) != 0)
 				sd->vd.body_style = 0;
+#endif
 		} else if (vd != NULL) {
 			memcpy(&sd->vd, vd, sizeof(struct view_data));
 		} else {
@@ -11033,7 +11035,9 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				clif->changelook(bl, LOOK_WEAPON, 0);
 				clif->changelook(bl, LOOK_SHIELD, 0);
 				clif->changelook(bl, LOOK_CLOTHES_COLOR, vd->cloth_color);
+#if PACKETVER < 20231220
 				clif->changelook(bl, LOOK_BODY2, 0);
+#endif
 				break;
 			case SC_KAAHI:
 				val4 = INVALID_TIMER;
@@ -13268,7 +13272,7 @@ static int status_change_end_(struct block_list *bl, enum sc_type type, int tid)
 			clif->changelook(bl,LOOK_WEAPON,sd->vd.weapon);
 			clif->changelook(bl,LOOK_SHIELD,sd->vd.shield);
 			clif->changelook(bl,LOOK_CLOTHES_COLOR,cap_value(sd->status.clothes_color,0,battle_config.max_cloth_color));
-			clif->changelook(bl,LOOK_BODY2,cap_value(sd->status.body,0,battle_config.max_body_style));
+			clif->changelook(bl,LOOK_BODY2,cap_value(sd->status.body,MIN_BODY_STYLE,MAX_BODY_STYLE));
 		}
 	}
 

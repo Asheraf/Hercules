@@ -43,8 +43,13 @@ struct status_data;
 #define MAX_HAIR_COLOR  (battle->bc->max_hair_color)
 #define MIN_CLOTH_COLOR (battle->bc->min_cloth_color)
 #define MAX_CLOTH_COLOR (battle->bc->max_cloth_color)
-#define MIN_BODY_STYLE (battle->bc->min_body_style)
-#define MAX_BODY_STYLE (battle->bc->max_body_style)
+// Older clients use a small body-style index; clients from 2023-12-20 use a job ID.
+#define MIN_BODY_STYLE 0
+#if PACKETVER >= 20231220
+#define MAX_BODY_STYLE (JOB_MAX - 1)
+#else
+#define MAX_BODY_STYLE 4
+#endif
 
 #define is_boss(bl)     ((status_get_mode(bl) & MD_BOSS) != 0x0) // Can refine later [Aru]
 
@@ -559,7 +564,6 @@ struct Battle_Config {
 	int shadow_refine_atk;
 
 	// BodyStyle
-	int min_body_style, max_body_style;
 	int save_body_style;
 
 	// Warp Face Direction

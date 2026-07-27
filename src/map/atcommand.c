@@ -1822,10 +1822,12 @@ ACMD(bodystyle)
 
 	memset(atcmd_output, '\0', sizeof(atcmd_output));
 
+#if PACKETVER < 20231220
 	if (!pc->has_second_costume(sd)) {
 		clif->message(fd, msg_fd(fd, MSGTBL_NO_ALTERNATE_BODY_AVAILABLE)); // This job has no alternate body styles.
 		return false;
 	}
+#endif
 
 	if (*message == '\0' || sscanf(message, "%d", &body_style) < 1) {
 		sprintf(atcmd_output, "Please, enter a body style (usage: @bodystyle <body ID: %d-%d>).", MIN_BODY_STYLE, MAX_BODY_STYLE);

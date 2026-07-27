@@ -737,8 +737,13 @@ static int pc_makesavestatus(struct map_session_data *sd)
 	if(!battle_config.save_clothcolor)
 		sd->status.clothes_color=0;
 
-	if (!battle_config.save_body_style)
+	if (!battle_config.save_body_style) {
+#if PACKETVER >= 20231220
+		sd->status.body = sd->status.class_;
+#else
 		sd->status.body = 0;
+#endif
+	}
 
 
 	//Only copy the Cart/Peco/Falcon options, the rest are handled via
@@ -9482,12 +9487,12 @@ static int pc_jobchange(struct map_session_data *sd, int class_, int upper)
 	if (sd->disguise != -1)
 		pc->disguise(sd, -1);
 
-	// Fix atcommand @jobchange when the player changing from 3rd job having alternate body style into non-3rd job, crashing the client
-	if (pc->has_second_costume(sd) == false) {
-		sd->status.body = 0;
-		sd->vd.body_style = 0;
-		clif->changelook(&sd->bl, LOOK_BODY2, sd->vd.body_style);
-	}
+#if PACKETVER >= 20231220
+	sd->status.body = class_;
+#else
+	sd->status.body = 0;
+#endif
+	clif->changelook(&sd->bl, LOOK_BODY2, sd->status.body);
 
 	status->set_viewdata(&sd->bl, class_);
 	clif->changelook(&sd->bl, LOOK_BASE, sd->vd.class_); // move sprite update to prevent client crashes with incompatible equipment [Valaris]

@@ -10608,8 +10608,6 @@ static const struct config_data_old battle_data[] = {
 	{ "costume_refine_def",                 &battle_config.costume_refine_def,              1,      0,      1,              },
 	{ "shadow_refine_def",                  &battle_config.shadow_refine_def,               1,      0,      1,              },
 	{ "shadow_refine_atk",                  &battle_config.shadow_refine_atk,               1,      0,      1,              },
-	{ "min_body_style",                     &battle_config.min_body_style,                  0,      0,      SHRT_MAX,       },
-	{ "max_body_style",                     &battle_config.max_body_style,                  4,      0,      SHRT_MAX,       },
 	{ "save_body_style",                    &battle_config.save_body_style,                 0,      0,      1,              },
 	{ "player_warp_keep_direction",         &battle_config.player_warp_keep_direction,      0,      0,      1,              },
 	{ "atcommand_levelup_events",           &battle_config.atcommand_levelup_events,        0,      0,      1,              },
@@ -10854,6 +10852,18 @@ static void battle_config_check_deprecated(const char *filename, struct config_t
 
 	if (libconfig->lookup(config, "battle_configuration/traps_setting") != NULL) {
 		ShowError("The `traps_setting` battle conf option has been replaced by `trap_visibility`. Please see conf/map/battle/skill.conf.\n");
+	}
+
+	const char *body_style_keys[] = {
+		"min_body_style",
+		"max_body_style"
+	};
+	for (int i = 0; i < ARRAYLENGTH(body_style_keys); ++i) {
+		char conf_name[100];
+
+		snprintf(conf_name, sizeof(conf_name), "battle_configuration/%s", body_style_keys[i]);
+		if (libconfig->lookup(config, conf_name) != NULL)
+			ShowError("The `%s` battle conf option has been removed. Body style limits are determined by PACKETVER. (config found in \"%s\")\n", body_style_keys[i], filename);
 	}
 
 	const char *unit_params_keys[] = {
