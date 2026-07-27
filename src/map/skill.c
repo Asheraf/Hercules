@@ -8218,6 +8218,7 @@ static int skill_castend_id(int tid, int64 tick, int id, intptr_t data)
 			case GN_WALLOFTHORN:
 			case SU_CN_POWDERING:
 			case SU_SV_ROOTTWIST:
+			case AG_RAIN_OF_CRYSTAL:
 				ud->skillx = target->x;
 				ud->skilly = target->y;
 				ud->skilltimer = tid;
@@ -10205,10 +10206,6 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			                    src,skill_id,skill_lv,tick, flag|BCT_ENEMY|1,
 			                    skill->castend_damage_id);
 			status_change_end(src, SC_HIDING, INVALID_TIMER);
-			break;
-		case AG_RAIN_OF_CRYSTAL:
-			clif->skill_nodamage(src, src, skill_id, skill_lv, 1);
-			skill->unitsetting(src, skill_id, skill_lv, src->x, src->y, 0);
 			break;
 		case AG_ENERGY_CONVERSION:
 			if (status_get_sp(src) == status_get_max_sp(src)) {
@@ -15965,6 +15962,7 @@ static int skill_castend_pos2(struct block_list *src, int x, int y, uint16 skill
 		case MH_XENO_SLASHER:
 		case SU_CN_POWDERING:
 		case SU_SV_ROOTTWIST:
+		case AG_RAIN_OF_CRYSTAL:
 		case AG_MYSTERY_ILLUSION:
 		case AG_STRANTUM_TREMOR:
 		case AG_TORNADO_STORM:
