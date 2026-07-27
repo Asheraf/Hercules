@@ -198,6 +198,7 @@ jlvl: "Params: <number of levels>\n" "Raises your job level the desired number o
 allskill: "Give you all skills."
 stpoint: "Params: <number of points> - Gives you the desired number of stat points."
 skpoint: "Params: <number of points> - Gives you the desired number of skill points."
+ap: "Params: <value> - Sets your AP."
 zeny: "Params: <amount> - Gives you desired amount of Zeny."
 cash: "Params: <amount> - Gives you the specified amount of cash points."
 points: "Params: <amount> - Gives you the specified amount of Kafra Points."

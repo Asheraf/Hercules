@@ -447,7 +447,7 @@ Base Level: 13 (3.323%) | Job Level: 10 (0.000%)
 
 @stats
 
-Displays the stats of the attached player in your chat bar.
+Displays the stats of the attached player in your chat bar, including AP.
 
 ---------------------------------------
 
@@ -891,6 +891,12 @@ Gives your character all skills in their current skill tree.
 @skpoint <+/- amount>
 
 Changes unused status or skill points by the specified amount.
+
+---------------------------------------
+
+@ap <amount>
+
+Sets your AP to the specified value.
 
 ---------------------------------------
 

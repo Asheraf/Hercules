@@ -2640,6 +2640,24 @@ ACMD(statuspoint)
 }
 
 /*==========================================
+ * @ap
+ *------------------------------------------*/
+ACMD(ap)
+{
+	int ap;
+
+	if (*message == '\0' || sscanf(message, "%d", &ap) != 1) {
+		clif->message(fd, "Please enter a valid AP value (usage: @ap <value>).");
+		return false;
+	}
+
+	pc->setparam(sd, SP_AP, ap);
+	clif->updatestatus(sd, SP_AP);
+	clif->message(fd, "AP changed.");
+	return true;
+}
+
+/*==========================================
  * @skpoint (Rewritten by [Yor])
  *------------------------------------------*/
 ACMD(skillpoint)
@@ -9057,6 +9075,8 @@ ACMD(stats)
 		{ "MaxHp - %d", 0 },
 		{ "Sp - %d", 0 },
 		{ "MaxSp - %d", 0 },
+		{ "Ap - %d", 0 },
+		{ "MaxAp - %d", 0 },
 		{ "Str - %3d", 0 },
 		{ "Agi - %3d", 0 },
 		{ "Vit - %3d", 0 },
@@ -9081,16 +9101,18 @@ ACMD(stats)
 	output_table[3].value = sd->status.max_hp;
 	output_table[4].value = sd->status.sp;
 	output_table[5].value = sd->status.max_sp;
-	output_table[6].value = sd->status.str;
-	output_table[7].value = sd->status.agi;
-	output_table[8].value = sd->status.vit;
-	output_table[9].value = sd->status.int_;
-	output_table[10].value = sd->status.dex;
-	output_table[11].value = sd->status.luk;
-	output_table[12].value = sd->status.zeny;
-	output_table[13].value = sd->status.skill_point;
-	output_table[14].value = sd->change_level_2nd;
-	output_table[15].value = sd->change_level_3rd;
+	output_table[6].value = sd->battle_status.ap;
+	output_table[7].value = sd->battle_status.max_ap;
+	output_table[8].value = sd->status.str;
+	output_table[9].value = sd->status.agi;
+	output_table[10].value = sd->status.vit;
+	output_table[11].value = sd->status.int_;
+	output_table[12].value = sd->status.dex;
+	output_table[13].value = sd->status.luk;
+	output_table[14].value = sd->status.zeny;
+	output_table[15].value = sd->status.skill_point;
+	output_table[16].value = sd->change_level_2nd;
+	output_table[17].value = sd->change_level_3rd;
 
 	sprintf(job_jobname, "Job - %s %s", pc->job_name(sd->status.class_), "(level %d)");
 	sprintf(output, msg_fd(fd, MSGTBL_TARGET_STATS), sd->status.name); // '%s' stats:
@@ -10737,6 +10759,7 @@ static void atcommand_basecommands(void)
 		ACMD_DEF(displaystatus),
 		ACMD_DEF2("stpoint", statuspoint),
 		ACMD_DEF2("skpoint", skillpoint),
+		ACMD_DEF(ap),
 		ACMD_DEF(zeny),
 		ACMD_DEF2("str", param),
 		ACMD_DEF2("agi", param),
