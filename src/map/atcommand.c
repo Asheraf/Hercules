@@ -1032,9 +1032,15 @@ ACMD(jobchange)
 	} else if (sscanf(message, "%12d %12d", &job, &upper) >= 1) { // Numeric job ID
 		found = true;
 	} else { // Job name
+		char job_name[64] = { '\0' };
 		int i;
 
-		// Normal Jobs
+		if (sscanf(message, "%63s %12d", job_name, &upper) >= 1) {
+			job = pc->check_job_name(job_name);
+			found = job != -1;
+		}
+
+		// Localized job names.
 		for (i = JOB_NOVICE; !found && i < JOB_MAX_BASIC; i++) {
 			if (strncmpi(message, pc->job_name(i), 16) == 0) {
 				job = i;
@@ -1043,9 +1049,8 @@ ACMD(jobchange)
 			}
 		}
 
-		// High Jobs, Babies and Third
 		for (i = JOB_NOVICE_HIGH; !found && i < JOB_MAX; i++) {
-			if (strncmpi(message, pc->job_name(i), 16) == 0) {
+			if (pc->db_checkid(i) && strncmpi(message, pc->job_name(i), 16) == 0) {
 				job = i;
 				found = true;
 				break;
@@ -1068,6 +1073,9 @@ ACMD(jobchange)
 	 || job == JOB_STAR_GLADIATOR2 || job == JOB_BABY_STAR_GLADIATOR2
 	 || (job >= JOB_RUNE_KNIGHT2 && job <= JOB_MECHANIC_T2)
 	 || (job >= JOB_BABY_RUNE2 && job <= JOB_BABY_MECHANIC2)
+	 || (job >= JOB_WINDHAWK2 && job <= JOB_IMPERIAL_GUARD2)
+	 || job == JOB_SKY_EMPEROR2
+	 || (job >= JOB_RUNE_KNIGHT_2ND && job <= JOB_WANDERER_2ND)
 	) {
 		/* WHY DO WE LIST THEM THEN? */
 		clif->message(fd, msg_fd(fd, MSGTBL_CANNOT_CHANGE_JOB_COMMAND)); //"You can not change to this job by command."
@@ -2782,9 +2790,15 @@ ACMD(param)
 	if (battle_config.atcommand_max_stat_bypass != 0)
 		max = SHRT_MAX;
 	else if (stats[index] >= SP_POW && stats[index] <= SP_CRT)
-		max = battle_config.max_trait_parameter;
+		max = (sd->job & JOBL_FOURTH) != 0 || sd->job == MAPID_ALITEA
+			? battle_config.max_trait_parameter : 0;
 	else
 		max = pc_maxstats(sd);
+
+	if (stats[index] >= SP_POW && stats[index] <= SP_CRT && max <= 0) {
+		clif->message(fd, msg_fd(fd, MSGTBL_IMPOSSIBLE_TO_INCREASE_VALUE)); // Unable to increase the number/value.
+		return false;
+	}
 
 	int current = pc->getstat(sd, stats[index]);
 	int minimum = stats[index] >= SP_POW && stats[index] <= SP_CRT ? 0 : 1;
